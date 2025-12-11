@@ -3,7 +3,7 @@ import StoreKit
 
 struct PaywallView: View {
     @Binding var isPresented: Bool
-    @State private var showTrialOption = true
+    @State private var selectedPlan: PlanType = .weekly
     @State private var products: [Product] = []
     @State private var weeklyPrice = "$4.99"
     @State private var sixMonthPrice = "$29.99"
@@ -13,6 +13,11 @@ struct PaywallView: View {
 
     private let weeklyProductID = "com.manuelworlitzer.weddingplanner.premium.weekly"
     private let sixMonthProductID = "com.manuelworlitzer.weddingplanner.premium.6months"
+
+    enum PlanType {
+        case weekly
+        case sixMonth
+    }
 
     var body: some View {
         ZStack {
@@ -48,79 +53,71 @@ struct PaywallView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
 
-                // Top 25% - Hero Image
-                VStack(spacing: 20) {
-                    Image("paywall-hero-image")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: UIScreen.main.bounds.height * 0.25)
-                        .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.1), radius: 20, y: 10)
+                // Romantic hero section
+                VStack(spacing: 16) {
+                    // Animated hearts icon
+                    PaywallHeartAnimation()
+                        .frame(height: 80)
+
+                    // Heartfelt title
+                    VStack(spacing: 8) {
+                        Text("Your love story deserves")
+                            .font(.system(size: 20, weight: .light, design: .serif))
+                            .foregroundColor(Color(hex: "6B6B6B"))
+
+                        Text("The Perfect Plan")
+                            .font(.system(size: 32, weight: .bold, design: .serif))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+                    }
+                    .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 32)
                 .padding(.top, 20)
 
                 // Main content
-                VStack(spacing: 32) {
-                    // Title section
+                VStack(spacing: 24) {
+                    // Sweet features with hearts
                     VStack(spacing: 12) {
-                        Text(showTrialOption ? "Test it 3 days for free" : "Enjoy the premium experience")
-                            .font(.system(size: 32, weight: .bold, design: .serif))
-                            .foregroundColor(Color(hex: "2C2C2C"))
-                            .multilineTextAlignment(.center)
-
-                        Text("Scan unlimited, get insights and more")
-                            .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(Color(hex: "7A7A7A"))
-                            .multilineTextAlignment(.center)
-
-                        Text("Cancel anytime")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(hex: "D4B5A9"))
+                        FeatureRow(icon: "heart.fill", text: "Unlimited guests & vendors", color: Color(hex: "FFB6C1"))
+                        FeatureRow(icon: "sparkles", text: "Smart budget insights", color: Color(hex: "FFD700"))
+                        FeatureRow(icon: "calendar.badge.clock", text: "Timeline management", color: Color(hex: "D4B5A9"))
                     }
+                    .padding(.horizontal, 32)
 
-                    // Pricing section
-                    VStack(spacing: 8) {
-                        if showTrialOption {
-                            VStack(spacing: 4) {
-                                Text("3 days free then")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(Color(hex: "2C2C2C"))
+                    // Warm message
+                    Text("We're here to make your planning journey stress-free")
+                        .font(.system(size: 14, weight: .regular, design: .serif))
+                        .foregroundColor(Color(hex: "9B9B9B"))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
 
-                                Text(weeklyPrice + " per week")
-                                    .font(.system(size: 24, weight: .bold))
-                                    .foregroundColor(Color(hex: "2C2C2C"))
-
-                                Text("Auto renewable. Cancel anytime")
-                                    .font(.system(size: 12, weight: .regular))
-                                    .foregroundColor(Color(hex: "9B9B9B"))
+                    // Pricing cards - side by side
+                    HStack(spacing: 16) {
+                        // Weekly Plan Card
+                        PricingCard(
+                            isSelected: selectedPlan == .weekly,
+                            mainText: "3 days free",
+                            subText: "then \(weeklyPrice)/week",
+                            onTap: {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    selectedPlan = .weekly
+                                }
                             }
-                        } else {
-                            Text(sixMonthPrice + " for 6 months")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(Color(hex: "2C2C2C"))
-                        }
+                        )
+
+                        // 6-Month Plan Card
+                        PricingCard(
+                            isSelected: selectedPlan == .sixMonth,
+                            mainText: calculateWeeklyPrice(),
+                            subText: "billed 6-monthly",
+                            onTap: {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    selectedPlan = .sixMonth
+                                }
+                            }
+                        )
                     }
-                    .animation(.easeInOut(duration: 0.3), value: showTrialOption)
-
-                    // Toggle container
-                    HStack {
-                        Text(showTrialOption ? "3 days free" : "6 month plan")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(Color(hex: "2C2C2C"))
-
-                        Spacer()
-
-                        Toggle("", isOn: $showTrialOption)
-                            .toggleStyle(CustomToggleStyle())
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.08), radius: 12, y: 6)
-                    )
+                    .padding(.horizontal, 4)
 
                     Spacer()
 
@@ -128,13 +125,17 @@ struct PaywallView: View {
                     Button(action: {
                         purchaseSubscription()
                     }) {
-                        HStack {
+                        HStack(spacing: 8) {
                             if isPurchasing {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                     .scaleEffect(0.8)
                             } else {
-                                Text(showTrialOption ? "Test for free" : "Subscribe now")
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+
+                                Text(selectedPlan == .weekly ? "Start Planning Together" : "Unlock Full Experience")
                                     .font(.system(size: 18, weight: .medium))
                                     .foregroundColor(.white)
                             }
@@ -229,8 +230,18 @@ struct PaywallView: View {
         }
     }
 
+    private func calculateWeeklyPrice() -> String {
+        // Extract numeric value from sixMonthPrice and divide by 26 weeks
+        let priceString = sixMonthPrice.replacingOccurrences(of: "$", with: "")
+        if let price = Double(priceString) {
+            let weeklyPrice = price / 26.0
+            return String(format: "$%.2f/week", weeklyPrice)
+        }
+        return "$1.15/week"
+    }
+
     private func purchaseSubscription() {
-        let productID = showTrialOption ? weeklyProductID : sixMonthProductID
+        let productID = selectedPlan == .weekly ? weeklyProductID : sixMonthProductID
         guard let product = products.first(where: { $0.id == productID }) else { return }
 
         isPurchasing = true
@@ -330,27 +341,136 @@ struct PaywallView: View {
     }
 }
 
-struct CustomToggleStyle: ToggleStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HStack {
-            configuration.label
+// MARK: - Paywall Heart Animation
+struct PaywallHeartAnimation: View {
+    @State private var isAnimating = false
+    @State private var scale: CGFloat = 1.0
+    @State private var rotation: Double = 0
 
-            Button(action: {
-                configuration.isOn.toggle()
-            }) {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(configuration.isOn ? Color(hex: "D4B5A9") : Color(hex: "E0E0E0"))
-                    .frame(width: 50, height: 28)
-                    .overlay(
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 24, height: 24)
-                            .offset(x: configuration.isOn ? 11 : -11)
-                            .shadow(color: Color.black.opacity(0.1), radius: 4, y: 2)
+    var body: some View {
+        ZStack {
+            // Glow effect
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(hex: "FFB6C1").opacity(0.3),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 10,
+                        endRadius: 50
                     )
-                    .animation(.easeInOut(duration: 0.2), value: configuration.isOn)
+                )
+                .frame(width: 100, height: 100)
+                .scaleEffect(scale)
+                .blur(radius: 10)
+
+            // Main heart
+            Image(systemName: "heart.fill")
+                .font(.system(size: 50, weight: .light))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Color(hex: "FFB6C1"),
+                            Color(hex: "FFC0CB")
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .scaleEffect(scale)
+                .rotationEffect(.degrees(rotation))
+                .shadow(color: Color(hex: "FFB6C1").opacity(0.4), radius: 12, x: 0, y: 6)
+
+            // Small orbiting hearts
+            ForEach(0..<3, id: \.self) { index in
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(Color(hex: "FFB6C1").opacity(0.6))
+                    .offset(
+                        x: cos(Angle(degrees: Double(index) * 120 + rotation * 2).radians) * 35,
+                        y: sin(Angle(degrees: Double(index) * 120 + rotation * 2).radians) * 35
+                    )
             }
         }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                scale = 1.1
+            }
+            withAnimation(.linear(duration: 8).repeatForever(autoreverses: false)) {
+                rotation = 360
+            }
+        }
+    }
+}
+
+// MARK: - Feature Row Component
+struct FeatureRow: View {
+    let icon: String
+    let text: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(color)
+                .frame(width: 24, height: 24)
+
+            Text(text)
+                .font(.system(size: 15, weight: .regular, design: .serif))
+                .foregroundColor(Color(hex: "4A4A4A"))
+
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Pricing Card Component
+struct PricingCard: View {
+    let isSelected: Bool
+    let mainText: String
+    let subText: String
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 8) {
+                // Main text - bold
+                Text(mainText)
+                    .font(.system(size: 24, weight: .bold, design: .serif))
+                    .foregroundColor(Color(hex: "2C2C2C"))
+                    .multilineTextAlignment(.center)
+
+                // Sub text - small
+                Text(subText)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(Color(hex: "6B6B6B"))
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 28)
+            .padding(.horizontal, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(
+                                isSelected ? Color(hex: "D4B5A9") : Color.clear,
+                                lineWidth: 2
+                            )
+                    )
+                    .shadow(
+                        color: isSelected ? Color(hex: "D4B5A9").opacity(0.3) : Color.black.opacity(0.08),
+                        radius: isSelected ? 16 : 12,
+                        y: 6
+                    )
+            )
+            .scaleEffect(isSelected ? 1.02 : 1.0)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

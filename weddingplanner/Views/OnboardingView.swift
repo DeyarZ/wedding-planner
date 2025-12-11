@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 struct OnboardingView: View {
     @State private var currentScreen = 0
@@ -60,27 +61,34 @@ struct OnboardingView: View {
             })
             .tag(6)
 
-            Onboarding08_TrialOfferScreen(onContinue: {
+            Onboarding08_ReviewRequestScreen(onContinue: {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     currentScreen = 8
                 }
             })
             .tag(7)
 
-            Onboarding09_NotificationScreen(onContinue: {
+            Onboarding09_TrialOfferScreen(onContinue: {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     currentScreen = 9
                 }
             })
             .tag(8)
 
-            Onboarding10_TrialTimelineScreen(onContinue: {
+            Onboarding10_NotificationScreen(onContinue: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    currentScreen = 10
+                }
+            })
+            .tag(9)
+
+            Onboarding11_TrialTimelineScreen(onContinue: {
                 UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
                 showMainApp = true
                 // Call the completion handler if provided
                 onComplete?()
             })
-            .tag(9)
+            .tag(10)
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .ignoresSafeArea(.all)
@@ -775,7 +783,7 @@ struct FeatureIcon: View {
     }
 }
 
-struct Onboarding08_TrialOfferScreen: View {
+struct Onboarding09_TrialOfferScreen: View {
     let onContinue: () -> Void
     @State private var showContent = false
 
@@ -1114,7 +1122,7 @@ struct FeatureShowcase3: View {
     }
 }
 
-struct Onboarding09_NotificationScreen: View {
+struct Onboarding10_NotificationScreen: View {
     let onContinue: () -> Void
     @State private var showContent = false
 
@@ -1440,7 +1448,7 @@ class TrialNotificationManager {
     }
 }
 
-struct Onboarding10_TrialTimelineScreen: View {
+struct Onboarding11_TrialTimelineScreen: View {
     let onContinue: () -> Void
     @State private var showContent = false
 
@@ -3014,6 +3022,213 @@ struct InitialTaskCard: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         )
+    }
+}
+
+// MARK: - Review Request Screen
+
+struct Onboarding08_ReviewRequestScreen: View {
+    let onContinue: () -> Void
+    @State private var showContent = false
+    @State private var animateStars = false
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                // Same gradient background
+                LinearGradient(
+                    colors: [
+                        Color(hex: "F8F4F0"),
+                        Color(hex: "F5EFE7")
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .ignoresSafeArea(.all)
+
+                VStack(spacing: 0) {
+                    Spacer()
+
+                    // Animated Stars Icon
+                    AnimatedStarsView(isAnimating: $animateStars)
+                        .frame(height: 120)
+                        .opacity(showContent ? 1 : 0)
+                        .scaleEffect(showContent ? 1 : 0.8)
+                        .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.2), value: showContent)
+
+                    Spacer()
+                        .frame(height: 60)
+
+                    // Headline Text
+                    VStack(spacing: 16) {
+                        Text("LOVING BLISSFUL?")
+                            .font(.system(size: 28, weight: .bold, design: .serif))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 40)
+
+                        // Body Text
+                        Text("We're a small team trying to grow and help more couples plan their perfect day.\n\nWould you mind leaving us a quick review?")
+                            .font(.system(size: 16, weight: .light, design: .serif))
+                            .foregroundColor(Color(hex: "6B6B6B"))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(6)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 40)
+                    }
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : 20)
+                    .animation(.easeOut(duration: 0.8).delay(0.4), value: showContent)
+
+                    Spacer()
+
+                    // Heart icon with text
+                    HStack(spacing: 8) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color(hex: "FFB6C1"))
+
+                        Text("It means the world to us")
+                            .font(.system(size: 14, weight: .light, design: .serif))
+                            .foregroundColor(Color(hex: "6B6B6B"))
+                    }
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : 20)
+                    .animation(.easeOut(duration: 0.8).delay(0.6), value: showContent)
+
+                    Spacer()
+                        .frame(height: 24)
+
+                    // Continue Button
+                    Button(action: {
+                        // Request the review using modern API
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                            if #available(iOS 18.0, *) {
+                                AppStore.requestReview(in: windowScene)
+                            } else {
+                                SKStoreReviewController.requestReview(in: windowScene)
+                            }
+                        }
+                        // Continue to next screen
+                        onContinue()
+                    }) {
+                        Text("Sure, I'd love to help!")
+                            .font(.system(size: 18, weight: .regular, design: .serif))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+                            .frame(maxWidth: .infinity, minHeight: 56)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white)
+                                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                            )
+                    }
+                    .padding(.horizontal, 20)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : 30)
+                    .animation(.easeOut(duration: 0.8).delay(0.8), value: showContent)
+
+                    Spacer()
+                        .frame(height: 80)
+                }
+            }
+        }
+        .ignoresSafeArea(.all)
+        .onAppear {
+            showContent = true
+            animateStars = true
+        }
+    }
+}
+
+// MARK: - Animated Stars Component
+struct AnimatedStarsView: View {
+    @Binding var isAnimating: Bool
+    @State private var rotationAngles: [Double] = [0, 0, 0, 0, 0]
+    @State private var scales: [CGFloat] = [1, 1, 1, 1, 1]
+    @State private var opacities: [Double] = [1, 1, 1, 1, 1]
+
+    var body: some View {
+        ZStack {
+            // Glow effect background
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(hex: "FFD700").opacity(0.3),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 20,
+                        endRadius: 80
+                    )
+                )
+                .frame(width: 160, height: 160)
+                .blur(radius: 20)
+
+            // Main central star
+            Image(systemName: "star.fill")
+                .font(.system(size: 60, weight: .medium))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Color(hex: "FFD700"),  // Gold
+                            Color(hex: "FFA500")   // Orange
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: Color(hex: "FFD700").opacity(0.5), radius: 15, x: 0, y: 8)
+                .scaleEffect(scales[0])
+
+            // Orbiting smaller stars
+            ForEach(0..<4, id: \.self) { index in
+                Image(systemName: "star.fill")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(Color(hex: "FFD700").opacity(0.8))
+                    .scaleEffect(scales[index + 1])
+                    .opacity(opacities[index + 1])
+                    .offset(
+                        x: cos(Angle(degrees: rotationAngles[index + 1]).radians) * 60,
+                        y: sin(Angle(degrees: rotationAngles[index + 1]).radians) * 60
+                    )
+            }
+        }
+        .onChange(of: isAnimating) { _, animating in
+            if animating {
+                startAnimation()
+            }
+        }
+    }
+
+    private func startAnimation() {
+        // Main star pulse
+        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+            scales[0] = 1.1
+        }
+
+        // Orbiting stars
+        for index in 0..<4 {
+            let baseAngle = Double(index) * 90
+            rotationAngles[index + 1] = baseAngle
+
+            withAnimation(.linear(duration: 8).repeatForever(autoreverses: false)) {
+                rotationAngles[index + 1] = baseAngle + 360
+            }
+
+            // Pulsing effect for orbiting stars
+            withAnimation(
+                .easeInOut(duration: 1.0 + Double(index) * 0.2)
+                .repeatForever(autoreverses: true)
+                .delay(Double(index) * 0.2)
+            ) {
+                scales[index + 1] = 1.3
+                opacities[index + 1] = 0.6
+            }
+        }
     }
 }
 
