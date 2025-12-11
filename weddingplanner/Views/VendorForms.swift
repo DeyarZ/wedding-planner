@@ -303,6 +303,18 @@ struct ProductionAddPaymentView: View {
 
         vendor.totalPaid += amountValue
 
+        // Sync with BudgetItem if there's a linked one
+        if let budgetItems = vendor.wedding?.budgetItems {
+            for budgetItem in budgetItems {
+                if budgetItem.vendor?.id == vendor.id {
+                    budgetItem.amountSpent = vendor.totalPaid
+                    budgetItem.isPaid = vendor.totalPaid >= vendor.contractAmount
+                    budgetItem.paymentStatus = vendor.totalPaid >= vendor.contractAmount ? .fullyPaid :
+                                              vendor.totalPaid > 0 ? .partiallyPaid : .pending
+                }
+            }
+        }
+
         modelContext.insert(payment)
 
         do {

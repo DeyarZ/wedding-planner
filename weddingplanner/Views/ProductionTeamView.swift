@@ -265,11 +265,55 @@ struct ProductionTeamView: View {
         vendor.wedding = dataManager.wedding
         modelContext.insert(vendor)
 
+        // Create corresponding BudgetItem for this vendor
+        let budgetItem = BudgetItem(
+            name: vendor.name,
+            category: mapVendorCategoryToBudgetCategory(vendor.category),
+            estimatedAmount: vendor.contractAmount
+        )
+        budgetItem.vendor = vendor
+        budgetItem.amountSpent = vendor.totalPaid
+        budgetItem.wedding = dataManager.wedding
+        modelContext.insert(budgetItem)
+
         do {
             try modelContext.save()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {
             print("Error adding vendor: \(error)")
+        }
+    }
+
+    private func mapVendorCategoryToBudgetCategory(_ vendorCategory: VendorCategory) -> BudgetCategory {
+        switch vendorCategory {
+        case .venue:
+            return .venue
+        case .catering:
+            return .venue
+        case .photography:
+            return .photography
+        case .videography:
+            return .photography
+        case .florist:
+            return .flowers
+        case .music:
+            return .entertainment
+        case .planner:
+            return .other
+        case .officiant:
+            return .other
+        case .transportation:
+            return .transportation
+        case .cake:
+            return .venue
+        case .attire:
+            return .attire
+        case .beauty:
+            return .attire
+        case .decor:
+            return .flowers
+        case .other:
+            return .other
         }
     }
 }

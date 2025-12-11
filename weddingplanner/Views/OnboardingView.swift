@@ -3,6 +3,11 @@ import SwiftUI
 struct OnboardingView: View {
     @State private var currentScreen = 0
     @State private var showMainApp = false
+    var onComplete: (() -> Void)?
+
+    init(onComplete: (() -> Void)? = nil) {
+        self.onComplete = onComplete
+    }
 
     var body: some View {
         TabView(selection: $currentScreen) {
@@ -72,6 +77,8 @@ struct OnboardingView: View {
             Onboarding10_TrialTimelineScreen(onContinue: {
                 UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
                 showMainApp = true
+                // Call the completion handler if provided
+                onComplete?()
             })
             .tag(9)
         }
@@ -1884,12 +1891,16 @@ struct Onboarding03_WeddingBasicsScreen: View {
                                 VStack(spacing: 16) {
                                     TextField("First person's name", text: $firstName)
                                         .font(.system(size: 18, weight: .regular, design: .serif))
-                                        .foregroundColor(Color(hex: "2C2C2C"))
+                                        .foregroundColor(Color(hex: "1A1A1A"))
                                         .padding(.horizontal, 20)
                                         .padding(.vertical, 18)
                                         .background(
                                             RoundedRectangle(cornerRadius: 16)
                                                 .fill(Color.white)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 16)
+                                                        .stroke(Color(hex: "E0E0E0"), lineWidth: 1)
+                                                )
                                                 .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
                                         )
                                         .focused($isInputFocused)
@@ -1899,12 +1910,16 @@ struct Onboarding03_WeddingBasicsScreen: View {
 
                                     TextField("Second person's name", text: $secondName)
                                         .font(.system(size: 18, weight: .regular, design: .serif))
-                                        .foregroundColor(Color(hex: "2C2C2C"))
+                                        .foregroundColor(Color(hex: "1A1A1A"))
                                         .padding(.horizontal, 20)
                                         .padding(.vertical, 18)
                                         .background(
                                             RoundedRectangle(cornerRadius: 16)
                                                 .fill(Color.white)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 16)
+                                                        .stroke(Color(hex: "E0E0E0"), lineWidth: 1)
+                                                )
                                                 .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
                                         )
                                         .focused($isInputFocused)
@@ -1934,6 +1949,10 @@ struct Onboarding03_WeddingBasicsScreen: View {
                                     .background(
                                         RoundedRectangle(cornerRadius: 16)
                                             .fill(Color.white)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(Color(hex: "E0E0E0"), lineWidth: 1)
+                                            )
                                             .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
                                     )
                             }
@@ -1952,12 +1971,16 @@ struct Onboarding03_WeddingBasicsScreen: View {
 
                                 TextField("Venue name (optional)", text: $venue)
                                     .font(.system(size: 18, weight: .regular, design: .serif))
-                                    .foregroundColor(Color(hex: "2C2C2C"))
+                                    .foregroundColor(Color(hex: "1A1A1A"))
                                     .padding(.horizontal, 20)
                                     .padding(.vertical, 18)
                                     .background(
                                         RoundedRectangle(cornerRadius: 16)
                                             .fill(Color.white)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(Color(hex: "E0E0E0"), lineWidth: 1)
+                                            )
                                             .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
                                     )
                                     .focused($isInputFocused)

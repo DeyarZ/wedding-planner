@@ -16,12 +16,23 @@ struct ContentView: View {
     @State private var showNotificationPermission = false
     @State private var showOnboarding = false
     @State private var showPaywall = false
+    @State private var isPremiumUser = false
+    @State private var hasShownPaywallOnce = false
 
     var body: some View {
         Group {
             if showOnboarding {
-                OnboardingView()
-                    .environmentObject(dataManager)
+                OnboardingView {
+                    // Onboarding completed callback
+                    showOnboarding = false
+                    // Show paywall after onboarding for free users
+                    if !isPremiumUser {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            showPaywall = true
+                        }
+                    }
+                }
+                .environmentObject(dataManager)
             } else {
                 ZStack {
                 // Ultra minimal background
@@ -70,11 +81,26 @@ struct ContentView: View {
         .onAppear {
             dataManager.setup(modelContext: modelContext)
 
+            // Check premium status
+            isPremiumUser = UserDefaults.standard.bool(forKey: "isPremiumUser")
+
             // Check if this is the first launch
             let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
             if !hasCompletedOnboarding {
                 showOnboarding = true
+                // After onboarding, paywall will show
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    hasShownPaywallOnce = true
+                }
             } else {
+                // For returning users, show paywall every time (unless premium)
+                if !isPremiumUser && !hasShownPaywallOnce {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showPaywall = true
+                        hasShownPaywallOnce = true
+                    }
+                }
+
                 // Create a default wedding if none exists (for existing users)
                 if !dataManager.hasWedding {
                     dataManager.createWedding(

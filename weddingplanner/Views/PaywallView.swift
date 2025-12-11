@@ -8,6 +8,8 @@ struct PaywallView: View {
     @State private var weeklyPrice = "$4.99"
     @State private var sixMonthPrice = "$29.99"
     @State private var isPurchasing = false
+    @State private var showTermsOfUse = false
+    @State private var showPrivacyPolicy = false
 
     private let weeklyProductID = "com.manuelworlitzer.weddingplanner.premium.weekly"
     private let sixMonthProductID = "com.manuelworlitzer.weddingplanner.premium.6months"
@@ -152,10 +154,51 @@ struct PaywallView: View {
                         .shadow(color: Color(hex: "B89B91").opacity(0.3), radius: 12, y: 6)
                     }
                     .disabled(isPurchasing)
+
+                    // Restore Purchases Button
+                    Button(action: restorePurchases) {
+                        Text("Restore Purchases")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "9B9B9B"))
+                            .underline()
+                    }
+                    .padding(.top, 8)
+
+                    // Terms of Use & Privacy Policy
+                    HStack(spacing: 4) {
+                        Button(action: {
+                            showTermsOfUse = true
+                        }) {
+                            Text("Terms of Use")
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(Color(hex: "9B9B9B"))
+                                .underline()
+                        }
+
+                        Text(" & ")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(Color(hex: "9B9B9B"))
+
+                        Button(action: {
+                            showPrivacyPolicy = true
+                        }) {
+                            Text("Privacy Policy")
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(Color(hex: "9B9B9B"))
+                                .underline()
+                        }
+                    }
+                    .padding(.top, 4)
                 }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 32)
             }
+        }
+        .sheet(isPresented: $showTermsOfUse) {
+            TermsOfUseView()
+        }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            PrivacyPolicyView()
         }
         .onAppear {
             loadProducts()
@@ -202,6 +245,7 @@ struct PaywallView: View {
                     case .verified(let transaction):
                         // Update premium status
                         await MainActor.run {
+                            UserDefaults.standard.set(true, forKey: "isPremiumUser")
                             UserDefaults.standard.set(true, forKey: "hasPremiumAccess")
                             UserDefaults.standard.set(Date(), forKey: "premiumPurchaseDate")
                             isPurchasing = false
@@ -244,6 +288,46 @@ struct PaywallView: View {
             }
         }
     }
+
+    private func restorePurchases() {
+        Task {
+            // Restore purchases using StoreKit 2
+            do {
+                // This will restore all the user's purchased subscriptions
+                try await AppStore.sync()
+
+                // Check if user has active subscription
+                var hasActiveSubscription = false
+
+                // Get all products to check entitlements
+                for product in products {
+                    // Check if user has access to this product
+                    let verificationResult = await product.currentEntitlement
+
+                    switch verificationResult {
+                    case .verified(let transaction):
+                        hasActiveSubscription = true
+                        await transaction.finish()
+                    case .unverified:
+                        print("Unverified entitlement for \(product.id)")
+                    default:
+                        break
+                    }
+                }
+
+                // Update premium status if subscription found
+                if hasActiveSubscription {
+                    await MainActor.run {
+                        UserDefaults.standard.set(true, forKey: "isPremiumUser")
+                        UserDefaults.standard.set(true, forKey: "hasPremiumAccess")
+                        isPresented = false
+                    }
+                }
+            } catch {
+                print("Failed to restore purchases: \(error)")
+            }
+        }
+    }
 }
 
 struct CustomToggleStyle: ToggleStyle {
@@ -265,6 +349,168 @@ struct CustomToggleStyle: ToggleStyle {
                             .shadow(color: Color.black.opacity(0.1), radius: 4, y: 2)
                     )
                     .animation(.easeInOut(duration: 0.2), value: configuration.isOn)
+            }
+        }
+    }
+}
+
+struct TermsOfUseView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Terms of Use")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(Color(hex: "2C2C2C"))
+                        .padding(.bottom, 10)
+
+                    Group {
+                        Text("1. Acceptance of Terms")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("By downloading, installing, or using the Wedding Planner app, you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use our app.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("2. Service Description")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("Wedding Planner is a mobile application that helps users plan and organize their wedding events. The app provides tools for vendor management, budget tracking, timeline creation, and other wedding-related planning features.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("3. User Responsibilities")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account. You agree to use the app only for lawful purposes and in accordance with these Terms of Use.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("4. Subscription and Payment")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("Premium features require a subscription. Subscriptions are automatically renewable unless cancelled at least 24 hours before the end of the current period. You may cancel your subscription at any time through your App Store account settings.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("5. Limitation of Liability")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("The app is provided 'as is' without any warranties. We shall not be liable for any damages arising from the use of this app. Your use of the app is at your own risk.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+                    }
+
+                    Text("For more information, visit:")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color(hex: "4A4A4A"))
+                        .padding(.top, 20)
+
+                    Text("https://weddingplanner.app/terms")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(hex: "9B9B9B"))
+                        .padding(.bottom, 30)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundColor(Color(hex: "D4B5A9"))
+                }
+            }
+        }
+    }
+}
+
+struct PrivacyPolicyView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Privacy Policy")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(Color(hex: "2C2C2C"))
+                        .padding(.bottom, 10)
+
+                    Group {
+                        Text("Information We Collect")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("We collect information you provide directly to us, such as when you create an account, plan your wedding events, or contact us for support. This may include your name, email address, wedding date, and planning preferences.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("How We Use Your Information")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("We use the information we collect to provide, maintain, and improve our services, process transactions, send you technical notices and support messages, and communicate with you about products, services, and events.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("Data Security")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("Third-Party Services")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("Our app may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to read their privacy policies.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+
+                        Text("Contact Us")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+
+                        Text("If you have any questions about this Privacy Policy, please contact us. We reserve the right to update this policy at any time, and we will notify you of any material changes.")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "4A4A4A"))
+                    }
+
+                    Text("For more information, visit:")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color(hex: "4A4A4A"))
+                        .padding(.top, 20)
+
+                    Text("https://weddingplanner.app/privacy")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(hex: "9B9B9B"))
+                        .padding(.bottom, 30)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundColor(Color(hex: "D4B5A9"))
+                }
             }
         }
     }
