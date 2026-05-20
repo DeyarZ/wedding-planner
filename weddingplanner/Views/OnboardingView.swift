@@ -1,5 +1,8 @@
 import SwiftUI
 import StoreKit
+import AppTrackingTransparency
+import RevenueCat
+import FacebookCore
 
 struct OnboardingView: View {
     @State private var currentScreen = 0
@@ -83,6 +86,8 @@ struct OnboardingView: View {
             .tag(9)
 
             Onboarding11_TrialTimelineScreen(onContinue: {
+                Singular.event(EVENT_SNG_COMPLETE_REGISTRATION)
+                AppEvents.shared.logEvent(.completedRegistration)
                 UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
                 showMainApp = true
                 // Call the completion handler if provided
@@ -912,7 +917,7 @@ struct AppUIShowcaseView: View {
             // Feature labels - properly positioned below phone
             HStack(spacing: 12) {
                 ForEach(0..<3, id: \.self) { index in
-                    Text(["Budget Tracking", "Guest Management", "Timeline Planning"][index])
+                    Text(LocalizedStringKey(["Budget Tracking", "Guest Management", "Timeline Planning"][index]))
                         .font(.system(size: 11, weight: .light, design: .serif))
                         .foregroundColor(currentFeature == index ? Color(hex: "2C2C2C") : Color(hex: "9B9B9B"))
                         .opacity(isAnimating ? 1 : 0.7)
@@ -982,7 +987,7 @@ struct FeatureShowcase1: View {
                             .fill([Color(hex: "D4B5A9"), Color(hex: "C8D4C8"), Color(hex: "C8D4E8")][index])
                             .frame(width: 8, height: 8)
 
-                        Text(["Venue & Catering", "Photography", "Flowers & Decor"][index])
+                        Text(LocalizedStringKey(["Venue & Catering", "Photography", "Flowers & Decor"][index]))
                             .font(.system(size: 10, weight: .light, design: .serif))
                             .foregroundColor(Color(hex: "6B6B6B"))
 
@@ -1049,7 +1054,7 @@ struct FeatureShowcase2: View {
                                 .font(.system(size: 11, weight: .regular, design: .serif))
                                 .foregroundColor(Color(hex: "2C2C2C"))
 
-                            Text(["Party of 2", "Plus one", "Solo", "Party of 3", "Plus one", "Solo"][index])
+                            Text(LocalizedStringKey(["Party of 2", "Plus one", "Solo", "Party of 3", "Plus one", "Solo"][index]))
                                 .font(.system(size: 8, weight: .light, design: .serif))
                                 .foregroundColor(Color(hex: "9B9B9B"))
                         }
@@ -1105,7 +1110,7 @@ struct FeatureShowcase3: View {
                                 .font(.system(size: 10, weight: .medium, design: .serif))
                                 .foregroundColor(Color(hex: "2C2C2C"))
 
-                            Text(["Guest Arrival", "Ceremony", "Cocktail Hour", "Reception", "First Dance"][index])
+                            Text(LocalizedStringKey(["Guest Arrival", "Ceremony", "Cocktail Hour", "Reception", "First Dance"][index]))
                                 .font(.system(size: 12, weight: .light, design: .serif))
                                 .foregroundColor(Color(hex: "6B6B6B"))
                         }
@@ -1353,17 +1358,17 @@ class TrialNotificationManager {
 
     private func scheduleEngagementNotifications() {
         let engagementMessages = [
-            "Welcome to Blissful! Ready to start planning your perfect day? 💕",
-            "Your wedding countdown has begun! Check your timeline today ✨",
-            "How's your budget looking? Track your spending with ease 💰",
-            "Don't forget to add your guests! Manage RSVPs effortlessly 👥",
-            "Tasks keeping you organized? Mark off what you've completed ✅",
-            "Your wedding plans are coming together beautifully! 🌸"
+            String(localized: "Welcome to Blissful! Ready to start planning your perfect day? 💕"),
+            String(localized: "Your wedding countdown has begun! Check your timeline today ✨"),
+            String(localized: "How's your budget looking? Track your spending with ease 💰"),
+            String(localized: "Don't forget to add your guests! Manage RSVPs effortlessly 👥"),
+            String(localized: "Tasks keeping you organized? Mark off what you've completed ✅"),
+            String(localized: "Your wedding plans are coming together beautifully! 🌸")
         ]
 
         for day in 1...6 {
             let content = UNMutableNotificationContent()
-            content.title = "Your Wedding Planning Journey"
+            content.title = String(localized: "Your Wedding Planning Journey")
             content.body = engagementMessages[day - 1]
             content.sound = .default
             content.categoryIdentifier = "ENGAGEMENT"
@@ -1387,8 +1392,8 @@ class TrialNotificationManager {
 
     private func scheduleTrialReminderNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Your Free Trial Ends Soon"
-        content.body = "Only 2 days left! Continue planning your dream wedding with full access to all features 💍"
+        content.title = String(localized: "Your Free Trial Ends Soon")
+        content.body = String(localized: "Only 2 days left! Continue planning your dream wedding with full access to all features 💍")
         content.sound = .default
         content.categoryIdentifier = "TRIAL_REMINDER"
         content.userInfo = ["type": "trial_reminder"]
@@ -1411,8 +1416,8 @@ class TrialNotificationManager {
 
     private func scheduleFinalReminderNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Last Day of Your Free Trial"
-        content.body = "Your trial ends tomorrow. Keep planning your perfect wedding day! 🎊"
+        content.title = String(localized: "Last Day of Your Free Trial")
+        content.body = String(localized: "Your trial ends tomorrow. Keep planning your perfect wedding day! 🎊")
         content.sound = .default
         content.categoryIdentifier = "FINAL_REMINDER"
         content.userInfo = ["type": "final_reminder"]
@@ -1451,6 +1456,7 @@ class TrialNotificationManager {
 struct Onboarding11_TrialTimelineScreen: View {
     let onContinue: () -> Void
     @State private var showContent = false
+    @State private var showTrackingPriming = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -1527,8 +1533,34 @@ struct Onboarding11_TrialTimelineScreen: View {
             }
         }
         .ignoresSafeArea(.all)
+        .overlay {
+            if showTrackingPriming {
+                TrackingPrimingView(onContinue: {
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        showTrackingPriming = false
+                    }
+                    requestTrackingAuthorization()
+                })
+                .transition(.opacity)
+            }
+        }
         .onAppear {
             showContent = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation(.easeIn(duration: 0.3)) {
+                    showTrackingPriming = true
+                }
+            }
+        }
+    }
+
+    private func requestTrackingAuthorization() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            ATTrackingManager.requestTrackingAuthorization { _ in
+                Task { @MainActor in
+                    Purchases.shared.attribution.collectDeviceIdentifiers()
+                }
+            }
         }
     }
 }
@@ -1698,8 +1730,8 @@ struct TrialTimeline: View {
 struct TimelineStep: View {
     let icon: String
     let iconColor: Color
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
     let isLast: Bool
 
     var body: some View {
@@ -1798,7 +1830,7 @@ struct OnboardingNavigation: View {
                         onComplete()
                     }
                 }) {
-                    Text(currentScreen == totalScreens - 1 ? "Get Started" : "Next")
+                    Text(currentScreen == totalScreens - 1 ? LocalizedStringKey("Get Started") : LocalizedStringKey("Next"))
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.white)
                         .padding(.horizontal, 32)
@@ -2158,7 +2190,7 @@ struct Onboarding04_BudgetSetupScreen: View {
                                         totalBudget = String(format: "%.0f", range.value)
                                         checkCanContinue()
                                     }) {
-                                        Text(range.label)
+                                        Text(LocalizedStringKey(range.label))
                                             .font(.system(size: 16, weight: .medium, design: .serif))
                                             .foregroundColor(selectedBudgetRange == range.value ? .white : Color(hex: "2C2C2C"))
                                             .frame(maxWidth: .infinity)
@@ -2386,7 +2418,7 @@ struct Onboarding05_GuestCountScreen: View {
                                             guestCount = range.value
                                         }) {
                                             VStack(spacing: 8) {
-                                                Text(range.label)
+                                                Text(LocalizedStringKey(range.label))
                                                     .font(.system(size: 14, weight: .medium, design: .serif))
                                                     .foregroundColor(selectedGuestRange == range.value ? .white : Color(hex: "2C2C2C"))
                                                     .multilineTextAlignment(.center)
@@ -2695,12 +2727,12 @@ struct PriorityCard: View {
                     .foregroundColor(isSelected ? .white : Color(hex: "D4B5A9"))
 
                 VStack(spacing: 4) {
-                    Text(priority.name)
+                    Text(LocalizedStringKey(priority.name))
                         .font(.system(size: 16, weight: .medium, design: .serif))
                         .foregroundColor(isSelected ? .white : Color(hex: "2C2C2C"))
                         .multilineTextAlignment(.center)
 
-                    Text(priority.description)
+                    Text(LocalizedStringKey(priority.description))
                         .font(.system(size: 12, weight: .regular, design: .serif))
                         .foregroundColor(isSelected ? Color.white.opacity(0.9) : Color(hex: "6B6B6B"))
                         .multilineTextAlignment(.center)
@@ -2992,13 +3024,13 @@ struct InitialTaskCard: View {
             // Task content
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text(task.title)
+                    Text(LocalizedStringKey(task.title))
                         .font(.system(size: 16, weight: .medium, design: .serif))
                         .foregroundColor(Color(hex: "2C2C2C"))
 
                     Spacer()
 
-                    Text(task.estimatedTime)
+                    Text(LocalizedStringKey(task.estimatedTime))
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(Color(hex: "9B9B9B"))
                         .padding(.horizontal, 8)
@@ -3009,7 +3041,7 @@ struct InitialTaskCard: View {
                         )
                 }
 
-                Text(task.description)
+                Text(LocalizedStringKey(task.description))
                     .font(.system(size: 14, weight: .regular, design: .serif))
                     .foregroundColor(Color(hex: "6B6B6B"))
                     .lineLimit(2)

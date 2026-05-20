@@ -252,11 +252,11 @@ struct ProductionTeamView: View {
 
     private func getMotivationalMessage() -> String {
         let messages = [
-            "Your dream team is ready",
-            "Another piece of the puzzle, complete",
-            "Vendors confirmed = one less thing to worry about",
-            "Building your perfect day, one vendor at a time",
-            "Your team is coming together beautifully"
+            String(localized: "Your dream team is ready"),
+            String(localized: "Another piece of the puzzle, complete"),
+            String(localized: "Vendors confirmed = one less thing to worry about"),
+            String(localized: "Building your perfect day, one vendor at a time"),
+            String(localized: "Your team is coming together beautifully")
         ]
         return messages.randomElement() ?? messages[0]
     }
@@ -445,7 +445,7 @@ struct ProductionVendorCard: View {
 
 struct TeamStat: View {
     let value: String
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
 
     var body: some View {
@@ -515,7 +515,7 @@ struct CategoryFilterChip: View {
                         .font(.system(size: 12, weight: .light))
                 }
 
-                Text(label ?? category?.rawValue ?? "")
+                Text(LocalizedStringKey(label ?? category?.rawValue ?? ""))
                     .font(.system(size: 12, weight: .regular))
             }
             .foregroundColor(isSelected ? .white : Color(hex: "7A7A7A"))

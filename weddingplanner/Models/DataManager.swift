@@ -298,14 +298,10 @@ extension DataManager {
     func purchasePremium() {
         // Cancel trial reminder notifications when user purchases premium
         TrialNotificationManager.shared.cancelTrialReminders()
-
-        // Set premium status (you can add this to your Wedding model if needed)
-        UserDefaults.standard.set(true, forKey: "hasPremiumAccess")
-        UserDefaults.standard.set(Date(), forKey: "premiumPurchaseDate")
     }
 
     var hasPremiumAccess: Bool {
-        return UserDefaults.standard.bool(forKey: "hasPremiumAccess")
+        return SubscriptionManager.shared.isSubscribed
     }
 
     func canAddGuest() -> Bool {

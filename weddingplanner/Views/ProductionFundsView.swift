@@ -392,13 +392,13 @@ struct ProductionFundsView: View {
 
     private func getReassurance() -> String {
         if percentageSpent < 50 {
-            return "You're well within budget – smooth sailing ahead"
+            return String(localized: "You're well within budget – smooth sailing ahead")
         } else if percentageSpent < 80 {
-            return "Your budget is on track – every euro has its place"
+            return String(localized: "Your budget is on track – every euro has its place")
         } else if percentageSpent < 100 {
-            return "Almost there – you've managed beautifully"
+            return String(localized: "Almost there – you've managed beautifully")
         } else {
-            return "Let's review and adjust – we've got this together"
+            return String(localized: "Let's review and adjust – we've got this together")
         }
     }
 
@@ -503,7 +503,7 @@ struct PaymentAlertRow: View {
                         .foregroundColor(Color(hex: "2C2C2C"))
 
                     if let days = item.daysUntilDue {
-                        Text(days < 0 ? "\(abs(days)) days overdue" : "Due in \(days) days")
+                        Text(days < 0 ? String(localized: "\(abs(days)) days overdue") : String(localized: "Due in \(days) days"))
                             .font(.system(size: 11, weight: .thin))
                             .foregroundColor(isOverdue ? Color(hex: "EF5350") : Color(hex: "7A7A7A"))
                     }
@@ -626,7 +626,7 @@ struct BudgetTransactionRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(transaction.transactionDescription ?? "Payment")
+                Text(transaction.transactionDescription ?? String(localized: "Payment"))
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Color(hex: "2C2C2C"))
 
@@ -675,7 +675,7 @@ struct BudgetTransactionRow: View {
 
 struct BudgetQuickActionButton: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
     let action: () -> Void
 

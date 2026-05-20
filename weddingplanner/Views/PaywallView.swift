@@ -1,18 +1,16 @@
 import SwiftUI
-import StoreKit
+import RevenueCat
+import FacebookCore
 
 struct PaywallView: View {
     @Binding var isPresented: Bool
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var selectedPlan: PlanType = .weekly
-    @State private var products: [Product] = []
     @State private var weeklyPrice = "$4.99"
     @State private var sixMonthPrice = "$29.99"
     @State private var isPurchasing = false
     @State private var showTermsOfUse = false
     @State private var showPrivacyPolicy = false
-
-    private let weeklyProductID = "com.manuelworlitzer.weddingplanner.premium.weekly"
-    private let sixMonthProductID = "com.manuelworlitzer.weddingplanner.premium.6months"
 
     enum PlanType {
         case weekly
@@ -89,6 +87,7 @@ struct PaywallView: View {
                         .font(.system(size: 14, weight: .regular, design: .serif))
                         .foregroundColor(Color(hex: "9B9B9B"))
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 40)
 
                     // Pricing cards - side by side
@@ -121,40 +120,55 @@ struct PaywallView: View {
 
                     Spacer()
 
-                    // Purchase button
-                    Button(action: {
-                        purchaseSubscription()
-                    }) {
-                        HStack(spacing: 8) {
-                            if isPurchasing {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .scaleEffect(0.8)
-                            } else {
-                                Image(systemName: "heart.fill")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white)
-
-                                Text(selectedPlan == .weekly ? "Start Planning Together" : "Unlock Full Experience")
-                                    .font(.system(size: 18, weight: .medium))
-                                    .foregroundColor(.white)
-                            }
+                    VStack(spacing: 10) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color(hex: "2C2C2C"))
+                            Text(trustText)
+                                .font(.system(size: 14, weight: .regular, design: .serif))
+                                .foregroundColor(Color(hex: "2C2C2C"))
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color(hex: "D4B5A9"), Color(hex: "B89B91")],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
+
+                        // Purchase button
+                        Button(action: {
+                            purchaseSubscription()
+                        }) {
+                            HStack(spacing: 8) {
+                                if isPurchasing {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .scaleEffect(0.8)
+                                } else {
+                                    Image(systemName: "heart.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white)
+
+                                    Text(selectedPlan == .weekly ? "Start Planning Together" : "Unlock Full Experience")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(
+                                Capsule()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color(hex: "D4B5A9"), Color(hex: "B89B91")],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
                                     )
-                                )
-                        )
-                        .shadow(color: Color(hex: "B89B91").opacity(0.3), radius: 12, y: 6)
+                            )
+                            .shadow(color: Color(hex: "B89B91").opacity(0.3), radius: 12, y: 6)
+                        }
+                        .disabled(isPurchasing)
+
+                        summaryText
+                            .foregroundColor(Color(hex: "9B9B9B"))
+                            .multilineTextAlignment(.center)
                     }
-                    .disabled(isPurchasing)
 
                     // Restore Purchases Button
                     Button(action: restorePurchases) {
@@ -202,30 +216,40 @@ struct PaywallView: View {
             PrivacyPolicyView()
         }
         .onAppear {
-            loadProducts()
+            Singular.event(EVENT_SNG_CONTENT_VIEW)
+            AppEvents.shared.logEvent(.viewedContent)
+            loadPrices()
         }
     }
 
-    private func loadProducts() {
+    private var summaryText: Text {
+        let body = Font.system(size: 15, weight: .regular, design: .serif)
+        let bold = Font.system(size: 15, weight: .bold, design: .serif)
+        switch selectedPlan {
+        case .weekly:
+            return Text("3 days free, then just ").font(body)
+                + Text("\(weeklyPrice)/week").font(bold)
+        case .sixMonth:
+            return Text("Just ").font(body)
+                + Text(sixMonthPrice).font(bold)
+                + Text(" every 6 months (\(calculateWeeklyPrice()))").font(body)
+        }
+    }
+
+    private var trustText: String {
+        selectedPlan == .weekly ? "No payment due now" : "Cancel anytime, no commitment"
+    }
+
+    private func loadPrices() {
         Task {
-            do {
-                let productIDs = [weeklyProductID, sixMonthProductID]
-                let loadedProducts = try await Product.products(for: productIDs)
-
-                await MainActor.run {
-                    self.products = loadedProducts
-
-                    // Update prices with real App Store prices
-                    if let weeklyProduct = loadedProducts.first(where: { $0.id == weeklyProductID }) {
-                        weeklyPrice = weeklyProduct.displayPrice
-                    }
-
-                    if let sixMonthProduct = loadedProducts.first(where: { $0.id == sixMonthProductID }) {
-                        sixMonthPrice = sixMonthProduct.displayPrice
-                    }
-                }
-            } catch {
-                print("Failed to load products: \(error)")
+            if subscriptionManager.offerings == nil {
+                await subscriptionManager.loadOfferings()
+            }
+            if let weekly = subscriptionManager.weeklyPackage?.storeProduct {
+                weeklyPrice = weekly.localizedPriceString
+            }
+            if let sixMonth = subscriptionManager.sixMonthPackage?.storeProduct {
+                sixMonthPrice = sixMonth.localizedPriceString
             }
         }
     }
@@ -241,101 +265,33 @@ struct PaywallView: View {
     }
 
     private func purchaseSubscription() {
-        let productID = selectedPlan == .weekly ? weeklyProductID : sixMonthProductID
-        guard let product = products.first(where: { $0.id == productID }) else { return }
+        AppEvents.shared.logEvent(.initiatedCheckout)
+
+        let package = selectedPlan == .weekly
+            ? subscriptionManager.weeklyPackage
+            : subscriptionManager.sixMonthPackage
+
+        guard let package = package else {
+            print("No package available for selection \(selectedPlan)")
+            return
+        }
 
         isPurchasing = true
 
         Task {
-            do {
-                let result = try await product.purchase()
-
-                switch result {
-                case .success(let verification):
-                    switch verification {
-                    case .verified(let transaction):
-                        // Update premium status
-                        await MainActor.run {
-                            UserDefaults.standard.set(true, forKey: "isPremiumUser")
-                            UserDefaults.standard.set(true, forKey: "hasPremiumAccess")
-                            UserDefaults.standard.set(Date(), forKey: "premiumPurchaseDate")
-                            isPurchasing = false
-                            isPresented = false
-                        }
-
-                        // Finish the transaction
-                        await transaction.finish()
-
-                    case .unverified:
-                        await MainActor.run {
-                            isPurchasing = false
-                        }
-                        print("Transaction unverified")
-                    }
-
-                case .userCancelled:
-                    await MainActor.run {
-                        isPurchasing = false
-                    }
-                    print("User cancelled purchase")
-
-                case .pending:
-                    await MainActor.run {
-                        isPurchasing = false
-                    }
-                    print("Purchase pending")
-
-                @unknown default:
-                    await MainActor.run {
-                        isPurchasing = false
-                    }
-                    print("Unknown purchase result")
-                }
-            } catch {
-                await MainActor.run {
-                    isPurchasing = false
-                    print("Purchase failed: \(error)")
-                }
+            let success = await subscriptionManager.purchase(package)
+            isPurchasing = false
+            if success && subscriptionManager.isSubscribed {
+                isPresented = false
             }
         }
     }
 
     private func restorePurchases() {
         Task {
-            // Restore purchases using StoreKit 2
-            do {
-                // This will restore all the user's purchased subscriptions
-                try await AppStore.sync()
-
-                // Check if user has active subscription
-                var hasActiveSubscription = false
-
-                // Get all products to check entitlements
-                for product in products {
-                    // Check if user has access to this product
-                    let verificationResult = await product.currentEntitlement
-
-                    switch verificationResult {
-                    case .verified(let transaction):
-                        hasActiveSubscription = true
-                        await transaction.finish()
-                    case .unverified:
-                        print("Unverified entitlement for \(product.id)")
-                    default:
-                        break
-                    }
-                }
-
-                // Update premium status if subscription found
-                if hasActiveSubscription {
-                    await MainActor.run {
-                        UserDefaults.standard.set(true, forKey: "isPremiumUser")
-                        UserDefaults.standard.set(true, forKey: "hasPremiumAccess")
-                        isPresented = false
-                    }
-                }
-            } catch {
-                print("Failed to restore purchases: \(error)")
+            await subscriptionManager.restorePurchases()
+            if subscriptionManager.isSubscribed {
+                isPresented = false
             }
         }
     }
@@ -439,9 +395,11 @@ struct PricingCard: View {
             VStack(spacing: 8) {
                 // Main text - bold
                 Text(mainText)
-                    .font(.system(size: 24, weight: .bold, design: .serif))
+                    .font(.system(size: 26, weight: .bold, design: .serif))
                     .foregroundColor(Color(hex: "2C2C2C"))
                     .multilineTextAlignment(.center)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
 
                 // Sub text - small
                 Text(subText)
@@ -450,7 +408,7 @@ struct PricingCard: View {
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 28)
+            .padding(.vertical, 32)
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 20)
@@ -638,4 +596,5 @@ struct PrivacyPolicyView: View {
 
 #Preview {
     PaywallView(isPresented: .constant(true))
+        .environmentObject(SubscriptionManager.shared)
 }

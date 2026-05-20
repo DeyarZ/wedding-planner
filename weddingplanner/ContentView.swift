@@ -11,13 +11,16 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var dataManager = DataManager()
+    @ObservedObject private var feedbackManager = FeedbackManager.shared
     @EnvironmentObject var notificationManager: NotificationManager
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var selectedTab = 0
     @State private var showNotificationPermission = false
     @State private var showOnboarding = false
     @State private var showPaywall = false
-    @State private var isPremiumUser = false
     @State private var hasShownPaywallOnce = false
+
+    private var isPremiumUser: Bool { subscriptionManager.isSubscribed }
 
     var body: some View {
         Group {
@@ -76,13 +79,14 @@ struct ContentView: View {
                 .fullScreenCover(isPresented: $showPaywall) {
                     PaywallView(isPresented: $showPaywall)
                 }
+                .sheet(isPresented: $feedbackManager.isPresented) {
+                    FeedbackView()
+                }
             }
         }
         .onAppear {
             dataManager.setup(modelContext: modelContext)
-
-            // Check premium status
-            isPremiumUser = UserDefaults.standard.bool(forKey: "isPremiumUser")
+            feedbackManager.registerAppOpen()
 
             // Check if this is the first launch
             let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
@@ -125,6 +129,16 @@ struct ContentView: View {
             if notificationManager.hasPermission {
                 notificationManager.scheduleRandomMotivation()
             }
+
+            // Gentle, infrequent feedback prompt for engaged users.
+            // Defer so it never collides with onboarding / paywall flows.
+            if !showOnboarding && !showPaywall && feedbackManager.shouldAutoPrompt() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    if !showOnboarding && !showPaywall && !showNotificationPermission {
+                        feedbackManager.requestFeedback()
+                    }
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ChangeTab"))) { notification in
             if let userInfo = notification.userInfo,
@@ -136,6 +150,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowPaywall"))) { _ in
             showPaywall = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowFeedback"))) { _ in
+            feedbackManager.requestFeedback()
         }
         .fullScreenCover(isPresented: $showNotificationPermission) {
             NotificationPermissionView(showPermissionScreen: $showNotificationPermission)
@@ -166,6 +183,19 @@ struct LuxuryHeader: View {
             }
 
             Spacer()
+
+            // Discreet feedback entry point
+            Button {
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("ShowFeedback"),
+                    object: nil
+                )
+            } label: {
+                Image(systemName: "bubble.left")
+                    .font(.system(size: 13, weight: .thin))
+                    .foregroundColor(Color(hex: "B8B8B8"))
+            }
+            .padding(.trailing, 14)
 
             // Minimal date
             if let wedding = dataManager.wedding {
@@ -198,7 +228,7 @@ struct LuxuryNavigation: View {
         HStack(spacing: 30) {
             ForEach(0..<items.count, id: \.self) { index in
                 LuxuryNavItem(
-                    title: items[index],
+                    title: LocalizedStringKey(items[index]),
                     isSelected: selectedTab == index,
                     namespace: namespace,
                     action: {
@@ -220,7 +250,7 @@ struct LuxuryNavigation: View {
 }
 
 struct LuxuryNavItem: View {
-    let title: String
+    let title: LocalizedStringKey
     let isSelected: Bool
     let namespace: Namespace.ID
     let action: () -> Void
@@ -249,5 +279,6 @@ struct LuxuryNavItem: View {
 
 #Preview {
     ContentView()
+        .environmentObject(SubscriptionManager.shared)
         .modelContainer(for: [Wedding.self, Vendor.self, Guest.self, WeddingTask.self, BudgetItem.self, Transaction.self, PlusOne.self, VendorPayment.self, VendorCommunication.self])
 }

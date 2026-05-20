@@ -161,7 +161,7 @@ struct EmotionalDashboardView: View {
             .animation(.easeOut(duration: 0.8).delay(0.2), value: animateIn)
 
             // Rotating affirmation
-            Text(affirmations[currentAffirmation])
+            Text(LocalizedStringKey(affirmations[currentAffirmation]))
                 .font(.system(size: 16, weight: .light, design: .serif))
                 .foregroundColor(Color(hex: "9B9B9B"))
                 .italic()
@@ -214,7 +214,7 @@ struct EmotionalDashboardView: View {
             CoreAreaCard(
                 icon: "clock",
                 title: "Time",
-                value: "\(getUpcomingTasksCount()) tasks",
+                value: String(localized: "\(getUpcomingTasksCount()) tasks"),
                 subtitle: "due this week",
                 color: Color(hex: "C8D4E8"),
                 tabIndex: 1,
@@ -227,7 +227,7 @@ struct EmotionalDashboardView: View {
             CoreAreaCard(
                 icon: "person.3",
                 title: "Team",
-                value: "\(getBookedVendorsCount()) of \(getTotalVendorsCount())",
+                value: String(localized: "\(getBookedVendorsCount()) of \(getTotalVendorsCount())"),
                 subtitle: "vendors booked",
                 color: Color(hex: "E8D4C8"),
                 tabIndex: 2,
@@ -254,7 +254,7 @@ struct EmotionalDashboardView: View {
                 icon: "creditcard",
                 title: "Funds",
                 value: formatCurrency(dataManager.spentBudget),
-                subtitle: "of \(formatCurrency(dataManager.totalBudget)) spent",
+                subtitle: LocalizedStringKey("of \(formatCurrency(dataManager.totalBudget)) spent"),
                 color: Color(hex: "C8E8D4"),
                 tabIndex: 4,
                 action: {
@@ -340,7 +340,7 @@ struct EmotionalDashboardView: View {
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(Color(hex: "9B9B9B"))
 
-                Text(getWeeklyWisdom())
+                Text(LocalizedStringKey(getWeeklyWisdom()))
                     .font(.system(size: 18, weight: .light, design: .serif))
                     .foregroundColor(Color(hex: "7A7A7A"))
                     .multilineTextAlignment(.center)
@@ -403,7 +403,14 @@ struct EmotionalDashboardView: View {
         guard let nextTask = upcoming, let dueDate = nextTask.dueDate else { return nil }
 
         let daysUntil = Calendar.current.dateComponents([.day], from: Date(), to: dueDate).day ?? 0
-        let timeText = daysUntil == 0 ? "Today" : daysUntil == 1 ? "Tomorrow" : "In \(daysUntil) days"
+        let timeText: String
+        if daysUntil == 0 {
+            timeText = String(localized: "Today")
+        } else if daysUntil == 1 {
+            timeText = String(localized: "Tomorrow")
+        } else {
+            timeText = String(localized: "In \(daysUntil) days")
+        }
 
         return (title: nextTask.title, timeText: timeText, icon: nextTask.category.icon, task: nextTask)
     }
@@ -417,6 +424,10 @@ struct EmotionalDashboardView: View {
 
             // Celebrate!
             UINotificationFeedbackGenerator().notificationOccurred(.success)
+            FeedbackManager.shared.recordTaskCompleted()
+            if FeedbackManager.shared.shouldAutoPrompt() {
+                NotificationCenter.default.post(name: NSNotification.Name("ShowFeedback"), object: nil)
+            }
             showSparkle = true
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
@@ -539,9 +550,9 @@ struct EmptyFocusState: View {
 
 struct CoreAreaCard: View {
     let icon: String
-    let title: String
+    let title: LocalizedStringKey
     let value: String
-    let subtitle: String
+    let subtitle: LocalizedStringKey
     let color: Color
     let tabIndex: Int
     let action: () -> Void

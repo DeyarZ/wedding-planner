@@ -359,11 +359,11 @@ struct ProductionGuestsView: View {
 
     private func getMotivationalMessage() -> String {
         let messages = [
-            "Every guest is where they belong",
-            "One step closer to a perfect day",
-            "RSVPs flowing in – your wedding is filling with love",
-            "Your people are taken care of",
-            "Every name, every detail, in perfect order"
+            String(localized: "Every guest is where they belong"),
+            String(localized: "One step closer to a perfect day"),
+            String(localized: "RSVPs flowing in – your wedding is filling with love"),
+            String(localized: "Your people are taken care of"),
+            String(localized: "Every name, every detail, in perfect order")
         ]
         return messages.randomElement() ?? messages[0]
     }
@@ -499,7 +499,7 @@ struct ProductionGuestRow: View {
 
 struct QuickStat: View {
     let value: String
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
 
     var body: some View {
@@ -546,7 +546,7 @@ struct GuestFilterChip: View {
                     Image(systemName: icon)
                         .font(.system(size: 11, weight: .light))
                 }
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(.system(size: 12, weight: .regular))
             }
             .foregroundColor(isSelected ? .white : Color(hex: "7A7A7A"))

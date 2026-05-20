@@ -218,7 +218,7 @@ struct ProductionTimelineView: View {
             }
 
             // Rotating micro-copy
-            Text(microCopyMessages[currentMicroCopy])
+            Text(LocalizedStringKey(microCopyMessages[currentMicroCopy]))
                 .font(.system(size: 14, weight: .light, design: .serif))
                 .foregroundStyle(
                     LinearGradient(
@@ -384,8 +384,8 @@ struct ProductionTimelineView: View {
         VStack(spacing: 16) {
             TimelineQuickActionButton(
                 icon: "calendar.day.timeline.left",
-                title: "Wedding Day Schedule",
-                subtitle: "Plan your perfect day timeline",
+                title: String(localized: "Wedding Day Schedule"),
+                subtitle: String(localized: "Plan your perfect day timeline"),
                 color: Color(hex: "E8C4B8"),
                 action: {
                     showingDaySchedule = true
@@ -395,8 +395,8 @@ struct ProductionTimelineView: View {
 
             TimelineQuickActionButton(
                 icon: "calendar",
-                title: "Calendar View",
-                subtitle: "See all events at a glance",
+                title: String(localized: "Calendar View"),
+                subtitle: String(localized: "See all events at a glance"),
                 color: Color(hex: "C8D4E8"),
                 action: {
                     showingCalendar = true
@@ -529,18 +529,18 @@ struct ProductionTimelineView: View {
 
         if daysLeft < 180 && daysLeft > 120 {
             if dataManager.wedding?.vendors?.filter({ $0.category == .photography && $0.isBooked }).isEmpty ?? true {
-                return "📷 Most couples book their photographer 6-8 months out. Ready to start looking?"
+                return String(localized: "📷 Most couples book their photographer 6-8 months out. Ready to start looking?")
             }
         }
 
         if daysLeft < 90 && daysLeft > 60 {
             if dataManager.wedding?.guests?.filter({ $0.invitationSent }).isEmpty ?? true {
-                return "✉️ Time to send those invitations! Most go out 2-3 months before."
+                return String(localized: "✉️ Time to send those invitations! Most go out 2-3 months before.")
             }
         }
 
         if overdueTasksCount ?? 0 > 3 {
-            return "💝 You have a few tasks that need attention. Take them one at a time - you've got this!"
+            return String(localized: "💝 You have a few tasks that need attention. Take them one at a time - you've got this!")
         }
 
         // Positive reinforcement
@@ -549,7 +549,7 @@ struct ProductionTimelineView: View {
            total > 0 {
             let percentage = Double(completed) / Double(total)
             if percentage > 0.7 {
-                return "🌟 You're doing amazing! Over 70% of your tasks are complete."
+                return String(localized: "🌟 You're doing amazing! Over 70% of your tasks are complete.")
             }
         }
 
@@ -679,7 +679,7 @@ struct ProductionFilterChip: View {
                 Image(systemName: filter.icon)
                     .font(.system(size: 12, weight: .regular))
 
-                Text(filter.rawValue)
+                Text(LocalizedStringKey(filter.rawValue))
                     .font(.system(size: 12, weight: .regular))
 
                 if count > 0 {
@@ -721,13 +721,13 @@ struct ProductionTaskCard: View {
     }
 
     private var deadlineText: String {
-        guard let dueDate = task.dueDate else { return "No deadline" }
+        guard let dueDate = task.dueDate else { return String(localized: "No deadline") }
 
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
 
         if task.isOverdue {
-            return "Overdue"
+            return String(localized: "Overdue")
         } else {
             return formatter.localizedString(for: dueDate, relativeTo: Date())
         }
@@ -891,7 +891,7 @@ struct ProductionTaskCard: View {
 struct EmptyTaskState: View {
     let filter: ProductionTimelineView.TaskFilter
 
-    private var message: (title: String, subtitle: String, icon: String) {
+    private var message: (title: LocalizedStringKey, subtitle: LocalizedStringKey, icon: String) {
         switch filter {
         case .all:
             return ("You're all caught up!", "Take a moment to breathe. You're doing amazing.", "checkmark.seal")
