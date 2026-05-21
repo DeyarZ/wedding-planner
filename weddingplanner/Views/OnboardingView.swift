@@ -86,8 +86,8 @@ struct OnboardingView: View {
             .tag(9)
 
             Onboarding11_TrialTimelineScreen(onContinue: {
-                Singular.event(EVENT_SNG_COMPLETE_REGISTRATION)
-                AppEvents.shared.logEvent(.completedRegistration)
+                Singular.event(EVENT_SNG_TUTORIAL_COMPLETE)
+                AppEvents.shared.logEvent(.completedTutorial)
                 UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
                 showMainApp = true
                 // Call the completion handler if provided

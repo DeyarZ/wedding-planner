@@ -3,6 +3,8 @@ import SwiftData
 import UIKit
 import MessageUI
 import Charts
+import Singular
+import FacebookCore
 
 // MARK: - Main Production Guests View
 struct ProductionGuestsView: View {
@@ -375,6 +377,12 @@ struct ProductionGuestsView: View {
         do {
             try modelContext.save()
             notificationFeedback.notificationOccurred(.success)
+
+            if !UserDefaults.standard.bool(forKey: "didFireActivationEvent") {
+                UserDefaults.standard.set(true, forKey: "didFireActivationEvent")
+                Singular.event("sng_activation")
+                AppEvents.shared.logEvent(AppEvents.Name("Activation"))
+            }
         } catch {
             print("Error adding guest: \(error)")
         }

@@ -265,6 +265,7 @@ struct PaywallView: View {
     }
 
     private func purchaseSubscription() {
+        Singular.event("sng_initiated_checkout")
         AppEvents.shared.logEvent(.initiatedCheckout)
 
         let package = selectedPlan == .weekly

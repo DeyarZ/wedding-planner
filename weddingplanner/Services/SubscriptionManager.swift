@@ -1,6 +1,7 @@
 import Foundation
 import RevenueCat
 import FacebookCore
+import Singular
 
 @MainActor
 class SubscriptionManager: NSObject, ObservableObject {
@@ -78,15 +79,17 @@ class SubscriptionManager: NSObject, ObservableObject {
                 let priceDouble = NSDecimalNumber(decimal: product.price).doubleValue
                 let currencyCode = product.currencyCode ?? "USD"
                 if hasFreeTrial(for: product) {
-                    Singular.event(EVENT_SNG_START_TRIAL)
-                    AppEvents.shared.logEvent(
-                        .startTrial,
-                        valueToSum: priceDouble,
-                        parameters: [.currency: currencyCode]
+                    Singular.customRevenue(
+                        EVENT_SNG_START_TRIAL,
+                        currency: currencyCode,
+                        amount: priceDouble
                     )
                 } else {
-                    Singular.event(EVENT_SNG_SUBSCRIBE)
-                    AppEvents.shared.logPurchase(amount: priceDouble, currency: currencyCode)
+                    Singular.customRevenue(
+                        EVENT_SNG_SUBSCRIBE,
+                        currency: currencyCode,
+                        amount: priceDouble
+                    )
                 }
 
                 isLoading = false
