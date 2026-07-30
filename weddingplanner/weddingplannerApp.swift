@@ -23,7 +23,7 @@ struct WeddingPlannerApp: App {
     // Requesting it from App.init() fires the one-shot iOS dialog before the
     // first frame — unprimed, with no context — which burns the single chance
     // we get. The only request point is the primed onboarding screen
-    // (Onboarding10_NotificationScreen -> NotificationManager.requestPermission).
+    // (OnboardingNotificationScreen -> NotificationManager.requestPermission).
 
     var sharedModelContainer: ModelContainer = {
         // ALL models need to be included because of relationships

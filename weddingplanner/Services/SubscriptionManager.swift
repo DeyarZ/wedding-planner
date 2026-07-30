@@ -263,13 +263,21 @@ class SubscriptionManager: NSObject, ObservableObject {
     /// Everything that talks about "the trial" must go through this so the app
     /// can never contradict the App Store.
     var trialDurationDays: Int {
+        trialDurationDaysIfAny ?? Config.fallbackTrialDays
+    }
+
+    /// Same as `trialDurationDays` but without the fallback: `nil` means the
+    /// current offering genuinely has no free trial. Surfaces that need to
+    /// render a no-trial variant (the onboarding trial-timeline screen) must
+    /// use this, otherwise they would promise a trial the store does not give.
+    var trialDurationDaysIfAny: Int? {
         if let package = defaultPackage, let days = Self.trialDays(for: package) {
             return days
         }
         for package in availablePackages {
             if let days = Self.trialDays(for: package) { return days }
         }
-        return Config.fallbackTrialDays
+        return nil
     }
 
     private nonisolated static func days(in period: RevenueCat.SubscriptionPeriod) -> Int? {

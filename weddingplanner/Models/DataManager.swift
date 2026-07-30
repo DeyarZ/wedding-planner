@@ -142,6 +142,9 @@ class DataManager: ObservableObject {
         }
     }
 
+    /// Upper bound on how many of the seeded tasks get a local reminder.
+    private static let maxSeededTaskReminders = 10
+
     private func addInitialTasks(to wedding: Wedding, tasks: [InitialTaskData], modelContext: ModelContext) {
         let calendar = Calendar.current
 
@@ -157,8 +160,12 @@ class DataManager: ObservableObject {
             if let dueDate = calendar.date(byAdding: .day, value: daysFromNow, to: Date()) {
                 task.dueDate = dueDate
 
-                // Schedule notification
-                NotificationManager.shared.scheduleTaskReminder(for: task)
+                // iOS only keeps 64 pending local notifications. The seeded
+                // checklist is now the full wedding plan, so only the nearest
+                // tasks get a reminder — the rest are scheduled as they come up.
+                if index < Self.maxSeededTaskReminders {
+                    NotificationManager.shared.scheduleTaskReminder(for: task)
+                }
             }
 
             task.wedding = wedding
@@ -174,6 +181,15 @@ class DataManager: ObservableObject {
         case "budget": return .planning
         case "invitations": return .invitations
         case "guests": return .planning
+        case "planning": return .planning
+        case "vendors": return .vendors
+        case "attire": return .attire
+        case "decorations": return .decorations
+        case "entertainment", "music": return .entertainment
+        case "flowers": return .flowers
+        case "transportation": return .transportation
+        case "accommodation": return .accommodation
+        case "legal": return .legal
         default: return .other
         }
     }
@@ -188,6 +204,11 @@ class DataManager: ObservableObject {
     }
 
     private func getDaysFromNow(for task: InitialTaskData, index: Int) -> Int {
+        // The onboarding checklist plans backwards from the wedding date and
+        // supplies its own lead time; the category defaults below only apply to
+        // callers that do not.
+        if let explicit = task.daysFromNow { return max(1, explicit) }
+
         switch task.category {
         case "budget": return 1 // Review budget tomorrow
         case "venue": return 7 // Start venue research next week
@@ -269,6 +290,10 @@ struct InitialTaskData {
     let category: String
     let priority: Int
     let estimatedTime: String
+    /// Explicit lead time in days. The onboarding checklist is planned
+    /// backwards from the wedding date, so it needs to set the due date itself
+    /// instead of falling back to the per-category defaults.
+    var daysFromNow: Int? = nil
 }
 
 enum StressLevel {

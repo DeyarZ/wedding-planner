@@ -39,9 +39,12 @@ struct ContentView: View {
                 OnboardingView {
                     // Onboarding completed callback
                     showOnboarding = false
-                    // Show paywall after onboarding for free users
+                    // The paywall is the third page of the pre-paywall sequence
+                    // (trial timeline → value recap → price), so it follows as
+                    // quickly as the dismissal allows rather than feeling like a
+                    // separate interruption after the app has appeared.
                     if !isPremiumUser {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                             paywallSource = .postOnboarding
                             showPaywall = true
                         }
@@ -131,7 +134,7 @@ struct ContentView: View {
 
             // Notification permission is NEVER requested from here. The single
             // request point is the primed screen in onboarding
-            // (Onboarding10_NotificationScreen) — an unprimed prompt burns the
+            // (OnboardingNotificationScreen) — an unprimed prompt burns the
             // one-shot iOS dialog and tanks the opt-in rate.
 
             // Schedule daily motivation if permissions granted
