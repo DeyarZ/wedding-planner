@@ -127,6 +127,57 @@ class SubscriptionManager: NSObject, ObservableObject {
         guard let introDiscount = product.introductoryDiscount else { return false }
         return introDiscount.paymentMode == .freeTrial
     }
+
+    // MARK: - Trial length
+
+    /// The real free-trial length in days, read from the introductory offer on
+    /// the StoreProduct. Falls back to `Config.fallbackTrialDays` when offerings
+    /// have not loaded yet. Everything that talks about the trial (copy,
+    /// reminders) must go through this so the app can never contradict itself.
+    var trialDurationDays: Int {
+        let products = [weeklyPackage?.storeProduct, sixMonthPackage?.storeProduct].compactMap { $0 }
+        for product in products {
+            guard let intro = product.introductoryDiscount,
+                  intro.paymentMode == .freeTrial else { continue }
+            if let days = Self.days(in: intro.subscriptionPeriod), days > 0 {
+                return days
+            }
+        }
+        return Config.fallbackTrialDays
+    }
+
+    private static func days(in period: RevenueCat.SubscriptionPeriod) -> Int? {
+        switch period.unit {
+        case .day: return period.value
+        case .week: return period.value * 7
+        case .month: return period.value * 30
+        case .year: return period.value * 365
+        }
+    }
+
+    // MARK: - Pricing helpers
+
+    /// Locale-aware "per week" equivalent for a multi-week product.
+    /// Uses the product's own price (Decimal) and price formatter, so it is
+    /// correct in every currency — never parse the localized price string.
+    static func localizedPricePerWeek(for product: StoreProduct, weeks: Int) -> String? {
+        guard weeks > 0 else { return nil }
+        let perWeek = NSDecimalNumber(decimal: product.price)
+            .dividing(by: NSDecimalNumber(value: weeks))
+
+        if let formatter = product.priceFormatter,
+           let formatted = formatter.string(from: perWeek) {
+            return formatted
+        }
+
+        let fallback = NumberFormatter()
+        fallback.numberStyle = .currency
+        fallback.locale = .current
+        if let currencyCode = product.currencyCode {
+            fallback.currencyCode = currencyCode
+        }
+        return fallback.string(from: perWeek)
+    }
 }
 
 extension SubscriptionManager: PurchasesDelegate {

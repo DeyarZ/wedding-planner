@@ -9,8 +9,31 @@ struct OnboardingView: View {
     @State private var showMainApp = false
     var onComplete: (() -> Void)?
 
+    /// Short, stable slugs for the funnel event. Index == screen tag.
+    /// NOTE: the former screen 7 (review request) was removed — asking for a
+    /// review inside onboarding is an App Review 5.6.3 rejection risk.
+    private static let screenNames = [
+        "welcome",          // 0
+        "features",         // 1
+        "wedding_basics",   // 2
+        "budget_setup",     // 3
+        "guest_count",      // 4
+        "priorities",       // 5
+        "initial_tasks",    // 6
+        "trial_offer",      // 7
+        "notifications",    // 8
+        "trial_timeline"    // 9
+    ]
+
+    static var screenCount: Int { screenNames.count }
+
     init(onComplete: (() -> Void)? = nil) {
         self.onComplete = onComplete
+    }
+
+    private func trackStep(_ index: Int) {
+        guard Self.screenNames.indices.contains(index) else { return }
+        Analytics.onboardingStep(index, Self.screenNames[index])
     }
 
     var body: some View {
@@ -64,26 +87,19 @@ struct OnboardingView: View {
             })
             .tag(6)
 
-            Onboarding08_ReviewRequestScreen(onContinue: {
+            Onboarding09_TrialOfferScreen(onContinue: {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     currentScreen = 8
                 }
             })
             .tag(7)
 
-            Onboarding09_TrialOfferScreen(onContinue: {
+            Onboarding10_NotificationScreen(onContinue: {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     currentScreen = 9
                 }
             })
             .tag(8)
-
-            Onboarding10_NotificationScreen(onContinue: {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    currentScreen = 10
-                }
-            })
-            .tag(9)
 
             Onboarding11_TrialTimelineScreen(onContinue: {
                 Singular.event(EVENT_SNG_TUTORIAL_COMPLETE)
@@ -93,10 +109,16 @@ struct OnboardingView: View {
                 // Call the completion handler if provided
                 onComplete?()
             })
-            .tag(10)
+            .tag(9)
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .ignoresSafeArea(.all)
+        .onAppear {
+            trackStep(0)
+        }
+        .onChange(of: currentScreen) { _, newScreen in
+            trackStep(newScreen)
+        }
         .fullScreenCover(isPresented: $showMainApp) {
             ContentView()
         }
@@ -1194,9 +1216,7 @@ struct Onboarding10_NotificationScreen: View {
 
                     // Proceed for free Button
                     Button(action: {
-                        // Schedule smart notifications when user proceeds
-                        scheduleSmartNotifications()
-                        onContinue()
+                        requestPermissionAndSchedule()
                     }) {
                         Text("Proceed for free")
                             .font(.system(size: 18, weight: .regular, design: .serif))
@@ -1224,8 +1244,21 @@ struct Onboarding10_NotificationScreen: View {
         }
     }
 
-    private func scheduleSmartNotifications() {
-        TrialNotificationManager.shared.scheduleSmartTrialNotifications()
+    /// The ONE place in the app where the iOS notification prompt is requested.
+    /// The screen above is the primer; the system dialog follows it immediately,
+    /// and the trial reminders are only scheduled once permission is granted.
+    private func requestPermissionAndSchedule() {
+        // Read the real trial length here (main actor) so the completion below
+        // stays free of actor-isolated access.
+        let trialDays = SubscriptionManager.shared.trialDurationDays
+        let advance = onContinue
+
+        NotificationManager.shared.requestPermission { granted in
+            if granted {
+                TrialNotificationManager.shared.scheduleSmartTrialNotifications(trialDays: trialDays)
+            }
+            advance()
+        }
     }
 }
 
@@ -1342,21 +1375,40 @@ class TrialNotificationManager {
     static let shared = TrialNotificationManager()
     private let notificationManager = NotificationManager.shared
 
-    func scheduleSmartTrialNotifications() {
+    /// Upper bound used when clearing engagement reminders, so a shorter trial
+    /// still cleans up ids scheduled by an older/longer trial configuration.
+    private static let maxEngagementDays = 14
+
+    /// Schedules the trial reminder ladder against the ACTUAL trial length.
+    /// This used to be hardcoded to a 7-day trial (reminders on day 5/6) while
+    /// the product ships a 3-day trial — the reminders fired after the trial had
+    /// already converted or lapsed.
+    func scheduleSmartTrialNotifications(trialDays: Int = Config.fallbackTrialDays) {
+        let days = max(1, trialDays)
+
         // Clear any existing trial notifications
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: getTrialNotificationIds())
 
-        // Schedule daily engagement notifications (days 1-6)
-        scheduleEngagementNotifications()
+        // Daily engagement notifications for every full day of the trial.
+        scheduleEngagementNotifications(trialDays: days)
 
-        // Schedule trial reminder (day 5 - 2 days before 7-day trial ends)
-        scheduleTrialReminderNotification()
+        // Nothing sensible to remind about on a 1-day trial.
+        guard days >= 2 else { return }
 
-        // Schedule final reminder (day 6 - 1 day before trial ends)
-        scheduleFinalReminderNotification()
+        // Heads-up reminder: 2 days before the trial ends when the trial is long
+        // enough, otherwise 1 day before.
+        let reminderOffset = max(1, days - 2)
+        scheduleTrialReminderNotification(dayOffset: reminderOffset, daysLeft: days - reminderOffset)
+
+        // Final reminder the day before the trial ends (skip if it collides
+        // with the heads-up reminder on a short trial).
+        let finalOffset = days - 1
+        if finalOffset > reminderOffset {
+            scheduleFinalReminderNotification(dayOffset: finalOffset)
+        }
     }
 
-    private func scheduleEngagementNotifications() {
+    private func scheduleEngagementNotifications(trialDays: Int) {
         let engagementMessages = [
             String(localized: "Welcome to Blissful! Ready to start planning your perfect day? 💕"),
             String(localized: "Your wedding countdown has begun! Check your timeline today ✨"),
@@ -1366,7 +1418,9 @@ class TrialNotificationManager {
             String(localized: "Your wedding plans are coming together beautifully! 🌸")
         ]
 
-        for day in 1...6 {
+        // One per full day of the trial, never more than we have copy for.
+        let lastDay = min(max(trialDays, 1), engagementMessages.count)
+        for day in 1...lastDay {
             let content = UNMutableNotificationContent()
             content.title = String(localized: "Your Wedding Planning Journey")
             content.body = engagementMessages[day - 1]
@@ -1390,16 +1444,18 @@ class TrialNotificationManager {
         }
     }
 
-    private func scheduleTrialReminderNotification() {
+    private func scheduleTrialReminderNotification(dayOffset: Int, daysLeft: Int) {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Your Free Trial Ends Soon")
-        content.body = String(localized: "Only 2 days left! Continue planning your dream wedding with full access to all features 💍")
+        content.body = daysLeft <= 1
+            ? String(localized: "Only 1 day left! Continue planning your dream wedding with full access to all features 💍")
+            : String(localized: "Only 2 days left! Continue planning your dream wedding with full access to all features 💍")
         content.sound = .default
         content.categoryIdentifier = "TRIAL_REMINDER"
         content.userInfo = ["type": "trial_reminder"]
 
-        // Schedule for day 5 (2 days before trial ends) at 10 AM
-        let triggerDate = Calendar.current.date(byAdding: .day, value: 5, to: Date())!
+        // `daysLeft` days before the trial ends, at 10 AM
+        let triggerDate = Calendar.current.date(byAdding: .day, value: dayOffset, to: Date())!
         var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: triggerDate)
         dateComponents.hour = 10
         dateComponents.minute = 0
@@ -1414,7 +1470,7 @@ class TrialNotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
 
-    private func scheduleFinalReminderNotification() {
+    private func scheduleFinalReminderNotification(dayOffset: Int) {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Last Day of Your Free Trial")
         content.body = String(localized: "Your trial ends tomorrow. Keep planning your perfect wedding day! 🎊")
@@ -1422,8 +1478,8 @@ class TrialNotificationManager {
         content.categoryIdentifier = "FINAL_REMINDER"
         content.userInfo = ["type": "final_reminder"]
 
-        // Schedule for day 6 (1 day before trial ends) at 6 PM
-        let triggerDate = Calendar.current.date(byAdding: .day, value: 6, to: Date())!
+        // 1 day before the trial ends, at 6 PM
+        let triggerDate = Calendar.current.date(byAdding: .day, value: dayOffset, to: Date())!
         var dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: triggerDate)
         dateComponents.hour = 18
         dateComponents.minute = 0
@@ -1446,7 +1502,7 @@ class TrialNotificationManager {
 
     private func getTrialNotificationIds() -> [String] {
         var ids = ["trial_reminder_main", "trial_reminder_final"]
-        for day in 1...6 {
+        for day in 1...Self.maxEngagementDays {
             ids.append("engagement_day_\(day)")
         }
         return ids
@@ -3054,213 +3110,6 @@ struct InitialTaskCard: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
         )
-    }
-}
-
-// MARK: - Review Request Screen
-
-struct Onboarding08_ReviewRequestScreen: View {
-    let onContinue: () -> Void
-    @State private var showContent = false
-    @State private var animateStars = false
-
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Same gradient background
-                LinearGradient(
-                    colors: [
-                        Color(hex: "F8F4F0"),
-                        Color(hex: "F5EFE7")
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .ignoresSafeArea(.all)
-
-                VStack(spacing: 0) {
-                    Spacer()
-
-                    // Animated Stars Icon
-                    AnimatedStarsView(isAnimating: $animateStars)
-                        .frame(height: 120)
-                        .opacity(showContent ? 1 : 0)
-                        .scaleEffect(showContent ? 1 : 0.8)
-                        .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.2), value: showContent)
-
-                    Spacer()
-                        .frame(height: 60)
-
-                    // Headline Text
-                    VStack(spacing: 16) {
-                        Text("LOVING BLISSFUL?")
-                            .font(.system(size: 28, weight: .bold, design: .serif))
-                            .foregroundColor(Color(hex: "2C2C2C"))
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(4)
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 40)
-
-                        // Body Text
-                        Text("We're a small team trying to grow and help more couples plan their perfect day.\n\nWould you mind leaving us a quick review?")
-                            .font(.system(size: 16, weight: .light, design: .serif))
-                            .foregroundColor(Color(hex: "6B6B6B"))
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(6)
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 40)
-                    }
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : 20)
-                    .animation(.easeOut(duration: 0.8).delay(0.4), value: showContent)
-
-                    Spacer()
-
-                    // Heart icon with text
-                    HStack(spacing: 8) {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color(hex: "FFB6C1"))
-
-                        Text("It means the world to us")
-                            .font(.system(size: 14, weight: .light, design: .serif))
-                            .foregroundColor(Color(hex: "6B6B6B"))
-                    }
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : 20)
-                    .animation(.easeOut(duration: 0.8).delay(0.6), value: showContent)
-
-                    Spacer()
-                        .frame(height: 24)
-
-                    // Continue Button
-                    Button(action: {
-                        // Request the review using modern API
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                            if #available(iOS 18.0, *) {
-                                AppStore.requestReview(in: windowScene)
-                            } else {
-                                SKStoreReviewController.requestReview(in: windowScene)
-                            }
-                        }
-                        // Continue to next screen
-                        onContinue()
-                    }) {
-                        Text("Sure, I'd love to help!")
-                            .font(.system(size: 18, weight: .regular, design: .serif))
-                            .foregroundColor(Color(hex: "2C2C2C"))
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                            .background(
-                                Capsule()
-                                    .fill(Color.white)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-                            )
-                    }
-                    .padding(.horizontal, 20)
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : 30)
-                    .animation(.easeOut(duration: 0.8).delay(0.8), value: showContent)
-
-                    Spacer()
-                        .frame(height: 80)
-                }
-            }
-        }
-        .ignoresSafeArea(.all)
-        .onAppear {
-            showContent = true
-            animateStars = true
-        }
-    }
-}
-
-// MARK: - Animated Stars Component
-struct AnimatedStarsView: View {
-    @Binding var isAnimating: Bool
-    @State private var rotationAngles: [Double] = [0, 0, 0, 0, 0]
-    @State private var scales: [CGFloat] = [1, 1, 1, 1, 1]
-    @State private var opacities: [Double] = [1, 1, 1, 1, 1]
-
-    var body: some View {
-        ZStack {
-            // Glow effect background
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            Color(hex: "FFD700").opacity(0.3),
-                            Color.clear
-                        ],
-                        center: .center,
-                        startRadius: 20,
-                        endRadius: 80
-                    )
-                )
-                .frame(width: 160, height: 160)
-                .blur(radius: 20)
-
-            // Main central star
-            Image(systemName: "star.fill")
-                .font(.system(size: 60, weight: .medium))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [
-                            Color(hex: "FFD700"),  // Gold
-                            Color(hex: "FFA500")   // Orange
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .shadow(color: Color(hex: "FFD700").opacity(0.5), radius: 15, x: 0, y: 8)
-                .scaleEffect(scales[0])
-
-            // Orbiting smaller stars
-            ForEach(0..<4, id: \.self) { index in
-                Image(systemName: "star.fill")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(Color(hex: "FFD700").opacity(0.8))
-                    .scaleEffect(scales[index + 1])
-                    .opacity(opacities[index + 1])
-                    .offset(
-                        x: cos(Angle(degrees: rotationAngles[index + 1]).radians) * 60,
-                        y: sin(Angle(degrees: rotationAngles[index + 1]).radians) * 60
-                    )
-            }
-        }
-        .onChange(of: isAnimating) { _, animating in
-            if animating {
-                startAnimation()
-            }
-        }
-    }
-
-    private func startAnimation() {
-        // Main star pulse
-        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-            scales[0] = 1.1
-        }
-
-        // Orbiting stars
-        for index in 0..<4 {
-            let baseAngle = Double(index) * 90
-            rotationAngles[index + 1] = baseAngle
-
-            withAnimation(.linear(duration: 8).repeatForever(autoreverses: false)) {
-                rotationAngles[index + 1] = baseAngle + 360
-            }
-
-            // Pulsing effect for orbiting stars
-            withAnimation(
-                .easeInOut(duration: 1.0 + Double(index) * 0.2)
-                .repeatForever(autoreverses: true)
-                .delay(Double(index) * 0.2)
-            ) {
-                scales[index + 1] = 1.3
-                opacities[index + 1] = 0.6
-            }
-        }
     }
 }
 

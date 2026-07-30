@@ -15,14 +15,17 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
 
     // MARK: - Permission Management
 
-    func requestPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+    /// The ONE place the system notification prompt is requested. Call it only
+    /// from a primed context (the onboarding notification screen).
+    func requestPermission(completion: ((Bool) -> Void)? = nil) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
             DispatchQueue.main.async {
                 self.hasPermission = granted
                 if granted {
                     print("✅ Notification permission granted")
                     self.scheduleDefaultNotifications()
                 }
+                completion?(granted)
             }
         }
     }
@@ -37,9 +40,19 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
 
     // MARK: - Schedule Notifications
 
+    /// Identifiers owned by the recurring default schedule. Only these get
+    /// cleared — `removeAllPendingNotificationRequests()` used to wipe the
+    /// trial-end reminders (a conversion asset) along with them.
+    private static let defaultNotificationIDs = [
+        "daily.morning",
+        "daily.evening",
+        "weekly.milestone"
+    ]
+
     func scheduleDefaultNotifications() {
-        // Clear existing notifications first
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        // Clear only OUR recurring defaults — never the trial reminders.
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: Self.defaultNotificationIDs)
 
         // Schedule daily morning check-in
         scheduleDailyMorningCheckIn()

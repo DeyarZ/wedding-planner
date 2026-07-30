@@ -19,14 +19,12 @@ struct WeddingPlannerApp: App {
     @StateObject private var notificationManager = NotificationManager.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
-    init() {
-        // Request notification permissions on first launch
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
-            if granted {
-                print("✅ Notifications enabled")
-            }
-        }
-    }
+    // NOTE: notification permission is deliberately NOT requested here.
+    // Requesting it from App.init() fires the one-shot iOS dialog before the
+    // first frame — unprimed, with no context — which burns the single chance
+    // we get. The only request point is the primed onboarding screen
+    // (Onboarding10_NotificationScreen -> NotificationManager.requestPermission).
+
     var sharedModelContainer: ModelContainer = {
         // ALL models need to be included because of relationships
         let schema = Schema([

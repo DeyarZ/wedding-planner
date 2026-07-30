@@ -19,4 +19,15 @@ enum Config {
     // MARK: - Product IDs (App Store Connect)
     static let weeklyProductID = "com.manuelworlitzer.weddingplanner.premium.weekly"
     static let sixMonthProductID = "com.manuelworlitzer.weddingplanner.premium.6months"
+
+    // MARK: - Trial
+    /// Single source of truth for the free-trial length shown on the paywall and
+    /// used to schedule trial reminders. Only a fallback: when RevenueCat has the
+    /// product loaded, the introductory offer period on the StoreProduct wins
+    /// (see `SubscriptionManager.trialDurationDays`).
+    static let fallbackTrialDays = 3
+
+    /// Billing periods per year used to derive the "per week" equivalent price
+    /// of the 6-month plan (26 weeks in 6 months).
+    static let weeksInSixMonths = 26
 }

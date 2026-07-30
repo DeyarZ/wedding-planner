@@ -15,12 +15,23 @@ struct ContentView: View {
     @EnvironmentObject var notificationManager: NotificationManager
     @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var selectedTab = 0
-    @State private var showNotificationPermission = false
     @State private var showOnboarding = false
     @State private var showPaywall = false
-    @State private var hasShownPaywallOnce = false
+    @State private var paywallSource: Analytics.PaywallSource = .coldStart
+
+    /// Timestamp (seconds since 1970) of the last cold-start paywall. Persisted
+    /// so it survives relaunches — as @State it reset every launch and the
+    /// paywall was shown on EVERY cold start.
+    @AppStorage("lastColdStartPaywallAt") private var lastColdStartPaywallAt: Double = 0
+
+    /// At most one unprompted cold-start paywall per day.
+    private let coldStartPaywallCooldown: TimeInterval = 24 * 60 * 60
 
     private var isPremiumUser: Bool { subscriptionManager.isSubscribed }
+
+    private var canShowColdStartPaywall: Bool {
+        Date().timeIntervalSince1970 - lastColdStartPaywallAt >= coldStartPaywallCooldown
+    }
 
     var body: some View {
         Group {
@@ -31,6 +42,7 @@ struct ContentView: View {
                     // Show paywall after onboarding for free users
                     if !isPremiumUser {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            paywallSource = .postOnboarding
                             showPaywall = true
                         }
                     }
@@ -77,7 +89,7 @@ struct ContentView: View {
                 .preferredColorScheme(.light)
                 .environmentObject(dataManager)
                 .fullScreenCover(isPresented: $showPaywall) {
-                    PaywallView(isPresented: $showPaywall)
+                    PaywallView(isPresented: $showPaywall, source: paywallSource)
                 }
                 .sheet(isPresented: $feedbackManager.isPresented) {
                     FeedbackView()
@@ -92,16 +104,17 @@ struct ContentView: View {
             let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
             if !hasCompletedOnboarding {
                 showOnboarding = true
-                // After onboarding, paywall will show
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    hasShownPaywallOnce = true
-                }
+                // The post-onboarding paywall counts as today's impression, so a
+                // cold-start paywall does not stack on top of it.
+                lastColdStartPaywallAt = Date().timeIntervalSince1970
             } else {
-                // For returning users, show paywall every time (unless premium)
-                if !isPremiumUser && !hasShownPaywallOnce {
+                // Returning free users see the cold-start paywall at most once
+                // per day instead of on every single launch.
+                if !isPremiumUser && canShowColdStartPaywall {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        paywallSource = .coldStart
                         showPaywall = true
-                        hasShownPaywallOnce = true
+                        lastColdStartPaywallAt = Date().timeIntervalSince1970
                     }
                 }
 
@@ -116,14 +129,10 @@ struct ContentView: View {
                 }
             }
 
-            // Check if this is first launch for notifications
-            let hasAskedForNotifications = UserDefaults.standard.bool(forKey: "hasAskedForNotifications")
-            if !hasAskedForNotifications && !notificationManager.hasPermission {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    showNotificationPermission = true
-                    UserDefaults.standard.set(true, forKey: "hasAskedForNotifications")
-                }
-            }
+            // Notification permission is NEVER requested from here. The single
+            // request point is the primed screen in onboarding
+            // (Onboarding10_NotificationScreen) — an unprimed prompt burns the
+            // one-shot iOS dialog and tanks the opt-in rate.
 
             // Schedule daily motivation if permissions granted
             if notificationManager.hasPermission {
@@ -134,7 +143,7 @@ struct ContentView: View {
             // Defer so it never collides with onboarding / paywall flows.
             if !showOnboarding && !showPaywall && feedbackManager.shouldAutoPrompt() {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    if !showOnboarding && !showPaywall && !showNotificationPermission {
+                    if !showOnboarding && !showPaywall {
                         feedbackManager.requestFeedback()
                     }
                 }
@@ -149,14 +158,11 @@ struct ContentView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowPaywall"))) { _ in
+            paywallSource = .featureGate
             showPaywall = true
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowFeedback"))) { _ in
             feedbackManager.requestFeedback()
-        }
-        .fullScreenCover(isPresented: $showNotificationPermission) {
-            NotificationPermissionView(showPermissionScreen: $showNotificationPermission)
-                .environmentObject(notificationManager)
         }
     }
 }

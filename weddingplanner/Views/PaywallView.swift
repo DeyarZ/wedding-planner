@@ -4,11 +4,18 @@ import FacebookCore
 
 struct PaywallView: View {
     @Binding var isPresented: Bool
+    /// Which trigger opened this paywall. Sent as the `source` property on the
+    /// paywall view / dismiss events.
+    var source: Analytics.PaywallSource = .featureGate
     @EnvironmentObject var subscriptionManager: SubscriptionManager
     @State private var selectedPlan: PlanType = .weekly
-    @State private var weeklyPrice = "$4.99"
-    @State private var sixMonthPrice = "$29.99"
+    @State private var weeklyPrice = ""
+    @State private var sixMonthPrice = ""
+    /// Locale-aware "per week" equivalent of the 6-month plan, derived from the
+    /// StoreProduct price + its own formatter (never from string parsing).
+    @State private var sixMonthPricePerWeek = ""
     @State private var isPurchasing = false
+    @State private var didPurchase = false
     @State private var showTermsOfUse = false
     @State private var showPrivacyPolicy = false
 
@@ -35,7 +42,7 @@ struct PaywallView: View {
                 HStack {
                     Spacer()
                     Button(action: {
-                        isPresented = false
+                        dismissWithoutPurchase()
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .light))
@@ -95,8 +102,8 @@ struct PaywallView: View {
                         // Weekly Plan Card
                         PricingCard(
                             isSelected: selectedPlan == .weekly,
-                            mainText: "3 days free",
-                            subText: "then \(weeklyPrice)/week",
+                            mainText: trialHeadline,
+                            subText: "then \(displayWeeklyPrice)/week",
                             onTap: {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     selectedPlan = .weekly
@@ -107,7 +114,7 @@ struct PaywallView: View {
                         // 6-Month Plan Card
                         PricingCard(
                             isSelected: selectedPlan == .sixMonth,
-                            mainText: calculateWeeklyPrice(),
+                            mainText: sixMonthCardHeadline,
                             subText: "billed 6-monthly",
                             onTap: {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -216,10 +223,37 @@ struct PaywallView: View {
             PrivacyPolicyView()
         }
         .onAppear {
-            Singular.event(EVENT_SNG_CONTENT_VIEW)
-            AppEvents.shared.logEvent(.viewedContent)
+            Analytics.paywallView(source: source)
             loadPrices()
         }
+    }
+
+    /// Placeholder shown only in the split second before RevenueCat hands us the
+    /// real, localized prices. Never a hardcoded currency amount.
+    private static let pricePlaceholder = "—"
+
+    private var displayWeeklyPrice: String {
+        weeklyPrice.isEmpty ? Self.pricePlaceholder : weeklyPrice
+    }
+
+    private var displaySixMonthPrice: String {
+        sixMonthPrice.isEmpty ? Self.pricePlaceholder : sixMonthPrice
+    }
+
+    /// NOTE: kept as a literal so the existing localized strings in
+    /// Localizable.xcstrings keep matching. The trial length itself is sourced
+    /// from `SubscriptionManager.trialDurationDays` everywhere it drives logic
+    /// (reminder scheduling); copy changes belong with a pricing change.
+    private var trialHeadline: String {
+        "3 days free"
+    }
+
+    /// Big number on the 6-month card: the per-week equivalent in the user's own
+    /// currency. Falls back to the plain 6-month price if it cannot be derived.
+    private var sixMonthCardHeadline: String {
+        sixMonthPricePerWeek.isEmpty
+            ? displaySixMonthPrice
+            : "\(sixMonthPricePerWeek)/week"
     }
 
     private var summaryText: Text {
@@ -228,11 +262,14 @@ struct PaywallView: View {
         switch selectedPlan {
         case .weekly:
             return Text("3 days free, then just ").font(body)
-                + Text("\(weeklyPrice)/week").font(bold)
+                + Text("\(displayWeeklyPrice)/week").font(bold)
         case .sixMonth:
-            return Text("Just ").font(body)
-                + Text(sixMonthPrice).font(bold)
-                + Text(" every 6 months (\(calculateWeeklyPrice()))").font(body)
+            let base = Text("Just ").font(body)
+                + Text(displaySixMonthPrice).font(bold)
+            guard !sixMonthPricePerWeek.isEmpty else {
+                return base + Text(" every 6 months").font(body)
+            }
+            return base + Text(" every 6 months (\(sixMonthPricePerWeek)/week)").font(body)
         }
     }
 
@@ -250,18 +287,20 @@ struct PaywallView: View {
             }
             if let sixMonth = subscriptionManager.sixMonthPackage?.storeProduct {
                 sixMonthPrice = sixMonth.localizedPriceString
+                // Locale-aware per-week price straight off the StoreProduct.
+                sixMonthPricePerWeek = SubscriptionManager.localizedPricePerWeek(
+                    for: sixMonth,
+                    weeks: Config.weeksInSixMonths
+                ) ?? ""
             }
         }
     }
 
-    private func calculateWeeklyPrice() -> String {
-        // Extract numeric value from sixMonthPrice and divide by 26 weeks
-        let priceString = sixMonthPrice.replacingOccurrences(of: "$", with: "")
-        if let price = Double(priceString) {
-            let weeklyPrice = price / 26.0
-            return String(format: "$%.2f/week", weeklyPrice)
+    private func dismissWithoutPurchase() {
+        if !didPurchase {
+            Analytics.paywallDismissed(source: source)
         }
-        return "$1.15/week"
+        isPresented = false
     }
 
     private func purchaseSubscription() {
@@ -283,6 +322,9 @@ struct PaywallView: View {
             let success = await subscriptionManager.purchase(package)
             isPurchasing = false
             if success && subscriptionManager.isSubscribed {
+                didPurchase = true
+                // Trial reminders are only useful to non-subscribers.
+                TrialNotificationManager.shared.cancelTrialReminders()
                 isPresented = false
             }
         }
@@ -292,6 +334,8 @@ struct PaywallView: View {
         Task {
             await subscriptionManager.restorePurchases()
             if subscriptionManager.isSubscribed {
+                didPurchase = true
+                TrialNotificationManager.shared.cancelTrialReminders()
                 isPresented = false
             }
         }
