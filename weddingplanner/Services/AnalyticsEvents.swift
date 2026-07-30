@@ -13,6 +13,7 @@ enum Analytics {
     enum Event {
         static let onboardingStep = "onboarding_step"
         static let paywallDismissed = "paywall_dismissed"
+        static let paywallPlanSelected = "paywall_plan_selected"
     }
 
     /// Where a paywall impression came from. Sent as the `source` property on
@@ -56,6 +57,13 @@ enum Analytics {
     /// Paywall closed without a completed purchase.
     static func paywallDismissed(source: PaywallSource) {
         track(Event.paywallDismissed, ["source": source.rawValue])
+    }
+
+    /// User tapped a different plan on the ladder. `plan` is the normalised
+    /// duration slug (annual / lifetime / monthly / …), not a product ID, so it
+    /// stays comparable across pricing changes and RC A/B variants.
+    static func paywallPlanSelected(plan: String, source: PaywallSource) {
+        track(Event.paywallPlanSelected, ["plan": plan, "source": source.rawValue])
     }
 
     // MARK: - Helpers

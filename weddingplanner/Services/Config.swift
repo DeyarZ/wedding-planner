@@ -17,6 +17,22 @@ enum Config {
     static let supportEmail = "m.worlitzer@gmx.de"
 
     // MARK: - Product IDs (App Store Connect)
+    //
+    // These constants exist for tooling, debugging and the pricing runbook only.
+    // The paywall itself NEVER filters on a product identifier — it renders
+    // whatever the current RevenueCat offering contains, keyed by package type
+    // (see `SubscriptionManager.PlanKind`). That is what makes RC-native A/B
+    // testing possible without shipping a build.
+
+    /// New ladder (Phase 1). Created in App Store Connect + attached to the
+    /// `default` RevenueCat offering by a human — see `PRICING-FLIP.md`.
+    static let annualProductID = "com.manuelworlitzer.weddingplanner.premium.annual"
+    static let lifetimeProductID = "com.manuelworlitzer.weddingplanner.premium.lifetime"
+    static let monthlyProductID = "com.manuelworlitzer.weddingplanner.premium.monthly"
+
+    /// LEGACY — the two SKUs that are live today. After the pricing flip these
+    /// leave the main paywall: weekly becomes the dismissal rescue SKU and the
+    /// 6-month plan becomes the dismissal discount offer (Phase 4).
     static let weeklyProductID = "com.manuelworlitzer.weddingplanner.premium.weekly"
     static let sixMonthProductID = "com.manuelworlitzer.weddingplanner.premium.6months"
 
@@ -26,8 +42,4 @@ enum Config {
     /// product loaded, the introductory offer period on the StoreProduct wins
     /// (see `SubscriptionManager.trialDurationDays`).
     static let fallbackTrialDays = 3
-
-    /// Billing periods per year used to derive the "per week" equivalent price
-    /// of the 6-month plan (26 weeks in 6 months).
-    static let weeksInSixMonths = 26
 }

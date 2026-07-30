@@ -8,21 +8,13 @@ struct PaywallView: View {
     /// paywall view / dismiss events.
     var source: Analytics.PaywallSource = .featureGate
     @EnvironmentObject var subscriptionManager: SubscriptionManager
-    @State private var selectedPlan: PlanType = .weekly
-    @State private var weeklyPrice = ""
-    @State private var sixMonthPrice = ""
-    /// Locale-aware "per week" equivalent of the 6-month plan, derived from the
-    /// StoreProduct price + its own formatter (never from string parsing).
-    @State private var sixMonthPricePerWeek = ""
+    /// RevenueCat package identifier of the card the user tapped. `nil` means
+    /// "whatever the offering says is the default" — see `selectedPlan`.
+    @State private var selectedPackageID: String?
     @State private var isPurchasing = false
     @State private var didPurchase = false
     @State private var showTermsOfUse = false
     @State private var showPrivacyPolicy = false
-
-    enum PlanType {
-        case weekly
-        case sixMonth
-    }
 
     var body: some View {
         ZStack {
@@ -58,6 +50,11 @@ struct PaywallView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
 
+                // The ladder can be 1–4 cards tall depending on what the
+                // current RevenueCat offering contains, so the whole sheet
+                // scrolls rather than clipping on small devices.
+                ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
                 // Romantic hero section
                 VStack(spacing: 16) {
                     // Animated hearts icon
@@ -97,35 +94,26 @@ struct PaywallView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 40)
 
-                    // Pricing cards - side by side
-                    HStack(spacing: 16) {
-                        // Weekly Plan Card
-                        PricingCard(
-                            isSelected: selectedPlan == .weekly,
-                            mainText: trialHeadline,
-                            subText: "then \(displayWeeklyPrice)/week",
-                            onTap: {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selectedPlan = .weekly
-                                }
+                    // Pricing ladder — one card per package in the current
+                    // RevenueCat offering, ordered annual → forever → monthly.
+                    // No product identifier is referenced anywhere here, so the
+                    // ladder can be reshaped from the RC dashboard.
+                    if plans.isEmpty {
+                        ProgressView()
+                            .padding(.vertical, 40)
+                    } else {
+                        VStack(spacing: 12) {
+                            ForEach(plans) { plan in
+                                PlanRowCard(
+                                    plan: plan,
+                                    isSelected: plan.id == selectedPlan?.id,
+                                    isBestValue: plan.id == bestValuePlanID,
+                                    onTap: { select(plan) }
+                                )
                             }
-                        )
-
-                        // 6-Month Plan Card
-                        PricingCard(
-                            isSelected: selectedPlan == .sixMonth,
-                            mainText: sixMonthCardHeadline,
-                            subText: "billed 6-monthly",
-                            onTap: {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selectedPlan = .sixMonth
-                                }
-                            }
-                        )
+                        }
+                        .padding(.horizontal, 4)
                     }
-                    .padding(.horizontal, 4)
-
-                    Spacer()
 
                     VStack(spacing: 10) {
                         HStack(spacing: 6) {
@@ -151,7 +139,7 @@ struct PaywallView: View {
                                         .font(.system(size: 16))
                                         .foregroundColor(.white)
 
-                                    Text(selectedPlan == .weekly ? "Start Planning Together" : "Unlock Full Experience")
+                                    Text(ctaTitle)
                                         .font(.system(size: 18, weight: .medium))
                                         .foregroundColor(.white)
                                 }
@@ -214,6 +202,8 @@ struct PaywallView: View {
                 }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 32)
+                }
+                }
             }
         }
         .sheet(isPresented: $showTermsOfUse) {
@@ -224,74 +214,77 @@ struct PaywallView: View {
         }
         .onAppear {
             Analytics.paywallView(source: source)
-            loadPrices()
+            loadOfferings()
         }
     }
 
-    /// Placeholder shown only in the split second before RevenueCat hands us the
-    /// real, localized prices. Never a hardcoded currency amount.
-    private static let pricePlaceholder = "—"
+    // MARK: - The ladder
 
-    private var displayWeeklyPrice: String {
-        weeklyPrice.isEmpty ? Self.pricePlaceholder : weeklyPrice
+    /// One card per package in the current RevenueCat offering, already in
+    /// display order. Empty until offerings have loaded.
+    private var plans: [PaywallPlan] {
+        subscriptionManager.availablePackages.map(PaywallPlan.init)
     }
 
-    private var displaySixMonthPrice: String {
-        sixMonthPrice.isEmpty ? Self.pricePlaceholder : sixMonthPrice
+    /// The card that is highlighted. Defaults to whatever the offering says is
+    /// the best plan (annual first) until the user taps something else, so the
+    /// default selection moves with the RC offering — never with the binary.
+    private var selectedPlan: PaywallPlan? {
+        if let id = selectedPackageID, let match = plans.first(where: { $0.id == id }) {
+            return match
+        }
+        if let defaultID = subscriptionManager.defaultPackage?.identifier,
+           let match = plans.first(where: { $0.id == defaultID }) {
+            return match
+        }
+        return plans.first
     }
 
-    /// NOTE: kept as a literal so the existing localized strings in
-    /// Localizable.xcstrings keep matching. The trial length itself is sourced
-    /// from `SubscriptionManager.trialDurationDays` everywhere it drives logic
-    /// (reminder scheduling); copy changes belong with a pricing change.
-    private var trialHeadline: String {
-        "3 days free"
+    /// "BEST VALUE" goes on the longest-commitment plan present. Suppressed
+    /// when there is only one card — a badge on a single option says nothing.
+    private var bestValuePlanID: String? {
+        guard plans.count > 1 else { return nil }
+        for kind in SubscriptionManager.PlanKind.bestValuePriority {
+            if let match = plans.first(where: { $0.kind == kind }) { return match.id }
+        }
+        return nil
     }
 
-    /// Big number on the 6-month card: the per-week equivalent in the user's own
-    /// currency. Falls back to the plain 6-month price if it cannot be derived.
-    private var sixMonthCardHeadline: String {
-        sixMonthPricePerWeek.isEmpty
-            ? displaySixMonthPrice
-            : "\(sixMonthPricePerWeek)/week"
+    private func select(_ plan: PaywallPlan) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            selectedPackageID = plan.id
+        }
+        Analytics.paywallPlanSelected(plan: plan.kind.analyticsName, source: source)
     }
 
+    // MARK: - Copy
+
+    private var ctaTitle: String {
+        guard let plan = selectedPlan else { return String(localized: "Continue") }
+        if plan.trialDays != nil { return String(localized: "Start Planning Together") }
+        return String(localized: "Unlock everything")
+    }
+
+    /// The line under the CTA. Always spells out the real billing amount and
+    /// the trial length actually attached to the selected product (App Store
+    /// guideline 3.1.2) — no hardcoded trial length anywhere.
     private var summaryText: Text {
-        let body = Font.system(size: 15, weight: .regular, design: .serif)
-        let bold = Font.system(size: 15, weight: .bold, design: .serif)
-        switch selectedPlan {
-        case .weekly:
-            return Text("3 days free, then just ").font(body)
-                + Text("\(displayWeeklyPrice)/week").font(bold)
-        case .sixMonth:
-            let base = Text("Just ").font(body)
-                + Text(displaySixMonthPrice).font(bold)
-            guard !sixMonthPricePerWeek.isEmpty else {
-                return base + Text(" every 6 months").font(body)
-            }
-            return base + Text(" every 6 months (\(sixMonthPricePerWeek)/week)").font(body)
-        }
+        guard let plan = selectedPlan else { return Text("") }
+        return Text(plan.summary)
+            .font(.system(size: 15, weight: .regular, design: .serif))
     }
 
     private var trustText: String {
-        selectedPlan == .weekly ? "No payment due now" : "Cancel anytime, no commitment"
+        guard let plan = selectedPlan else { return String(localized: "Cancel anytime, no commitment") }
+        if plan.trialDays != nil { return String(localized: "No payment due now") }
+        if plan.kind == .lifetime { return String(localized: "One payment, no subscription") }
+        return String(localized: "Cancel anytime, no commitment")
     }
 
-    private func loadPrices() {
+    private func loadOfferings() {
         Task {
             if subscriptionManager.offerings == nil {
                 await subscriptionManager.loadOfferings()
-            }
-            if let weekly = subscriptionManager.weeklyPackage?.storeProduct {
-                weeklyPrice = weekly.localizedPriceString
-            }
-            if let sixMonth = subscriptionManager.sixMonthPackage?.storeProduct {
-                sixMonthPrice = sixMonth.localizedPriceString
-                // Locale-aware per-week price straight off the StoreProduct.
-                sixMonthPricePerWeek = SubscriptionManager.localizedPricePerWeek(
-                    for: sixMonth,
-                    weeks: Config.weeksInSixMonths
-                ) ?? ""
             }
         }
     }
@@ -307,14 +300,11 @@ struct PaywallView: View {
         Singular.event("sng_initiated_checkout")
         AppEvents.shared.logEvent(.initiatedCheckout)
 
-        let package = selectedPlan == .weekly
-            ? subscriptionManager.weeklyPackage
-            : subscriptionManager.sixMonthPackage
-
-        guard let package = package else {
-            print("No package available for selection \(selectedPlan)")
+        guard let plan = selectedPlan else {
+            print("[Paywall] No package available in the current offering")
             return
         }
+        let package = plan.package
 
         isPurchasing = true
 
@@ -428,33 +418,148 @@ struct FeatureRow: View {
     }
 }
 
+// MARK: - Paywall plan view model
+
+/// One rendered row of the pricing ladder, derived entirely from a RevenueCat
+/// package. Every price string comes off the `StoreProduct` (locale-aware, via
+/// its own formatter) — nothing here is ever string-built or hardcoded, and no
+/// product identifier is referenced, so the ladder follows the RC offering.
+struct PaywallPlan: Identifiable {
+    let package: Package
+    let kind: SubscriptionManager.PlanKind
+
+    init(package: Package) {
+        self.package = package
+        self.kind = SubscriptionManager.planKind(for: package)
+    }
+
+    /// RevenueCat package identifier — unique inside an offering.
+    var id: String { package.identifier }
+
+    var product: StoreProduct { package.storeProduct }
+
+    /// Free-trial length of *this* package, or nil when it has no trial. The
+    /// trial-vs-no-trial test runs by swapping the RC offering, so both must
+    /// render correctly from the same binary.
+    var trialDays: Int? { SubscriptionManager.trialDays(for: package) }
+
+    /// Left-hand label.
+    var title: String {
+        switch kind {
+        case .annual: return String(localized: "Yearly")
+        case .lifetime: return String(localized: "Forever")
+        case .monthly: return String(localized: "Monthly")
+        case .sixMonth: return String(localized: "6 Months")
+        case .threeMonth: return String(localized: "3 Months")
+        case .weekly: return String(localized: "Weekly")
+        case .other: return product.localizedTitle
+        }
+    }
+
+    /// Full billing price with its period, e.g. "€59.99/year".
+    var recurringPriceText: String {
+        let price = product.localizedPriceString
+        switch kind {
+        case .annual: return String(format: String(localized: "%@/year"), price)
+        case .monthly: return String(format: String(localized: "%@/month"), price)
+        case .weekly: return String(format: String(localized: "%@/week"), price)
+        case .sixMonth: return String(format: String(localized: "%@ every 6 months"), price)
+        case .threeMonth: return String(format: String(localized: "%@ every 3 months"), price)
+        case .lifetime, .other: return price
+        }
+    }
+
+    /// Line under the plan title on the card.
+    var subtitle: String {
+        if let days = trialDays {
+            return String(format: String(localized: "%1$lld days free, then %2$@"), days, recurringPriceText)
+        }
+        if kind == .lifetime {
+            return String(localized: "Pay once, yours until the big day & beyond")
+        }
+        return recurringPriceText
+    }
+
+    /// Line under the CTA for the selected plan.
+    var summary: String {
+        if let days = trialDays {
+            return String(format: String(localized: "%1$lld days free, then %2$@"), days, recurringPriceText)
+        }
+        if kind == .lifetime {
+            return String(format: String(localized: "%@ once — yours forever"), product.localizedPriceString)
+        }
+        return String(format: String(localized: "Just %@"), recurringPriceText)
+    }
+
+    /// Locale-aware per-week equivalent, derived from the product's own price
+    /// and billing period. Nil for one-time and weekly products.
+    private var pricePerWeek: String? {
+        SubscriptionManager.localizedPricePerWeek(for: product)
+    }
+
+    /// Big number on the right of the card.
+    var priceHeadline: String {
+        pricePerWeek ?? product.localizedPriceString
+    }
+
+    var priceCaption: String {
+        if pricePerWeek != nil { return String(localized: "per week") }
+        switch kind {
+        case .weekly: return String(localized: "per week")
+        case .monthly: return String(localized: "per month")
+        case .lifetime: return String(localized: "one-time")
+        case .other: return ""
+        default: return ""
+        }
+    }
+}
+
 // MARK: - Pricing Card Component
-struct PricingCard: View {
+
+struct PlanRowCard: View {
+    let plan: PaywallPlan
     let isSelected: Bool
-    let mainText: String
-    let subText: String
+    let isBestValue: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 8) {
-                // Main text - bold
-                Text(mainText)
-                    .font(.system(size: 26, weight: .bold, design: .serif))
-                    .foregroundColor(Color(hex: "2C2C2C"))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+            HStack(spacing: 14) {
+                Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
+                    .font(.system(size: 20, weight: .light))
+                    .foregroundColor(isSelected ? Color(hex: "D4B5A9") : Color(hex: "C9C9C9"))
 
-                // Sub text - small
-                Text(subText)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(Color(hex: "6B6B6B"))
-                    .multilineTextAlignment(.center)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(plan.title)
+                        .font(.system(size: 18, weight: .bold, design: .serif))
+                        .foregroundColor(Color(hex: "2C2C2C"))
+
+                    Text(plan.subtitle)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(Color(hex: "6B6B6B"))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer(minLength: 8)
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(plan.priceHeadline)
+                        .font(.system(size: 20, weight: .bold, design: .serif))
+                        .foregroundColor(Color(hex: "2C2C2C"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    if !plan.priceCaption.isEmpty {
+                        Text(plan.priceCaption)
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(Color(hex: "9B9B9B"))
+                    }
+                }
             }
+            .padding(.vertical, 18)
+            .padding(.horizontal, 18)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 32)
-            .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(Color.white)
@@ -471,7 +576,19 @@ struct PricingCard: View {
                         y: 6
                     )
             )
-            .scaleEffect(isSelected ? 1.02 : 1.0)
+            .overlay(alignment: .topTrailing) {
+                if isBestValue {
+                    Text("BEST VALUE")
+                        .font(.system(size: 10, weight: .bold))
+                        .tracking(0.5)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(Color(hex: "D4B5A9")))
+                        .offset(x: -12, y: -9)
+                }
+            }
+            .scaleEffect(isSelected ? 1.01 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
     }
