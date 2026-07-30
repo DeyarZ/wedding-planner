@@ -19,6 +19,7 @@ struct ProductionTimelineView: View {
     @State private var searchText = ""
     @State private var selectedFilter: TaskFilter = .all
     @State private var showingSearch = false
+    @State private var activeGate: PremiumGate? = nil
 
     // Haptic feedback generator
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -173,6 +174,7 @@ struct ProductionTimelineView: View {
         .sheet(item: $selectedPhase) { phase in
             PhaseDetailView(phase: phase, dataManager: dataManager)
         }
+        .premiumUpsell($activeGate)
         .onAppear {
             withAnimation {
                 animateIn = true
@@ -352,10 +354,12 @@ struct ProductionTimelineView: View {
                         .padding(.horizontal, 24)
                 }
 
-                // Task list
+                // Task list. Every task stays visible and readable — only the
+                // checkbox past the free allowance is locked.
                 ForEach(filteredTasks) { task in
                     ProductionTaskCard(
                         task: task,
+                        isLocked: !dataManager.canCompleteTask(task),
                         onToggle: {
                             toggleTask(task)
                         },
@@ -414,26 +418,33 @@ struct ProductionTimelineView: View {
                 showingAddTask = true
                 impactFeedback.impactOccurred()
             } else {
-                dataManager.showPaywallIfNeeded(for: "task")
+                activeGate = .customTask
             }
         }) {
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(hex: "D4B5A9"), Color(hex: "B89B91")],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+            ZStack(alignment: .topTrailing) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(hex: "D4B5A9"), Color(hex: "B89B91")],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .frame(width: 56, height: 56)
-                    .shadow(color: Color(hex: "B89B91").opacity(0.3), radius: 12, y: 6)
+                        .frame(width: 56, height: 56)
+                        .shadow(color: Color(hex: "B89B91").opacity(0.3), radius: 12, y: 6)
 
-                Image(systemName: "plus")
-                    .font(.system(size: 22, weight: .light))
-                    .foregroundColor(.white)
-                    .rotationEffect(.degrees(showingAddTask ? 45 : 0))
-                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showingAddTask)
+                    Image(systemName: "plus")
+                        .font(.system(size: 22, weight: .light))
+                        .foregroundColor(.white)
+                        .rotationEffect(.degrees(showingAddTask ? 45 : 0))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showingAddTask)
+                }
+
+                if !dataManager.canAddTask() {
+                    PremiumLockBadge(compact: true)
+                        .offset(x: 4, y: -2)
+                }
             }
         }
     }
@@ -574,6 +585,11 @@ struct ProductionTimelineView: View {
     }
 
     private func toggleTask(_ task: WeddingTask) {
+        guard dataManager.canCompleteTask(task) else {
+            activeGate = .taskCompleteLimit
+            return
+        }
+
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             task.isCompleted.toggle()
             task.completedDate = task.isCompleted ? Date() : nil
@@ -700,6 +716,9 @@ struct ProductionFilterChip: View {
 
 struct ProductionTaskCard: View {
     let task: WeddingTask
+    /// Free users past the checklist allowance still see the task in full —
+    /// only its checkbox turns into a lock.
+    var isLocked: Bool = false
     let onToggle: () -> Void
     let onEdit: () -> Void
     let onReschedule: () -> Void
@@ -788,10 +807,14 @@ struct ProductionTaskCard: View {
                 }) {
                     ZStack {
                         Circle()
-                            .stroke(taskColor, lineWidth: 2)
+                            .stroke(isLocked ? Color(hex: "D8D8D8") : taskColor, lineWidth: 2)
                             .frame(width: 24, height: 24)
 
-                        if task.isCompleted {
+                        if isLocked {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(Color(hex: "B89B91"))
+                        } else if task.isCompleted {
                             Circle()
                                 .fill(taskColor)
                                 .frame(width: 24, height: 24)

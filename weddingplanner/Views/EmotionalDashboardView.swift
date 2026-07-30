@@ -9,6 +9,7 @@ struct EmotionalDashboardView: View {
     @State private var selectedTab = 0
     @State private var showTaskDetail = false
     @State private var selectedTask: WeddingTask? = nil
+    @State private var activeGate: PremiumGate? = nil
 
     // Haptic feedback generators
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -82,6 +83,7 @@ struct EmotionalDashboardView: View {
                 dataManager.objectWillChange.send()
             }
         }
+        .premiumUpsell($activeGate)
     }
 
     // MARK: - Hero Section
@@ -187,6 +189,7 @@ struct EmotionalDashboardView: View {
                 ForEach(getTodaysTasks().prefix(2), id: \.id) { task in
                     TodayFocusCard(
                         task: task,
+                        isLocked: !dataManager.canCompleteTask(task),
                         onTap: {
                             selectedTask = task
                             impactFeedback.impactOccurred()
@@ -416,6 +419,11 @@ struct EmotionalDashboardView: View {
     }
 
     private func completeTask(_ task: WeddingTask) {
+        guard dataManager.canCompleteTask(task) else {
+            activeGate = .taskCompleteLimit
+            return
+        }
+
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             task.isCompleted = true
             task.completedDate = Date()
@@ -452,6 +460,8 @@ struct EmotionalDashboardView: View {
 // MARK: - Supporting Components
 struct TodayFocusCard: View {
     let task: WeddingTask
+    /// The task stays fully readable; only its checkbox locks.
+    var isLocked: Bool = false
     let onTap: () -> Void
     let onComplete: () -> Void
 
@@ -465,13 +475,13 @@ struct TodayFocusCard: View {
                     onComplete()
                 }) {
                     Circle()
-                        .stroke(Color(hex: "D4B5A9"), lineWidth: 2)
+                        .stroke(isLocked ? Color(hex: "D8D8D8") : Color(hex: "D4B5A9"), lineWidth: 2)
                         .frame(width: 24, height: 24)
                         .overlay(
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Color(hex: "D4B5A9"))
-                                .opacity(task.isCompleted ? 1 : 0)
+                            Image(systemName: isLocked ? "lock.fill" : "checkmark")
+                                .font(.system(size: isLocked ? 10 : 12, weight: .semibold))
+                                .foregroundColor(Color(hex: isLocked ? "B89B91" : "D4B5A9"))
+                                .opacity(isLocked || task.isCompleted ? 1 : 0)
                         )
                 }
                 .buttonStyle(PlainButtonStyle())

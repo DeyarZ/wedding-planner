@@ -49,7 +49,7 @@ struct MoodBoardView: View {
 
                             Spacer()
 
-                            if dataManager.canUploadPhoto() {
+                            if dataManager.canUploadPhoto(currentCount: photos.count) {
                                 PhotosPicker(
                                     selection: $selectedItems,
                                     maxSelectionCount: 10,
@@ -107,7 +107,7 @@ struct MoodBoardView: View {
 
                     if filteredPhotos.isEmpty {
                         EmptyMoodBoardState {
-                            if dataManager.canUploadPhoto() {
+                            if dataManager.canUploadPhoto(currentCount: photos.count) {
                                 showingImagePicker = true
                                 impactFeedback.impactOccurred()
                             } else {

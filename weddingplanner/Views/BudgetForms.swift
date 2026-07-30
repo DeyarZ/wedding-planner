@@ -352,6 +352,9 @@ struct ProductionBudgetItemDetailView: View {
 // MARK: - Add Budget Item View
 struct ProductionAddBudgetItemView: View {
     @Environment(\.dismiss) private var dismiss
+    /// Categories this user is allowed to file an expense under. Free users get
+    /// exactly one; the gate is decided by `DataManager`, never here.
+    var allowedCategories: [BudgetCategory] = BudgetCategory.allCases
     let onSave: (BudgetItem) -> Void
 
     @State private var name = ""
@@ -371,11 +374,12 @@ struct ProductionAddBudgetItemView: View {
                     TextField("Name", text: $name)
 
                     Picker("Category", selection: $category) {
-                        ForEach(BudgetCategory.allCases, id: \.self) { cat in
+                        ForEach(allowedCategories, id: \.self) { cat in
                             Label(cat.rawValue, systemImage: cat.icon)
                                 .tag(cat)
                         }
                     }
+                    .disabled(allowedCategories.count <= 1)
 
                     Picker("Priority", selection: $priority) {
                         ForEach(BudgetPriority.allCases, id: \.self) { pri in
@@ -397,6 +401,12 @@ struct ProductionAddBudgetItemView: View {
                 Section("Notes") {
                     TextField("Notes (optional)", text: $notes, axis: .vertical)
                         .lineLimit(3...6)
+                }
+            }
+            .onAppear {
+                // Keep the selection inside what this user may pick.
+                if !allowedCategories.contains(category), let first = allowedCategories.first {
+                    category = first
                 }
             }
             .navigationTitle("Add Budget Item")

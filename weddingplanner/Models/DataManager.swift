@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import SwiftUI
 import SwiftData
 import UserNotifications
@@ -11,13 +12,43 @@ class DataManager: ObservableObject {
 
     private var modelContext: ModelContext?
 
+    /// Every gate below reads `SubscriptionManager.shared`, so a view that only
+    /// observes the DataManager would keep its locks on screen after a purchase
+    /// until something else happened to redraw it. Forwarding the subscription
+    /// manager's change signal means the locks vanish the moment the
+    /// entitlement flips — no relaunch, no stale padlocks for a paying user.
+    private var subscriptionObserver: AnyCancellable?
+
+    init() {
+        subscriptionObserver = SubscriptionManager.shared.objectWillChange
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.objectWillChange.send()
+                }
+            }
+    }
+
     // MARK: - Free User Limits
-    private let FREE_GUEST_LIMIT = 10
-    private let FREE_VENDOR_LIMIT = 3
-    private let FREE_TASK_LIMIT = 5
-    private let FREE_PHOTO_LIMIT = 10
-    private let FREE_BUDGET_CATEGORY_LIMIT = 3
-    
+    //
+    // The single source of truth for the free tier. Nothing in the UI may
+    // compare a count against a number inline — every limit is enforced by
+    // exactly one method in the gate extension at the bottom of this file.
+    enum FreeLimit {
+        /// Guests a free user can create.
+        static let guests = 10
+        /// Vendors a free user can create.
+        static let vendors = 3
+        /// How many of the seeded checklist tasks a free user can tick off.
+        /// The seeded plan stays fully *visible* — this only caps interaction.
+        static let completableTasks = 5
+        /// Vision-board photos a free user can upload.
+        static let photos = 10
+        /// Budget categories a free user can open. The rest stay listed but
+        /// locked, so the value is visible instead of hidden.
+        static let budgetCategories = 1
+    }
+
+
     func setup(modelContext: ModelContext) {
         self.modelContext = modelContext
         loadWedding()
@@ -329,74 +360,172 @@ extension DataManager {
         return SubscriptionManager.shared.isSubscribed
     }
 
+    // MARK: - Guests
+
+    var guestCount: Int { wedding?.guests?.count ?? 0 }
+
     func canAddGuest() -> Bool {
         if hasPremiumAccess { return true }
-        return (wedding?.guests?.count ?? 0) < FREE_GUEST_LIMIT
+        return guestCount < FreeLimit.guests
     }
+
+    // MARK: - Vendors
+
+    var vendorCount: Int { wedding?.vendors?.count ?? 0 }
 
     func canAddVendor() -> Bool {
         if hasPremiumAccess { return true }
-        return (wedding?.vendors?.count ?? 0) < FREE_VENDOR_LIMIT
+        return vendorCount < FreeLimit.vendors
     }
 
+    // MARK: - Tasks
+    //
+    // Free users SEE the entire seeded plan — hiding it would gut the product's
+    // first impression. What is capped is interaction: the first
+    // `FreeLimit.completableTasks` tasks of the plan can be ticked off, custom
+    // tasks are premium-only.
+
+    /// The checklist in its canonical order: soonest deadline first, then
+    /// creation order. Deliberately independent of whatever filter or sort the
+    /// UI happens to show, so "the first five" never moves under the user.
+    private var orderedTasks: [WeddingTask] {
+        (wedding?.tasks ?? []).sorted { lhs, rhs in
+            let l = lhs.dueDate ?? Date.distantFuture
+            let r = rhs.dueDate ?? Date.distantFuture
+            if l != r { return l < r }
+            if lhs.createdAt != rhs.createdAt { return lhs.createdAt < rhs.createdAt }
+            return lhs.title < rhs.title
+        }
+    }
+
+    /// Identifiers of the tasks a free user may tick off.
+    private var freeCompletableTaskIDs: Set<PersistentIdentifier> {
+        Set(orderedTasks.prefix(FreeLimit.completableTasks).map { $0.persistentModelID })
+    }
+
+    /// Adding a custom task is premium — the seeded plan is the free product.
     func canAddTask() -> Bool {
-        if hasPremiumAccess { return true }
-        return (wedding?.tasks?.count ?? 0) < FREE_TASK_LIMIT
+        return hasPremiumAccess
     }
 
-    func canUploadPhoto() -> Bool {
+    /// Whether this specific task's checkbox is live for this user.
+    ///
+    /// Already-completed tasks always stay toggleable: an existing free user who
+    /// ticked off 20 tasks before this gate shipped keeps every one of them and
+    /// can still correct a mistake. The gate only blocks *new* completions.
+    func canCompleteTask(_ task: WeddingTask) -> Bool {
         if hasPremiumAccess { return true }
-        // Note: Photo count would need to be checked when Photo model is enabled
-        return true // TODO: Check photo count when Photo model is available
+        if task.isCompleted { return true }
+        return freeCompletableTaskIDs.contains(task.persistentModelID)
+    }
+
+    // MARK: - Photos
+
+    func canUploadPhoto(currentCount: Int) -> Bool {
+        if hasPremiumAccess { return true }
+        return currentCount < FreeLimit.photos
+    }
+
+    // MARK: - Budget
+    //
+    // Free users keep one category — the biggest one, which for practically
+    // every wedding is venue & catering. It is derived from the data rather than
+    // hardcoded so the free slot is the one that actually matters, and it is
+    // stable as long as the budget split is.
+
+    /// The one budget category a free user can open.
+    var freeBudgetCategory: BudgetCategory {
+        let items = wedding?.budgetItems ?? []
+        let totals = Dictionary(grouping: items, by: { $0.category })
+            .mapValues { $0.reduce(0) { $0 + $1.estimatedAmount } }
+
+        let best = BudgetCategory.allCases
+            .filter { totals[$0] != nil }
+            .max { (totals[$0] ?? 0) < (totals[$1] ?? 0) }
+
+        return best ?? .venue
+    }
+
+    /// Categories this user may open, in `BudgetCategory` order.
+    var unlockedBudgetCategories: [BudgetCategory] {
+        if hasPremiumAccess { return BudgetCategory.allCases }
+        return [freeBudgetCategory]
+    }
+
+    func canAccessBudgetCategory(_ category: BudgetCategory) -> Bool {
+        if hasPremiumAccess { return true }
+        return category == freeBudgetCategory
     }
 
     func canAccessAllBudgetCategories() -> Bool {
         return hasPremiumAccess
     }
 
+    /// Budget insights / charts.
+    func canViewBudgetAnalytics() -> Bool {
+        return hasPremiumAccess
+    }
+
+    /// Guest RSVP / meal breakdowns.
+    func canViewGuestAnalytics() -> Bool {
+        return hasPremiumAccess
+    }
+
+    // MARK: - Export
+
+    /// Covers every export surface — PDF, share sheet, guest and vendor lists.
     func canExportData() -> Bool {
         return hasPremiumAccess
     }
 
+    // MARK: - Remaining slots (for the "3 of 10" affordances)
+
     func getRemainingGuestSlots() -> Int {
         if hasPremiumAccess { return -1 } // Unlimited
-        return max(0, FREE_GUEST_LIMIT - (wedding?.guests?.count ?? 0))
+        return max(0, FreeLimit.guests - guestCount)
     }
 
     func getRemainingVendorSlots() -> Int {
         if hasPremiumAccess { return -1 } // Unlimited
-        return max(0, FREE_VENDOR_LIMIT - (wedding?.vendors?.count ?? 0))
+        return max(0, FreeLimit.vendors - vendorCount)
     }
 
     func getRemainingTaskSlots() -> Int {
         if hasPremiumAccess { return -1 } // Unlimited
-        return max(0, FREE_TASK_LIMIT - (wedding?.tasks?.count ?? 0))
+        let completed = orderedTasks.prefix(FreeLimit.completableTasks).filter { $0.isCompleted }.count
+        return max(0, FreeLimit.completableTasks - completed)
     }
 
     // MARK: - Paywall Triggers
+
+    /// Legacy entry point kept for the older view families that still call it
+    /// with a string. It routes through the same `PremiumGate` enum so the
+    /// analytics slug is identical no matter which surface fired.
     func showPaywallIfNeeded(for feature: String) {
-        var shouldShowPaywall = false
+        guard let gate = PremiumGate.fromLegacyFeature(feature) else { return }
 
-        switch feature {
-        case "guest":
-            shouldShowPaywall = !canAddGuest()
-        case "vendor":
-            shouldShowPaywall = !canAddVendor()
-        case "task":
-            shouldShowPaywall = !canAddTask()
-        case "photo":
-            shouldShowPaywall = !canUploadPhoto()
-        case "budget_categories":
-            shouldShowPaywall = !canAccessAllBudgetCategories()
-        case "export":
-            shouldShowPaywall = !canExportData()
-        default:
-            break
+        let blocked: Bool
+        switch gate {
+        case .guestsLimit: blocked = !canAddGuest()
+        case .vendorsLimit: blocked = !canAddVendor()
+        case .customTask, .taskCompleteLimit: blocked = !canAddTask()
+        case .photosLimit: blocked = !hasPremiumAccess
+        case .budgetCategories, .budgetAnalytics, .guestAnalytics: blocked = !hasPremiumAccess
+        case .pdfExport, .dataExport: blocked = !canExportData()
         }
 
-        if shouldShowPaywall {
-            NotificationCenter.default.post(name: NSNotification.Name("ShowPaywall"), object: nil)
-        }
+        if blocked { Self.requestUpgrade(for: gate) }
+    }
+
+    /// Fallback presentation path: posts to `ContentView`, which opens the
+    /// paywall with `source: .featureGate` and this gate attached. Views that
+    /// can present their own upsell sheet should do that instead.
+    static func requestUpgrade(for gate: PremiumGate) {
+        NotificationCenter.default.post(
+            name: NSNotification.Name("ShowPaywall"),
+            object: nil,
+            userInfo: ["gate": gate.rawValue]
+        )
     }
 }
 

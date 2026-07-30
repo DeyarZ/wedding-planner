@@ -10,6 +10,9 @@ struct TaskDetailSheet: View {
     @State private var notes: String = ""
     @State private var dueDate: Date = Date()
     @State private var showDatePicker = false
+    @State private var activeGate: PremiumGate? = nil
+
+    private var isCompletionLocked: Bool { !dataManager.canCompleteTask(task) }
 
     var body: some View {
         NavigationView {
@@ -45,11 +48,15 @@ struct TaskDetailSheet: View {
                         completeTask()
                     }) {
                         HStack {
-                            Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                            Image(systemName: isCompletionLocked ? "lock.fill" : (isCompleted ? "checkmark.circle.fill" : "circle"))
                                 .font(.system(size: 20))
 
                             Text(isCompleted ? "Completed" : "Mark as Complete")
                                 .font(.system(size: 16, weight: .medium))
+
+                            if isCompletionLocked {
+                                PremiumLockBadge(compact: true)
+                            }
                         }
                         .foregroundColor(isCompleted ? Color(hex: "66BB6A") : Color(hex: "D4B5A9"))
                         .frame(maxWidth: .infinity)
@@ -148,6 +155,7 @@ struct TaskDetailSheet: View {
                 }
             }
         }
+        .premiumUpsell($activeGate)
         .onAppear {
             isCompleted = task.isCompleted
             notes = task.notes ?? ""
@@ -163,6 +171,11 @@ struct TaskDetailSheet: View {
     }
 
     private func completeTask() {
+        guard dataManager.canCompleteTask(task) else {
+            activeGate = .taskCompleteLimit
+            return
+        }
+
         isCompleted.toggle()
         task.isCompleted = isCompleted
         task.completedDate = isCompleted ? Date() : nil

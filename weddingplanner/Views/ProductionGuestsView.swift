@@ -20,6 +20,7 @@ struct ProductionGuestsView: View {
     @State private var showingAnalytics = false
     @State private var showingExportOptions = false
     @State private var animateIn = false
+    @State private var activeGate: PremiumGate? = nil
 
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
     private let selectionFeedback = UISelectionFeedbackGenerator()
@@ -156,6 +157,7 @@ struct ProductionGuestsView: View {
         .sheet(isPresented: $showingExportOptions) {
             ProductionGuestExportView(guests: guests)
         }
+        .premiumUpsell($activeGate)
         .onAppear {
             withAnimation {
                 animateIn = true
@@ -185,12 +187,24 @@ struct ProductionGuestsView: View {
 
                 HStack(spacing: 12) {
                     Button(action: {
-                        showingAnalytics = true
-                        impactFeedback.impactOccurred()
+                        if dataManager.canViewGuestAnalytics() {
+                            showingAnalytics = true
+                            impactFeedback.impactOccurred()
+                        } else {
+                            activeGate = .guestAnalytics
+                        }
                     }) {
-                        Image(systemName: "chart.pie.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(Color(hex: "B89B91"))
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "chart.pie.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(Color(hex: "B89B91"))
+                                .opacity(dataManager.canViewGuestAnalytics() ? 1 : 0.45)
+
+                            if !dataManager.canViewGuestAnalytics() {
+                                PremiumLockBadge(compact: true)
+                                    .offset(x: 8, y: -8)
+                            }
+                        }
                     }
 
                     Button(action: {
@@ -198,13 +212,22 @@ struct ProductionGuestsView: View {
                             showingAddGuest = true
                             impactFeedback.impactOccurred()
                         } else {
-                            dataManager.showPaywallIfNeeded(for: "guest")
+                            activeGate = .guestsLimit
                         }
                     }) {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 24))
                             .foregroundColor(Color(hex: "D4B5A9"))
                     }
+                }
+            }
+
+            // Free users see how much of their allowance is left, and what the
+            // ceiling is, before they hit it.
+            if !dataManager.hasPremiumAccess {
+                HStack {
+                    FreeLimitPill(used: guests.count, limit: DataManager.FreeLimit.guests)
+                    Spacer()
                 }
             }
 
@@ -343,11 +366,15 @@ struct ProductionGuestsView: View {
             Spacer()
 
             Button(action: {
-                showingExportOptions = true
-                impactFeedback.impactOccurred()
+                if dataManager.canExportData() {
+                    showingExportOptions = true
+                    impactFeedback.impactOccurred()
+                } else {
+                    activeGate = .dataExport
+                }
             }) {
                 HStack(spacing: 6) {
-                    Image(systemName: "square.and.arrow.up")
+                    Image(systemName: dataManager.canExportData() ? "square.and.arrow.up" : "lock.fill")
                         .font(.system(size: 12))
                     Text("Export")
                         .font(.system(size: 12, weight: .regular))

@@ -45,18 +45,23 @@ enum Analytics {
     }
 
     /// Paywall impression. Uses the standard content-view event (already wired
-    /// on both SDKs) and adds the trigger as a `source` property.
-    static func paywallView(source: PaywallSource) {
-        Singular.event(EVENT_SNG_CONTENT_VIEW, withArgs: ["source": source.rawValue])
-        AppEvents.shared.logEvent(
-            .viewedContent,
-            parameters: [AppEvents.ParameterName("source"): source.rawValue]
-        )
+    /// on both SDKs) and adds the trigger as a `source` property. When the
+    /// trigger was a feature gate, `gate` names which limit fired
+    /// (`guests_limit`, `budget_categories`, `pdf_export`, …) so the funnel can
+    /// be split by the limit that actually earns the money.
+    static func paywallView(source: PaywallSource, gate: PremiumGate? = nil) {
+        var params: [String: Any] = ["source": source.rawValue]
+        if let gate { params["gate"] = gate.rawValue }
+
+        Singular.event(EVENT_SNG_CONTENT_VIEW, withArgs: params)
+        AppEvents.shared.logEvent(.viewedContent, parameters: metaParameters(params))
     }
 
     /// Paywall closed without a completed purchase.
-    static func paywallDismissed(source: PaywallSource) {
-        track(Event.paywallDismissed, ["source": source.rawValue])
+    static func paywallDismissed(source: PaywallSource, gate: PremiumGate? = nil) {
+        var params: [String: Any] = ["source": source.rawValue]
+        if let gate { params["gate"] = gate.rawValue }
+        track(Event.paywallDismissed, params)
     }
 
     /// User tapped a different plan on the ladder. `plan` is the normalised

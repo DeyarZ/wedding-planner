@@ -7,6 +7,9 @@ struct PaywallView: View {
     /// Which trigger opened this paywall. Sent as the `source` property on the
     /// paywall view / dismiss events.
     var source: Analytics.PaywallSource = .featureGate
+    /// Which feature gate sent the user here, when `source` is `.featureGate`.
+    /// Reported as the `gate` property on the paywall view / dismiss events.
+    var gate: PremiumGate? = nil
     @EnvironmentObject var subscriptionManager: SubscriptionManager
     /// RevenueCat package identifier of the card the user tapped. `nil` means
     /// "whatever the offering says is the default" — see `selectedPlan`.
@@ -213,7 +216,7 @@ struct PaywallView: View {
             PrivacyPolicyView()
         }
         .onAppear {
-            Analytics.paywallView(source: source)
+            Analytics.paywallView(source: source, gate: gate)
             loadOfferings()
         }
     }
@@ -291,7 +294,7 @@ struct PaywallView: View {
 
     private func dismissWithoutPurchase() {
         if !didPurchase {
-            Analytics.paywallDismissed(source: source)
+            Analytics.paywallDismissed(source: source, gate: gate)
         }
         isPresented = false
     }

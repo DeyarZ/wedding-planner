@@ -16,6 +16,11 @@ struct ProductionWeddingDayScheduleView: View {
     @State private var showingShareSheet = false
     @State private var pdfData: Data? = nil
     @State private var animateIn = false
+    @State private var activeGate: PremiumGate? = nil
+
+    /// Every way out of this screen — PDF, share sheet, vendor message — is the
+    /// same premium export. One check, three entry points.
+    private var canExport: Bool { dataManager.canExportData() }
 
     private let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     private let notificationFeedback = UINotificationFeedbackGenerator()
@@ -132,15 +137,15 @@ struct ProductionWeddingDayScheduleView: View {
                 .foregroundColor(Color(hex: "B89B91")),
                 trailing: Menu {
                     Button(action: exportPDF) {
-                        Label("Export PDF", systemImage: "doc.fill")
+                        Label("Export PDF", systemImage: canExport ? "doc.fill" : "lock.fill")
                     }
 
                     Button(action: shareSchedule) {
-                        Label("Share Schedule", systemImage: "square.and.arrow.up")
+                        Label("Share Schedule", systemImage: canExport ? "square.and.arrow.up" : "lock.fill")
                     }
 
                     Button(action: shareWithVendors) {
-                        Label("Send to Vendors", systemImage: "paperplane")
+                        Label("Send to Vendors", systemImage: canExport ? "paperplane" : "lock.fill")
                     }
 
                     Divider()
@@ -168,6 +173,7 @@ struct ProductionWeddingDayScheduleView: View {
                 ShareSheet(items: [pdfData])
             }
         }
+        .premiumUpsell($activeGate)
         .onAppear {
             loadScheduleEvents()
             withAnimation {
@@ -315,6 +321,8 @@ struct ProductionWeddingDayScheduleView: View {
 
     // MARK: - Export Functions
     private func exportPDF() {
+        guard canExport else { activeGate = .pdfExport; return }
+
         // Create PDF from schedule
         let pdfMetaData = [
             kCGPDFContextCreator: "Wedding Planner",
@@ -383,6 +391,8 @@ struct ProductionWeddingDayScheduleView: View {
     }
 
     private func shareSchedule() {
+        guard canExport else { activeGate = .pdfExport; return }
+
         let formatter = DateFormatter()
         formatter.dateStyle = .long
 
@@ -407,6 +417,8 @@ struct ProductionWeddingDayScheduleView: View {
     }
 
     private func shareWithVendors() {
+        guard canExport else { activeGate = .pdfExport; return }
+
         // Create a formatted message for vendors
         var message = "Hi! Here's our wedding day schedule:\n\n"
         message += "Date: \(formatDate(dataManager.wedding?.date ?? Date()))\n\n"

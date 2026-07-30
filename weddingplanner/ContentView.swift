@@ -18,6 +18,9 @@ struct ContentView: View {
     @State private var showOnboarding = false
     @State private var showPaywall = false
     @State private var paywallSource: Analytics.PaywallSource = .coldStart
+    /// Set only when the paywall was opened by a feature gate that could not
+    /// present its own upsell sheet.
+    @State private var paywallGate: PremiumGate? = nil
 
     /// Timestamp (seconds since 1970) of the last cold-start paywall. Persisted
     /// so it survives relaunches — as @State it reset every launch and the
@@ -46,6 +49,7 @@ struct ContentView: View {
                     if !isPremiumUser {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                             paywallSource = .postOnboarding
+                            paywallGate = nil
                             showPaywall = true
                         }
                     }
@@ -92,7 +96,7 @@ struct ContentView: View {
                 .preferredColorScheme(.light)
                 .environmentObject(dataManager)
                 .fullScreenCover(isPresented: $showPaywall) {
-                    PaywallView(isPresented: $showPaywall, source: paywallSource)
+                    PaywallView(isPresented: $showPaywall, source: paywallSource, gate: paywallGate)
                 }
                 .sheet(isPresented: $feedbackManager.isPresented) {
                     FeedbackView()
@@ -116,6 +120,7 @@ struct ContentView: View {
                 if !isPremiumUser && canShowColdStartPaywall {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         paywallSource = .coldStart
+                        paywallGate = nil
                         showPaywall = true
                         lastColdStartPaywallAt = Date().timeIntervalSince1970
                     }
@@ -160,8 +165,9 @@ struct ContentView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowPaywall"))) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowPaywall"))) { notification in
             paywallSource = .featureGate
+            paywallGate = (notification.userInfo?["gate"] as? String).flatMap(PremiumGate.init(rawValue:))
             showPaywall = true
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowFeedback"))) { _ in

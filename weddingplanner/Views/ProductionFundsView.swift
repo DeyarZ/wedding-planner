@@ -16,6 +16,7 @@ struct ProductionFundsView: View {
     @State private var selectedBudgetItem: BudgetItem? = nil
     @State private var showingInsights = false
     @State private var animateIn = false
+    @State private var activeGate: PremiumGate? = nil
 
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
     private let selectionFeedback = UISelectionFeedbackGenerator()
@@ -94,7 +95,9 @@ struct ProductionFundsView: View {
             }
         }
         .sheet(isPresented: $showingAddExpense) {
-            ProductionAddBudgetItemView { newItem in
+            // A free user can only file an expense under the category they
+            // actually own — the picker never shows a locked category.
+            ProductionAddBudgetItemView(allowedCategories: dataManager.unlockedBudgetCategories) { newItem in
                 addBudgetItem(newItem)
             }
         }
@@ -113,6 +116,7 @@ struct ProductionFundsView: View {
                 totalSpent: totalSpent
             )
         }
+        .premiumUpsell($activeGate)
         .onAppear {
             withAnimation {
                 animateIn = true
@@ -262,10 +266,7 @@ struct ProductionFundsView: View {
                     PaymentAlertRow(
                         item: item,
                         isOverdue: true,
-                        onTap: {
-                            selectedBudgetItem = item
-                            selectionFeedback.selectionChanged()
-                        }
+                        onTap: { openBudgetItem(item) }
                     )
                 }
 
@@ -274,10 +275,7 @@ struct ProductionFundsView: View {
                     PaymentAlertRow(
                         item: item,
                         isOverdue: false,
-                        onTap: {
-                            selectedBudgetItem = item
-                            selectionFeedback.selectionChanged()
-                        }
+                        onTap: { openBudgetItem(item) }
                     )
                 }
             }
@@ -295,24 +293,27 @@ struct ProductionFundsView: View {
 
                 Spacer()
 
-                Button(action: {
-                    showingInsights = true
-                    impactFeedback.impactOccurred()
-                }) {
-                    Image(systemName: "chart.pie")
+                Button(action: { openInsights() }) {
+                    Image(systemName: dataManager.canViewBudgetAnalytics() ? "chart.pie" : "lock.fill")
                         .font(.system(size: 16))
                         .foregroundColor(Color(hex: "B89B91"))
                 }
             }
 
-            // Category cards
+            // Category cards. Locked categories are LISTED, not hidden — a free
+            // user has to be able to see the eleven categories they are missing.
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 ForEach(getCategoryBreakdown(), id: \.category) { breakdown in
                     CategoryCard(
                         breakdown: breakdown,
+                        isLocked: !dataManager.canAccessBudgetCategory(breakdown.category),
                         onTap: {
-                            selectedCategory = breakdown.category
-                            selectionFeedback.selectionChanged()
+                            if dataManager.canAccessBudgetCategory(breakdown.category) {
+                                selectedCategory = breakdown.category
+                                selectionFeedback.selectionChanged()
+                            } else {
+                                activeGate = .budgetCategories
+                            }
                         }
                     )
                     .opacity(animateIn ? 1 : 0)
@@ -370,7 +371,8 @@ struct ProductionFundsView: View {
             BudgetQuickActionButton(
                 icon: "doc.text.fill",
                 label: "Export Report",
-                color: Color(hex: "66BB6A")
+                color: Color(hex: "66BB6A"),
+                isLocked: !dataManager.canExportData()
             ) {
                 exportBudgetReport()
             }
@@ -378,10 +380,10 @@ struct ProductionFundsView: View {
             BudgetQuickActionButton(
                 icon: "chart.bar.fill",
                 label: "View Insights",
-                color: Color(hex: "42A5F5")
+                color: Color(hex: "42A5F5"),
+                isLocked: !dataManager.canViewBudgetAnalytics()
             ) {
-                showingInsights = true
-                impactFeedback.impactOccurred()
+                openInsights()
             }
         }
         .opacity(animateIn ? 1 : 0)
@@ -448,7 +450,29 @@ struct ProductionFundsView: View {
         }
     }
 
+    private func openInsights() {
+        guard dataManager.canViewBudgetAnalytics() else {
+            activeGate = .budgetAnalytics
+            return
+        }
+        showingInsights = true
+        impactFeedback.impactOccurred()
+    }
+
+    private func openBudgetItem(_ item: BudgetItem) {
+        guard dataManager.canAccessBudgetCategory(item.category) else {
+            activeGate = .budgetCategories
+            return
+        }
+        selectedBudgetItem = item
+        selectionFeedback.selectionChanged()
+    }
+
     private func exportBudgetReport() {
+        guard dataManager.canExportData() else {
+            activeGate = .dataExport
+            return
+        }
         // Create budget report export
         notificationFeedback.notificationOccurred(.success)
     }
@@ -535,6 +559,9 @@ struct PaymentAlertRow: View {
 
 struct CategoryCard: View {
     let breakdown: (category: BudgetCategory, spent: Double, budget: Double, index: Int)
+    /// Locked cards keep their name and icon but blur the numbers — the user
+    /// sees that the category exists and is theirs to claim.
+    var isLocked: Bool = false
     let onTap: () -> Void
 
     private var percentage: Double {
@@ -553,10 +580,13 @@ struct CategoryCard: View {
                     Image(systemName: breakdown.category.icon)
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(Color(hex: "B89B91"))
+                        .opacity(isLocked ? 0.5 : 1)
 
                     Spacer()
 
-                    if isOverBudget {
+                    if isLocked {
+                        PremiumLockBadge(compact: true)
+                    } else if isOverBudget {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 12))
                             .foregroundColor(Color(hex: "FFA726"))
@@ -565,7 +595,7 @@ struct CategoryCard: View {
 
                 Text(breakdown.category.rawValue)
                     .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(Color(hex: "2C2C2C"))
+                    .foregroundColor(Color(hex: isLocked ? "8A8A8A" : "2C2C2C"))
                     .lineLimit(1)
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -599,6 +629,8 @@ struct CategoryCard: View {
                         .font(.system(size: 10, weight: .thin))
                         .foregroundColor(Color(hex: "9B9B9B"))
                 }
+                .blur(radius: isLocked ? 4 : 0)
+                .allowsHitTesting(!isLocked)
             }
             .padding(14)
             .background(
@@ -677,14 +709,15 @@ struct BudgetQuickActionButton: View {
     let icon: String
     let label: LocalizedStringKey
     let color: Color
+    var isLocked: Bool = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 8) {
-                Image(systemName: icon)
+                Image(systemName: isLocked ? "lock.fill" : icon)
                     .font(.system(size: 20, weight: .regular))
-                    .foregroundColor(color)
+                    .foregroundColor(isLocked ? Color(hex: "B89B91") : color)
 
                 Text(label)
                     .font(.system(size: 11, weight: .regular))

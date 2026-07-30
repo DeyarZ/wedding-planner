@@ -16,6 +16,7 @@ struct ProductionTeamView: View {
     @State private var selectedCategory: VendorCategory? = nil
     @State private var animateIn = false
     @State private var showingExportOptions = false
+    @State private var activeGate: PremiumGate? = nil
 
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
     private let selectionFeedback = UISelectionFeedbackGenerator()
@@ -80,8 +81,7 @@ struct ProductionTeamView: View {
                 if vendors.isEmpty {
                     // Empty state
                     EmptyTeamState {
-                        showingAddVendor = true
-                        impactFeedback.impactOccurred()
+                        addVendorTapped()
                     }
                     .padding(24)
                     .opacity(animateIn ? 1 : 0)
@@ -122,6 +122,7 @@ struct ProductionTeamView: View {
         .sheet(isPresented: $showingExportOptions) {
             ExportOptionsView(vendors: vendors)
         }
+        .premiumUpsell($activeGate)
         .onAppear {
             withAnimation {
                 animateIn = true
@@ -150,17 +151,18 @@ struct ProductionTeamView: View {
                 Spacer()
 
                 // Add vendor button
-                Button(action: {
-                    if dataManager.canAddVendor() {
-                        showingAddVendor = true
-                        impactFeedback.impactOccurred()
-                    } else {
-                        dataManager.showPaywallIfNeeded(for: "vendor")
-                    }
-                }) {
+                Button(action: { addVendorTapped() }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 24))
                         .foregroundColor(Color(hex: "D4B5A9"))
+                }
+            }
+
+            // Free users see the ceiling before they hit it.
+            if !dataManager.hasPremiumAccess {
+                HStack {
+                    FreeLimitPill(used: vendors.count, limit: DataManager.FreeLimit.vendors)
+                    Spacer()
                 }
             }
 
@@ -249,6 +251,17 @@ struct ProductionTeamView: View {
     }
 
     // MARK: - Helper Methods
+
+    /// Single entry point for "add a vendor" — the empty state and the header
+    /// button both go through it, so the limit can only be enforced in one place.
+    private func addVendorTapped() {
+        if dataManager.canAddVendor() {
+            showingAddVendor = true
+            impactFeedback.impactOccurred()
+        } else {
+            activeGate = .vendorsLimit
+        }
+    }
 
     private func getMotivationalMessage() -> String {
         let messages = [
