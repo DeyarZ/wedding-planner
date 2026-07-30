@@ -1538,6 +1538,34 @@
         }
       }
     },
+    "60 days to go": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch 60 Tage"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan 60 días"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus que 60 jours"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mancano 60 giorni"
+          }
+        }
+      }
+    },
     "6:00 PM": {},
     "76–150 guests": {
       "localizations": {
@@ -5246,6 +5274,34 @@
         }
       }
     },
+    "Final stretch. Get everything ready with Premium.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Endspurt beginnt. Mit Premium bekommt ihr alles startklar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recta final. Déjalo todo listo con Premium."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière ligne droite. Préparez tout avec Premium."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rush finale. Prepara tutto con Premium."
+          }
+        }
+      }
+    },
     "Finalize Guest List": {
       "localizations": {
         "de": {
@@ -7069,6 +7125,62 @@
         }
       }
     },
+    "Keep my plan": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan behalten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conservar mi plan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garder mon plan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tieni il mio piano"
+          }
+        }
+      }
+    },
+    "Keep your plan for less — one last offer before you go.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Behaltet euren Plan – für weniger. Ein letztes Angebot, bevor ihr geht."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conserva tu plan por menos: una última oferta antes de irte."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gardez votre plan pour moins cher — une dernière offre avant de partir."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tieni il tuo piano spendendo meno: un'ultima offerta prima di uscire."
+          }
+        }
+      }
+    },
     "Keeping the budget": {
       "localizations": {
         "de": {
@@ -7553,6 +7665,34 @@
       }
     },
     "MR": {},
+    "Make it Forever — %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für immer sichern – %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hazlo Para siempre — %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passer à Pour toujours — %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passa a Per sempre — %@"
+          }
+        }
+      }
+    },
     "Mark Complete": {},
     "Mark Incomplete": {},
     "Mark as Complete": {},
@@ -8195,6 +8335,62 @@
         }
       }
     },
+    "No thanks, I'll plan on my own": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nein danke, ich plane allein weiter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No, gracias, sigo por mi cuenta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non merci, je continue seule"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No grazie, continuo da sola"
+          }
+        }
+      }
+    },
+    "No thanks, I'm happy with my plan": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nein danke, mein Plan passt so"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No, gracias, estoy bien con mi plan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non merci, mon plan me convient"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No grazie, il mio piano va bene così"
+          }
+        }
+      }
+    },
     "No transactions recorded": {},
     "No transactions yet": {
       "localizations": {
@@ -8425,6 +8621,34 @@
         }
       }
     },
+    "ONE LAST OFFER": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EIN LETZTES ANGEBOT"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UNA ÚLTIMA OFERTA"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UNE DERNIÈRE OFFRE"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UN'ULTIMA OFFERTA"
+          }
+        }
+      }
+    },
     "ONE LIST, ALWAYS CURRENT": {
       "localizations": {
         "de": {
@@ -8589,6 +8813,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pagamento unico, nessun abbonamento"
+          }
+        }
+      }
+    },
+    "One payment, yours beyond the big day.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einmal zahlen – und es bleibt euch, weit über den großen Tag hinaus."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un solo pago y es tuyo, mucho más allá del gran día."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un seul paiement, à vous bien au-delà du grand jour."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un solo pagamento, tuo ben oltre il grande giorno."
           }
         }
       }
@@ -14015,6 +14267,34 @@
         }
       }
     },
+    "Want to make it forever?": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll es für immer bleiben?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Y si fuera para siempre?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Et si c'était pour toujours ?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E se fosse per sempre?"
+          }
+        }
+      }
+    },
     "We collect information you provide directly to us, such as when you create an account, plan your wedding events, or contact us for support. This may include your name, email address, wedding date, and planning preferences.": {
       "localizations": {
         "de": {
@@ -15447,6 +15727,34 @@
         }
       }
     },
+    "You're in!": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ihr seid dabei!"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¡Ya estás dentro!"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est parti !"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ci sei!"
+          }
+        }
+      }
+    },
     "You're right on schedule.": {
       "localizations": {
         "de": {
@@ -15752,6 +16060,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Checklist completa, budget, lista invitati e fornitori si sbloccano subito."
+          }
+        }
+      }
+    },
+    "Your current plan stays active until you cancel it in the App Store.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Euer aktuelles Abo läuft weiter, bis ihr es im App Store kündigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan actual seguirá activo hasta que lo canceles en la App Store."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre abonnement actuel reste actif jusqu'à ce que vous le résiliiez dans l'App Store."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo piano attuale resta attivo finché non lo annulli nell'App Store."
           }
         }
       }
@@ -16424,6 +16760,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Il tuo matrimonio sta prendendo forma magnificamente! 🌸"
+          }
+        }
+      }
+    },
+    "Your wedding won't wait": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eure Hochzeit wartet nicht"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu boda no va a esperar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre mariage n'attendra pas"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo matrimonio non aspetta"
           }
         }
       }

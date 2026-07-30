@@ -14,14 +14,24 @@ enum Analytics {
         static let onboardingStep = "onboarding_step"
         static let paywallDismissed = "paywall_dismissed"
         static let paywallPlanSelected = "paywall_plan_selected"
+
+        // Phase 4 — recovery surfaces.
+        static let dismissalPaywallViewed = "dismissal_paywall_viewed"
+        static let dismissalPaywallPurchased = "dismissal_paywall_purchased"
+        static let dismissalPaywallDismissed = "dismissal_paywall_dismissed"
+        static let foreverUpsellViewed = "forever_upsell_viewed"
+        static let foreverUpsellPurchased = "forever_upsell_purchased"
+        static let foreverUpsellSkipped = "forever_upsell_skipped"
     }
 
     /// Where a paywall impression came from. Sent as the `source` property on
-    /// the paywall view / dismiss events so the three triggers are separable.
+    /// the paywall view / dismiss events so the triggers are separable.
     enum PaywallSource: String {
         case postOnboarding = "post_onboarding"
         case coldStart = "cold_start"
         case featureGate = "feature_gate"
+        /// Opened from the T-60-days-before-the-wedding win-back notification.
+        case winback = "winback"
     }
 
     // MARK: - Generic
@@ -69,6 +79,41 @@ enum Analytics {
     /// stays comparable across pricing changes and RC A/B variants.
     static func paywallPlanSelected(plan: String, source: PaywallSource) {
         track(Event.paywallPlanSelected, ["plan": plan, "source": source.rawValue])
+    }
+
+    // MARK: - Recovery surfaces (Phase 4)
+
+    /// The decline-ladder sheet was shown after a paywall was closed without a
+    /// purchase. `source` is the paywall the user actually declined, so the
+    /// recovery rate can be read per trigger.
+    static func dismissalPaywallViewed(source: PaywallSource) {
+        track(Event.dismissalPaywallViewed, ["source": source.rawValue])
+    }
+
+    /// The decline ladder converted. `plan` is the normalised duration slug of
+    /// whatever the `dismissal` offering sold, not a product ID.
+    static func dismissalPaywallPurchased(plan: String, source: PaywallSource) {
+        track(Event.dismissalPaywallPurchased, ["plan": plan, "source": source.rawValue])
+    }
+
+    /// The decline ladder was closed without a purchase — the end of the road.
+    static func dismissalPaywallDismissed(source: PaywallSource) {
+        track(Event.dismissalPaywallDismissed, ["source": source.rawValue])
+    }
+
+    /// The one-time post-purchase Forever upsell was shown.
+    static func foreverUpsellViewed() {
+        track(Event.foreverUpsellViewed)
+    }
+
+    /// A subscriber upgraded to the lifetime SKU straight after subscribing.
+    static func foreverUpsellPurchased() {
+        track(Event.foreverUpsellPurchased)
+    }
+
+    /// The Forever upsell was declined. Fires once per user at most.
+    static func foreverUpsellSkipped() {
+        track(Event.foreverUpsellSkipped)
     }
 
     // MARK: - Helpers

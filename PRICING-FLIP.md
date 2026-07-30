@@ -259,3 +259,127 @@ Reported state must match real state. Tick every line.
    already moved from weekly to 6-month. That is directionally what the plan wants, but it is a
    live pricing behaviour change, so it is your call, not the code's.
 5. Whether to finish deleting the stale `…premium.6monthsOnetime` draft IAP.
+
+---
+
+## 6. Phase 4 store-side — recovery surfaces
+
+**Owner: human.** The code for all three recovery surfaces is shipped (Phase 4 commit). Two of the
+three do nothing at all until the RevenueCat side below exists — deliberately: each one checks for
+its offering/package and **skips silently** when it is missing, so the binary is safe to ship
+before the flip and nobody meets a broken sheet.
+
+| Surface | Trigger | Needs store-side |
+|---|---|---|
+| **Dismissal paywall** (decline ladder) | user closes the main paywall without buying, source `post_onboarding` or `cold_start` only, max 1×/7d, never twice per session, never for premium | **RC offering `dismissal`** — without it: no-op |
+| **Post-purchase Forever upsell** | immediately after a *subscription* purchase, once per user ever | **a lifetime package in the `default` offering** (§2c) — without it: no-op |
+| **T-60 win-back** | local notification 60 days before the wedding date, non-premium users only, 10:00 local | **nothing** — works today |
+
+### 6a. RevenueCat offering `dismissal`
+
+Offerings → `+ New` → identifier **`dismissal`**. Do **not** mark it Current — the app fetches it
+by identifier (`RecoveryOffers.dismissalOfferingID`), `current` stays the main paywall.
+
+The recovery inventory is the two SKUs that leave the main paywall in Phase 1 (§1f) — both are
+already APPROVED, so no ASC work is needed:
+
+| Package identifier | Package type | Product | Role |
+|---|---|---|---|
+| `$rc_six_month` | **6 Month** | `…premium.6months` ($29.99 / €29.99) | discount anchor — 40% under annual, the "once you close this, it's gone" offer |
+| `$rc_weekly` | **Weekly** | `…premium.weekly` ($7.99 / €7.99) | rescue SKU — lowest possible entry price for a hard decliner |
+
+Both must be attached to the **`premium`** entitlement (they already are — same entitlement as
+everything else; verify, do not re-create).
+
+The sheet renders whatever this offering contains, in the same order the main paywall uses
+(longest commitment first), with **no** "BEST VALUE" badge and **no** invented discount claims. So
+the shape is a dashboard decision:
+
+- **Both packages** (recommended start): a real ladder — take the 6-month, or drop to weekly.
+- **6-month only**: cleanest "last chance" discount, no cheap escape hatch, protects LTV.
+- **Weekly only**: maximum recovery rate, lowest LTV per recovery. Only if the two-card version
+  under-converts.
+- **Delete the offering**: the surface switches itself off. That is the rollback — one click, no
+  release.
+
+> **No fake anchors.** The code deliberately shows no struck-through "was $49.99" price. The
+> discount is real (the 6-month is genuinely cheaper than the annual) but the two SKUs have
+> different durations, so a crossed-out comparison would be a misleading claim and an App Store
+> 3.1.2 risk. If you want an explicit anchor later, the honest version is a *same-duration*
+> discounted product with a promotional offer — that is an ASC change, not a copy change.
+
+### 6b. Forever upsell — no new store-side work
+
+It uses the **lifetime package of the `default` offering** (`$rc_lifetime`, §2c). If Phase 1's
+ladder is live, this surface is already armed. If you ship the ladder without a lifetime SKU, the
+upsell silently never appears — no error state.
+
+**Decision you own:** buying Forever does **not** cancel the subscription the user started thirty
+seconds earlier — StoreKit cannot do that, only the user can. The screen therefore carries the line
+*"Your current plan stays active until you cancel it in the App Store."* Removing that line will
+lift take-rate and buy you refund requests and 1-star reviews. Leave it.
+
+### 6c. Win-back — local notification, no ASC offer
+
+The T-60 win-back is a **local notification**, not an App Store win-back offer. That is the point:
+we know the wedding date, so we can hit the highest-intent moment in the category (start of panic
+season) without any store-side configuration, and it reaches people who *never subscribed* — whom
+an ASC win-back offer cannot touch at all (those are for **lapsed subscribers** only).
+
+Requires notification permission, which is asked for in the primed onboarding screen. Users who
+denied it get nothing — that is the cost of the opt-in rate, not a bug.
+
+**Later option (not built):** an **ASC win-back offer** on the subscription group for genuinely
+lapsed subscribers (Monetization → Subscriptions → group `21802664` → Win-Back Offers). Churned-
+monthly reactivation runs ~20% in the category. It is a separate lever from this one, it needs its
+own price/duration decision, and RevenueCat surfaces it through the standard offering machinery —
+so it is additive, not a replacement. Revisit once there is a meaningful lapsed base.
+
+### 6d. Verification checklist — Phase 4
+
+**Dismissal paywall (sandbox, real device, free user)**
+- [ ] RC → Offerings shows `dismissal` with the intended packages, and `default` is still Current.
+- [ ] Open the app cold as a free user → main paywall → tap **X** → the dismissal sheet appears.
+- [ ] Prices on it are the **6-month / weekly** prices, in the device's currency and formatting
+      (de-DE: `29,99 €`, no `$` anywhere).
+- [ ] Close it → the whole paywall goes away, the app is usable. `dismissal_paywall_dismissed` fires.
+- [ ] Open and close the main paywall **again in the same session** → the sheet does **not**
+      reappear (session guard).
+- [ ] Trigger the paywall from a **feature gate** (e.g. the 11th guest) and close it → the sheet
+      does **not** appear. Feature gates are excluded on purpose.
+- [ ] Delete the `dismissal` offering in RC → close the main paywall → nothing happens, no blank
+      sheet, no spinner. (Then put it back.)
+- [ ] Sandbox-purchase from the sheet → entitlement `premium` goes active,
+      `dismissal_paywall_purchased` fires with `plan=six_month|weekly`.
+- [ ] 7-day cap: reinstall (or clear `lastDismissalOfferAt` in UserDefaults) to see it again —
+      without that it must stay away for a week.
+
+**Forever upsell (sandbox)**
+- [ ] Sandbox-purchase the **annual** on the main paywall → the congratulations screen appears
+      immediately with the **lifetime** price, locale-correct.
+- [ ] Skip it → paywall closes, premium is active. `forever_upsell_skipped` fires.
+- [ ] Buy annual **again** on a fresh sandbox purchase in the same install → the screen does
+      **not** reappear (once per user, ever).
+- [ ] Buy the **lifetime** directly on the main paywall → the upsell does **not** appear.
+- [ ] Remove `$rc_lifetime` from `default` → buy annual → no upsell, no error. (Then put it back.)
+- [ ] Sandbox-purchase the lifetime *from* the upsell → `forever_upsell_purchased` fires,
+      entitlement stays active.
+
+**T-60 win-back (no store-side config needed)**
+- [ ] As a **free** user, set the wedding date to **90 days** out → Xcode → Debug → the pending
+      request `winback.t60` exists, firing at 10:00 exactly 60 days before that date. (Or:
+      `po UNUserNotificationCenter.current().getPendingNotificationRequests` / the notification
+      debugger.)
+- [ ] Move the wedding date by a week → the pending request moves with it, and there is still
+      exactly **one** `winback.t60`.
+- [ ] Set the wedding date to **30 days** out → **no** `winback.t60` pending. A user already inside
+      the final 60 days must not get "60 days to go".
+- [ ] Purchase premium → `winback.t60` disappears. Trial reminders and the daily/weekly schedule
+      are **untouched** (scoped identifiers — check the full pending list, not just this one).
+- [ ] Fire the notification (change the device date or shorten the lead in a debug build) → tapping
+      it opens the app **and** the paywall, and `paywall_view` carries `source=winback`.
+
+**Analytics (all three)**
+- [ ] Singular + Meta receive `dismissal_paywall_viewed|_purchased|_dismissed` and
+      `forever_upsell_viewed|_purchased|_skipped`.
+- [ ] `paywall_view` / `paywall_dismissed` now also appear with `source=winback`.

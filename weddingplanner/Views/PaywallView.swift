@@ -19,6 +19,22 @@ struct PaywallView: View {
     @State private var showTermsOfUse = false
     @State private var showPrivacyPolicy = false
 
+    // MARK: - Phase 4 recovery surfaces
+    //
+    // Both follow-ups are presented ON TOP of this view and only let it close
+    // when they are done, so the chain works identically from every host
+    // (cold start, post-onboarding, feature gate) with no host-side wiring.
+
+    /// Last time this user saw the decline ladder — the 7-day frequency cap.
+    @AppStorage(RecoveryOffers.Key.lastDismissalOfferAt) private var lastDismissalOfferAt: Double = 0
+    /// The Forever upsell is a once-in-a-lifetime screen.
+    @AppStorage(RecoveryOffers.Key.hasSeenForeverUpsell) private var hasSeenForeverUpsell = false
+
+    @State private var showDismissalOffer = false
+    @State private var dismissalPurchase: Package?
+    @State private var showForeverUpsell = false
+    @State private var foreverPackage: Package?
+
     var body: some View {
         ZStack {
             // Gradient background
@@ -49,6 +65,9 @@ struct PaywallView: View {
                                     .shadow(color: Color.black.opacity(0.1), radius: 8, y: 4)
                             )
                     }
+                    // Closing mid-purchase would tear the flow down under the
+                    // in-flight StoreKit callback.
+                    .disabled(isPurchasing)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
@@ -215,6 +234,40 @@ struct PaywallView: View {
         .sheet(isPresented: $showPrivacyPolicy) {
             PrivacyPolicyView()
         }
+        .fullScreenCover(isPresented: $showDismissalOffer, onDismiss: {
+            // A decline that converted is still a purchase, so it gets the
+            // Forever upsell like any other. A decline that stayed a decline
+            // ends the chain and finally closes the paywall.
+            if let package = dismissalPurchase {
+                presentForeverUpsellOrDismiss(after: package)
+            } else {
+                isPresented = false
+            }
+        }) {
+            DismissalPaywallView(
+                isPresented: $showDismissalOffer,
+                source: source,
+                onPurchase: { package in
+                    didPurchase = true
+                    dismissalPurchase = package
+                }
+            )
+            .environmentObject(subscriptionManager)
+        }
+        .fullScreenCover(isPresented: $showForeverUpsell, onDismiss: {
+            isPresented = false
+        }) {
+            if let package = foreverPackage {
+                ForeverUpsellView(isPresented: $showForeverUpsell, package: package)
+                    .environmentObject(subscriptionManager)
+            } else {
+                // Unreachable by construction (`foreverPackage` is always set
+                // before this cover is raised) — but a fullScreenCover cannot be
+                // swiped away, so an empty one would trap the user. Bail out
+                // instead of rendering nothing.
+                Color.clear.onAppear { showForeverUpsell = false }
+            }
+        }
         .onAppear {
             Analytics.paywallView(source: source, gate: gate)
             loadOfferings()
@@ -293,10 +346,53 @@ struct PaywallView: View {
     }
 
     private func dismissWithoutPurchase() {
-        if !didPurchase {
-            Analytics.paywallDismissed(source: source, gate: gate)
+        guard !didPurchase else {
+            isPresented = false
+            return
         }
+        Analytics.paywallDismissed(source: source, gate: gate)
+
+        // The decline ladder. Every guard lives in `RecoveryOffers` — including
+        // "no `dismissal` offering configured yet", which makes this a silent
+        // no-op before the store-side flip rather than a broken sheet.
+        if RecoveryOffers.shouldOfferDismissal(
+            source: source,
+            isSubscribed: subscriptionManager.isSubscribed,
+            offering: subscriptionManager.offering(RecoveryOffers.dismissalOfferingID),
+            lastShownAt: lastDismissalOfferAt
+        ) {
+            RecoveryOffers.markDismissalOfferShown()
+            lastDismissalOfferAt = Date().timeIntervalSince1970
+            showDismissalOffer = true
+            return
+        }
+
         isPresented = false
+    }
+
+    /// Single exit point for a completed purchase: kill the notifications that
+    /// only make sense for a non-payer, then either chain the Forever upsell or
+    /// close the paywall.
+    private func handlePurchase(of package: Package) {
+        didPurchase = true
+        TrialNotificationManager.shared.cancelTrialReminders()
+        WinBackNotificationManager.shared.cancel()
+        presentForeverUpsellOrDismiss(after: package)
+    }
+
+    private func presentForeverUpsellOrDismiss(after package: Package) {
+        guard RecoveryOffers.shouldOfferForever(
+            purchased: package,
+            lifetime: subscriptionManager.package(.lifetime),
+            hasSeen: hasSeenForeverUpsell
+        ), let lifetime = subscriptionManager.package(.lifetime) else {
+            isPresented = false
+            return
+        }
+
+        hasSeenForeverUpsell = true
+        foreverPackage = lifetime
+        showForeverUpsell = true
     }
 
     private func purchaseSubscription() {
@@ -315,10 +411,7 @@ struct PaywallView: View {
             let success = await subscriptionManager.purchase(package)
             isPurchasing = false
             if success && subscriptionManager.isSubscribed {
-                didPurchase = true
-                // Trial reminders are only useful to non-subscribers.
-                TrialNotificationManager.shared.cancelTrialReminders()
-                isPresented = false
+                handlePurchase(of: package)
             }
         }
     }
@@ -328,7 +421,10 @@ struct PaywallView: View {
             await subscriptionManager.restorePurchases()
             if subscriptionManager.isSubscribed {
                 didPurchase = true
+                // A restore is not a fresh purchase — no upsell, just get out
+                // of the way.
                 TrialNotificationManager.shared.cancelTrialReminders()
+                WinBackNotificationManager.shared.cancel()
                 isPresented = false
             }
         }

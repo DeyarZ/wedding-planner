@@ -105,9 +105,20 @@ class DataManager: ObservableObject {
             try modelContext.save()
             self.wedding = newWedding
             self.hasWedding = true
+            syncWinBackNotification()
         } catch {
             print("Error creating wedding: \(error)")
         }
+    }
+
+    /// Keeps the T-60 win-back aligned with the wedding date. Called from every
+    /// save, so a date that moves anywhere in the app reschedules — the manager
+    /// itself short-circuits when nothing changed, so this is cheap.
+    private func syncWinBackNotification() {
+        WinBackNotificationManager.shared.sync(
+            weddingDate: wedding?.date,
+            isSubscribed: SubscriptionManager.shared.isSubscribed
+        )
     }
 
     private func addBudgetCategories(to wedding: Wedding, totalBudget: Double, priorities: [String], modelContext: ModelContext) {
@@ -254,9 +265,10 @@ class DataManager: ObservableObject {
     
     func updateWedding() {
         guard let modelContext = modelContext else { return }
-        
+
         do {
             try modelContext.save()
+            syncWinBackNotification()
         } catch {
             print("Error updating wedding: \(error)")
         }

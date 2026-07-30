@@ -36,6 +36,13 @@ struct ContentView: View {
         Date().timeIntervalSince1970 - lastColdStartPaywallAt >= coldStartPaywallCooldown
     }
 
+    private func syncWinBackNotification() {
+        WinBackNotificationManager.shared.sync(
+            weddingDate: dataManager.wedding?.date,
+            isSubscribed: isPremiumUser
+        )
+    }
+
     var body: some View {
         Group {
             if showOnboarding {
@@ -147,6 +154,10 @@ struct ContentView: View {
                 notificationManager.scheduleRandomMotivation()
             }
 
+            // T-60 win-back: reconciled on every launch, so a wedding date that
+            // moved (or an expired trial) lands on the right day.
+            syncWinBackNotification()
+
             // Gentle, infrequent feedback prompt for engaged users.
             // Defer so it never collides with onboarding / paywall flows.
             if !showOnboarding && !showPaywall && feedbackManager.shouldAutoPrompt() {
@@ -166,9 +177,21 @@ struct ContentView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowPaywall"))) { notification in
-            paywallSource = .featureGate
+            // Feature gates post this without a source; the win-back
+            // notification posts `source = winback` so the two funnels stay
+            // separable. A premium user never gets a paywall from here.
+            let source = (notification.userInfo?["source"] as? String)
+                .flatMap(Analytics.PaywallSource.init(rawValue:)) ?? .featureGate
+            guard !isPremiumUser else { return }
+
+            paywallSource = source
             paywallGate = (notification.userInfo?["gate"] as? String).flatMap(PremiumGate.init(rawValue:))
             showPaywall = true
+        }
+        .onChange(of: subscriptionManager.isSubscribed) { _, _ in
+            // Entitlement resolved (or lapsed) — reconcile the T-60 win-back so
+            // a paying user never gets it and a lapsed one gets it back.
+            syncWinBackNotification()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowFeedback"))) { _ in
             feedbackManager.requestFeedback()

@@ -276,7 +276,15 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         // Handle notification tap
         let userInfo = response.notification.request.content.userInfo
 
-        if let taskId = userInfo["taskId"] as? String {
+        if userInfo["type"] as? String == "winback" {
+            // T-60 win-back tapped: straight into the paywall, tagged so the
+            // funnel can be read separately from the other triggers.
+            NotificationCenter.default.post(
+                name: NSNotification.Name("ShowPaywall"),
+                object: nil,
+                userInfo: ["source": Analytics.PaywallSource.winback.rawValue]
+            )
+        } else if let taskId = userInfo["taskId"] as? String {
             // Navigate to task detail
             NotificationCenter.default.post(
                 name: NSNotification.Name("OpenTask"),
