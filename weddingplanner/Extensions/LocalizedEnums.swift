@@ -10,6 +10,12 @@ import SwiftUI
 // `localizedName` resolves the rawValue through the catalog at render time.
 // It is DISPLAY ONLY — `rawValue` itself is never changed, so nothing that is
 // stored, compared, sorted or exported is affected.
+//
+// TRAP: because the lookup key is built at runtime from `rawValue`, Xcode's
+// static string extractor cannot see these keys and will report them as unused.
+// They are NOT unused. Do not let a "remove stale strings" pass delete the
+// catalog entries matching these enums' rawValues, or every label in this file
+// silently falls back to English on de/es/fr/it.
 
 protocol LocalizedRawRepresentable: RawRepresentable where RawValue == String {}
 
