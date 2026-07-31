@@ -9,6 +9,43 @@ Expected effect (from `MISSION-3X-ARPU.md`): **+40–70% RPD**, $0.62 → ~$1.0�
 
 ---
 
+## Status (2026-07-31) — ASC flip EXECUTED, RC side still open
+
+The §1 ASC work below is **done** (executed via API with explicit human authorization; all values
+read back from ASC, not assumed). Decision taken: **14-day free trial on annual** (§1d/§3 trial arm).
+
+| productId | ASC id | US | DE | Intro offer | State |
+|---|---|---|---|---|---|
+| `…premium.annual` | 6796619737 | $49.99 | 59,99 € | **14d free trial, 175/175 territories** | `MISSING_METADATA` |
+| `…premium.monthly` | 6796619788 | $12.99 | 14,99 € | none | `MISSING_METADATA` |
+| `…premium.lifetime` | 6796620049 | $79.99 | 99,99 € (manual override; auto was 89,99 €) | n/a | `MISSING_METADATA` |
+
+All three: localizations en-US/de-DE/es-ES/fr-FR/it, availability 175 territories, review notes
+filled. Group localizations added (de/es/fr/it). Existing weekly/6-month verified untouched.
+Annual sits at group level 1 *alongside* the 6-month (existing SKUs were not re-ranked per the
+don't-touch rule); the strict ladder in §1a is an optional 2-PATCH cleanup.
+
+**Remaining — human:**
+1. **Attach a review screenshot to each of the 3 SKUs** in ASC (only blocker; API submit failed
+   with `RELATIONSHIP.REQUIRED appStoreReviewScreenshot`), then submit **annual + monthly**
+   standalone.
+2. **Lifetime cannot be submitted standalone** — it is the app's first non-consumable
+   (`FIRST_NON_CONSUMABLE_MUST_BE_SUBMITTED_ON_VERSION`) and must ride with the next app-version
+   submission.
+3. **RevenueCat (§2 + §6a) is entirely open** — no RC API key for this project exists in
+   `~/.claude/.env.secrets`. Either add `RC_API_KEY_WEDDING` (RC → Project Settings → API Keys →
+   Secret) for agent execution, or click §2 (`default` offering) and §6a (`dismissal` offering)
+   by hand. Order per §2d: products Ready to Submit → import in RC → build offering → set Current.
+
+**API execution notes** (corrections to the text below): the Italian locale code for
+IAP/subscription localizations is `it`, not `it-IT`. Intro offers have no "all territories"
+shorthand — one POST per territory (175). Subscription base prices do **not** auto-equalize via
+API like IAP price schedules do; the 174 non-US territories were rolled out from the US price
+point's equalizations (idempotent scripts, intermittent ASC 500s needed one re-run). §1e's
+territory-factor pass via `/asc-pricing` beyond US/DE is still open.
+
+---
+
 ## 0. Ground truth as of 2026-07-30 (pulled read-only from the ASC API)
 
 | | |
