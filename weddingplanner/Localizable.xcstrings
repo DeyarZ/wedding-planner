@@ -8761,6 +8761,34 @@
         }
       }
     },
+    "One category is on us — every expense you add is filed there. Premium opens all of them.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Kategorie geht aufs Haus – jede Ausgabe wird dort einsortiert. Premium öffnet alle."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una categoría corre por nuestra cuenta: cada gasto se registra ahí. Premium las abre todas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une catégorie est offerte : chaque dépense y est classée. Premium les ouvre toutes."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una categoria è offerta da noi: ogni spesa finisce lì. Premium le apre tutte."
+          }
+        }
+      }
+    },
     "One guest list that never goes out of sync": {
       "localizations": {
         "de": {
@@ -15272,6 +15300,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dove si terrà?"
+          }
+        }
+      }
+    },
+    "Which expense is this for?": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu welcher Ausgabe gehört das?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿A qué gasto corresponde?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À quelle dépense se rapporte-t-elle ?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A quale spesa appartiene?"
           }
         }
       }

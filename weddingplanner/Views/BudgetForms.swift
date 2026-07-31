@@ -355,6 +355,10 @@ struct ProductionAddBudgetItemView: View {
     /// Categories this user is allowed to file an expense under. Free users get
     /// exactly one; the gate is decided by `DataManager`, never here.
     var allowedCategories: [BudgetCategory] = BudgetCategory.allCases
+    /// Called when the locked category row is tapped. The host opens the
+    /// existing `.budgetCategories` upsell — the form stays up, so nothing the
+    /// user already typed is lost.
+    var onLockedCategoryTap: (() -> Void)? = nil
     let onSave: (BudgetItem) -> Void
 
     @State private var name = ""
@@ -367,24 +371,37 @@ struct ProductionAddBudgetItemView: View {
     @State private var linkToVendor = false
     @State private var selectedVendor: Vendor? = nil
 
+    /// A free user has exactly one category open, so the picker would offer a
+    /// single choice. Rather than a dead control, the row says so out loud.
+    private var isCategoryLocked: Bool { allowedCategories.count <= 1 }
+
     var body: some View {
         NavigationStack {
             Form {
-                Section("Item Details") {
+                Section {
                     TextField("Name", text: $name)
 
-                    Picker("Category", selection: $category) {
-                        ForEach(allowedCategories, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon)
-                                .tag(cat)
+                    if isCategoryLocked {
+                        lockedCategoryRow
+                    } else {
+                        Picker("Category", selection: $category) {
+                            ForEach(allowedCategories, id: \.self) { cat in
+                                Label(cat.rawValue, systemImage: cat.icon)
+                                    .tag(cat)
+                            }
                         }
                     }
-                    .disabled(allowedCategories.count <= 1)
 
                     Picker("Priority", selection: $priority) {
                         ForEach(BudgetPriority.allCases, id: \.self) { pri in
                             Text(pri.rawValue).tag(pri)
                         }
+                    }
+                } header: {
+                    Text("Item Details")
+                } footer: {
+                    if isCategoryLocked {
+                        Text("One category is on us — every expense you add is filed there. Premium opens all of them.")
                     }
                 }
 
@@ -419,6 +436,31 @@ struct ProductionAddBudgetItemView: View {
                 .disabled(name.isEmpty || estimatedAmount.isEmpty)
             )
         }
+    }
+
+    /// The category row a free user sees: the open category, named, with the
+    /// same lock pill the locked category cards use. Tapping it opens the
+    /// upsell instead of doing nothing.
+    private var lockedCategoryRow: some View {
+        Button {
+            onLockedCategoryTap?()
+        } label: {
+            HStack {
+                Text("Category")
+                    .foregroundColor(Color(hex: "2C2C2C"))
+
+                Spacer()
+
+                Text(category.rawValue)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(Color(hex: "7A7A7A"))
+                    .lineLimit(1)
+
+                PremiumLockBadge()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private func saveBudgetItem() {
