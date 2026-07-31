@@ -12,11 +12,17 @@ struct ProductionFundsView: View {
 
     @State private var selectedCategory: BudgetCategory? = nil
     @State private var showingAddExpense = false
-    @State private var showingAddTransaction = false
+    @State private var showingTransactionItemPicker = false
+    /// Item chosen in the picker, applied once that sheet is gone.
+    @State private var pendingTransactionItem: BudgetItem? = nil
+    /// The budget item the "Add Transaction" form is filing against.
+    @State private var transactionTarget: BudgetItem? = nil
     @State private var selectedBudgetItem: BudgetItem? = nil
     @State private var showingInsights = false
     @State private var animateIn = false
     @State private var activeGate: PremiumGate? = nil
+    /// Gate raised from inside the add-expense sheet.
+    @State private var addExpenseGate: PremiumGate? = nil
 
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
     private let selectionFeedback = UISelectionFeedbackGenerator()
@@ -96,15 +102,40 @@ struct ProductionFundsView: View {
         }
         .sheet(isPresented: $showingAddExpense) {
             // A free user can only file an expense under the category they
-            // actually own — the picker never shows a locked category.
-            ProductionAddBudgetItemView(allowedCategories: dataManager.unlockedBudgetCategories) { newItem in
+            // actually own — the row says so, and taps through to the upsell.
+            ProductionAddBudgetItemView(
+                allowedCategories: dataManager.unlockedBudgetCategories,
+                onLockedCategoryTap: { addExpenseGate = .budgetCategories }
+            ) { newItem in
                 addBudgetItem(newItem)
             }
+            // Same gate, same copy as the Funds screen — but hosted inside the
+            // sheet, because only one sheet can be presented per view. Keeping
+            // it here means the half-filled form is still there afterwards.
+            .premiumUpsell($addExpenseGate)
         }
-        .sheet(isPresented: $showingAddTransaction) {
-            if let item = selectedBudgetItem {
-                ProductionAddTransactionView(budgetItem: item)
+        // A transaction always belongs to a budget item, so the item is picked
+        // first and the form is only ever presented with a real target.
+        .sheet(isPresented: $showingTransactionItemPicker, onDismiss: {
+            guard let pending = pendingTransactionItem else { return }
+            pendingTransactionItem = nil
+            if dataManager.canAccessBudgetCategory(pending.category) {
+                transactionTarget = pending
+            } else {
+                activeGate = .budgetCategories
             }
+        }) {
+            SelectBudgetItemSheet(
+                budgetItems: budgetItems,
+                isLocked: { !dataManager.canAccessBudgetCategory($0.category) },
+                onSelect: { item in
+                    pendingTransactionItem = item
+                    showingTransactionItemPicker = false
+                }
+            )
+        }
+        .sheet(item: $transactionTarget) { item in
+            ProductionAddTransactionView(budgetItem: item)
         }
         .sheet(item: $selectedBudgetItem) { item in
             ProductionBudgetItemDetailView(budgetItem: item)
@@ -333,13 +364,17 @@ struct ProductionFundsView: View {
 
                 Spacer()
 
-                Button(action: {
-                    showingAddTransaction = true
-                    impactFeedback.impactOccurred()
-                }) {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 16))
-                        .foregroundColor(Color(hex: "B89B91"))
+                // Nothing to pay against yet — the button would have nowhere to
+                // go, so it stays away until there is a first expense.
+                if !budgetItems.isEmpty {
+                    Button(action: {
+                        showingTransactionItemPicker = true
+                        impactFeedback.impactOccurred()
+                    }) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 16))
+                            .foregroundColor(Color(hex: "B89B91"))
+                    }
                 }
             }
 
@@ -730,6 +765,71 @@ struct BudgetQuickActionButton: View {
                     .fill(color.opacity(0.08))
             )
         }
+    }
+}
+
+/// Asks which expense a payment belongs to. A `Transaction` is always filed
+/// against a `BudgetItem`, so this is the missing first step of "add a
+/// transaction" from the budget overview.
+struct SelectBudgetItemSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let budgetItems: [BudgetItem]
+    var isLocked: (BudgetItem) -> Bool = { _ in false }
+    let onSelect: (BudgetItem) -> Void
+
+    var body: some View {
+        NavigationStack {
+            List(budgetItems, id: \.id) { item in
+                Button {
+                    onSelect(item)
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: item.category.icon)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(Color(hex: "B89B91"))
+                            .frame(width: 24)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.name)
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(Color(hex: "2C2C2C"))
+
+                            // Starter budgets name the item after its category,
+                            // so the subtitle would just repeat the row.
+                            if item.name != item.category.rawValue {
+                                Text(item.category.rawValue)
+                                    .font(.system(size: 11, weight: .thin))
+                                    .foregroundColor(Color(hex: "9B9B9B"))
+                            }
+                        }
+
+                        Spacer()
+
+                        if isLocked(item) {
+                            PremiumLockBadge(compact: true)
+                        } else {
+                            Text(formatCurrency(item.outstandingAmount))
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(Color(hex: "7A7A7A"))
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .navigationTitle("Which expense is this for?")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarItems(trailing: Button("Cancel") { dismiss() })
+        }
+    }
+
+    private func formatCurrency(_ amount: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.maximumFractionDigits = 0
+        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
     }
 }
 
