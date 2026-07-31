@@ -73,15 +73,20 @@ struct ProductionTimelineView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Fixed header with countdown
+                // Fixed header with countdown, styled as a proper inset card so
+                // it spans the full content width instead of hugging its text.
                 countdownHeader
+                    .frame(maxWidth: .infinity)
+                    .padding(20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.white)
+                            .shadow(color: Color.black.opacity(0.08), radius: 14, x: 0, y: 6)
+                            .shadow(color: Color.black.opacity(0.04), radius: 5, x: 0, y: 2)
+                    )
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
                     .padding(.bottom, 24)
-                    .background(
-                        Color(hex: "FDFBF7")
-                            .shadow(color: Color.black.opacity(0.02), radius: 10, y: 5)
-                    )
                     .opacity(animateIn ? 1 : 0)
                     .offset(y: animateIn ? 0 : -20)
                     .animation(.easeOut(duration: 0.8), value: animateIn)
@@ -117,7 +122,10 @@ struct ProductionTimelineView: View {
                             .opacity(animateIn ? 1 : 0)
                             .animation(.easeOut(duration: 0.8).delay(0.6), value: animateIn)
                     }
-                    .padding(.bottom, 100)
+                    .padding(.top, 8)
+                    // Clears the floating add button (56pt + 24pt inset) so no
+                    // row can come to rest underneath it.
+                    .padding(.bottom, 140)
                 }
             }
 
