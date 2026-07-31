@@ -56,21 +56,30 @@ struct PaywallView: View {
                         dismissWithoutPurchase()
                     }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .light))
-                            .foregroundColor(Color(hex: "9B9B9B"))
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(hex: "7A7A7A"))
                             .frame(width: 32, height: 32)
                             .background(
                                 Circle()
                                     .fill(Color.white)
                                     .shadow(color: Color.black.opacity(0.1), radius: 8, y: 4)
                             )
+                            // The disc stays 32pt so it keeps its visual weight,
+                            // but the hit area is padded out to the 44pt HIG
+                            // minimum — App Review checks that a paywall can be
+                            // dismissed, and a 32pt target is a rejection risk.
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     // Closing mid-purchase would tear the flow down under the
                     // in-flight StoreKit callback.
                     .disabled(isPurchasing)
+                    .accessibilityLabel(Text("Close"))
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
+                // 18/14 + the 6pt inset of the 32pt disc inside its 44pt target
+                // == the 24/20 the disc sat at before it was enlarged.
+                .padding(.horizontal, 18)
+                .padding(.top, 14)
 
                 // The ladder can be 1–4 cards tall depending on what the
                 // current RevenueCat offering contains, so the whole sheet

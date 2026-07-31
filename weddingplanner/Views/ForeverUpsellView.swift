@@ -31,11 +31,38 @@ struct ForeverUpsellView: View {
             )
             .ignoresSafeArea()
 
-            ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
+                // Sits outside the ScrollView on purpose: this screen is a
+                // fullScreenCover with no swipe-to-dismiss, and the "No thanks"
+                // link at the bottom can fall below the fold at large Dynamic
+                // Type — leaving no visible way out. Same control, same
+                // placement and 44pt target as PaywallView.
+                HStack {
+                    Spacer()
+                    Button(action: skip) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(hex: "7A7A7A"))
+                            .frame(width: 32, height: 32)
+                            .background(
+                                Circle()
+                                    .fill(Color.white)
+                                    .shadow(color: Color.black.opacity(0.1), radius: 8, y: 4)
+                            )
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .disabled(isPurchasing)
+                    .accessibilityLabel(Text("Close"))
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 14)
+
+                ScrollView(showsIndicators: false) {
                 VStack(spacing: 26) {
                     PaywallHeartAnimation()
                         .frame(height: 90)
-                        .padding(.top, 40)
+                        .padding(.top, 12)
 
                     VStack(spacing: 12) {
                         Text("You're in!")
@@ -143,6 +170,7 @@ struct ForeverUpsellView: View {
                 }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 40)
+                }
             }
         }
         .onAppear {

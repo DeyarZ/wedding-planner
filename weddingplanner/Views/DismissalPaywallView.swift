@@ -42,19 +42,23 @@ struct DismissalPaywallView: View {
                     Spacer()
                     Button(action: skip) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .light))
-                            .foregroundColor(Color(hex: "9B9B9B"))
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(hex: "7A7A7A"))
                             .frame(width: 32, height: 32)
                             .background(
                                 Circle()
                                     .fill(Color.white)
                                     .shadow(color: Color.black.opacity(0.1), radius: 8, y: 4)
                             )
+                            // 32pt disc, 44pt hit area — see PaywallView.
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .disabled(isPurchasing)
+                    .accessibilityLabel(Text("Close"))
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
+                .padding(.horizontal, 18)
+                .padding(.top, 14)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
