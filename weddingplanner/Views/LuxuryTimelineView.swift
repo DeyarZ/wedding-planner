@@ -1481,7 +1481,7 @@ struct TaskCategoryOption: View {
                             .fill(isSelected ? Color(hex: "B89B91").opacity(0.1) : Color(hex: "F8F8F8"))
                     )
 
-                Text(category.rawValue)
+                Text(category.localizedName)
                     .font(.system(size: 9, weight: .regular))
                     .foregroundColor(isSelected ? Color(hex: "2C2C2C") : Color(hex: "9B9B9B"))
                     .lineLimit(1)
@@ -1498,7 +1498,7 @@ struct TaskPriorityOption: View {
 
     var body: some View {
         Button(action: action) {
-            Text(priority.rawValue)
+            Text(priority.localizedName)
                 .font(.system(size: 12, weight: isSelected ? .medium : .regular))
                 .foregroundColor(isSelected ? .white : Color(hex: priority.color))
                 .padding(.horizontal, 16)

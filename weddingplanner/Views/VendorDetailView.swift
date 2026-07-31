@@ -158,7 +158,7 @@ struct ProductionVendorDetailView: View {
                     .foregroundColor(Color(hex: "2C2C2C"))
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text(vendor.category.rawValue)
+                Text(vendor.category.localizedName)
                     .font(.system(size: 14, weight: .thin))
                     .foregroundColor(Color(hex: "9B9B9B"))
 
@@ -305,7 +305,7 @@ struct ProductionVendorDetailView: View {
                 // Payment status badge
                 HStack {
                     Spacer()
-                    Text(vendor.paymentStatus.rawValue)
+                    Text(vendor.paymentStatus.localizedName)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(Color(hex: vendor.paymentStatus.color))
                 }
@@ -550,7 +550,7 @@ struct ProductionVendorDetailView: View {
 
 struct VendorContactActionButton: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
     let action: () -> Void
 
@@ -592,7 +592,7 @@ struct VendorDocumentRow: View {
                         .foregroundColor(Color(hex: "2C2C2C"))
                         .lineLimit(1)
 
-                    Text(document.documentType.rawValue)
+                    Text(document.documentType.localizedName)
                         .font(.system(size: 11, weight: .thin))
                         .foregroundColor(Color(hex: "9B9B9B"))
                 }
@@ -629,7 +629,7 @@ struct VendorCommunicationRow: View {
                     .foregroundColor(Color(hex: "2C2C2C"))
 
                 HStack {
-                    Text(communication.type.rawValue)
+                    Text(communication.type.localizedName)
                         .font(.system(size: 11, weight: .thin))
                         .foregroundColor(Color(hex: "9B9B9B"))
 

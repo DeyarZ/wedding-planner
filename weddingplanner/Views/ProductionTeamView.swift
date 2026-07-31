@@ -366,7 +366,7 @@ struct ProductionVendorCard: View {
                     .lineLimit(1)
 
                 // Category
-                Text(vendor.category.rawValue)
+                Text(vendor.category.localizedName)
                     .font(.system(size: 12, weight: .thin))
                     .foregroundColor(Color(hex: "9B9B9B"))
 
@@ -374,7 +374,7 @@ struct ProductionVendorCard: View {
                 if vendor.contractAmount > 0 {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text(vendor.paymentStatus.rawValue)
+                            Text(vendor.paymentStatus.localizedName)
                                 .font(.system(size: 11, weight: .regular))
                                 .foregroundColor(Color(hex: vendor.paymentStatus.color))
 
@@ -484,7 +484,7 @@ struct ProductionStatusBadge: View {
     let status: VendorStatus
 
     var body: some View {
-        Text(status.rawValue)
+        Text(status.localizedName)
             .font(.system(size: 10, weight: .medium))
             .foregroundColor(.white)
             .padding(.horizontal, 8)

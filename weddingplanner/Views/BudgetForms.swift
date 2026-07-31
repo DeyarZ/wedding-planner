@@ -107,12 +107,12 @@ struct ProductionBudgetItemDetailView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(budgetItem.name)
+                budgetItem.displayNameText
                     .font(.system(size: 24, weight: .light, design: .serif))
                     .foregroundColor(Color(hex: "2C2C2C"))
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text(budgetItem.category.rawValue)
+                Text(budgetItem.category.localizedName)
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(Color(hex: "7A7A7A"))
             }
@@ -256,7 +256,7 @@ struct ProductionBudgetItemDetailView: View {
                     ForEach(transactions.sorted { $0.date > $1.date }, id: \.id) { transaction in
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(transaction.transactionDescription ?? transaction.transactionType.rawValue)
+                                (transaction.transactionDescription.map(Text.init) ?? Text(transaction.transactionType.localizedName))
                                     .font(.system(size: 13, weight: .regular))
                                     .foregroundColor(Color(hex: "2C2C2C"))
 
@@ -386,7 +386,7 @@ struct ProductionAddBudgetItemView: View {
                     } else {
                         Picker("Category", selection: $category) {
                             ForEach(allowedCategories, id: \.self) { cat in
-                                Label(cat.rawValue, systemImage: cat.icon)
+                                Label(cat.localizedName, systemImage: cat.icon)
                                     .tag(cat)
                             }
                         }
@@ -394,7 +394,7 @@ struct ProductionAddBudgetItemView: View {
 
                     Picker("Priority", selection: $priority) {
                         ForEach(BudgetPriority.allCases, id: \.self) { pri in
-                            Text(pri.rawValue).tag(pri)
+                            Text(pri.localizedName).tag(pri)
                         }
                     }
                 } header: {
@@ -451,7 +451,7 @@ struct ProductionAddBudgetItemView: View {
 
                 Spacer()
 
-                Text(category.rawValue)
+                Text(category.localizedName)
                     .font(.system(size: 15, weight: .regular))
                     .foregroundColor(Color(hex: "7A7A7A"))
                     .lineLimit(1)
@@ -503,14 +503,14 @@ struct EditBudgetItemView: View {
 
                     Picker("Category", selection: $category) {
                         ForEach(BudgetCategory.allCases, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon)
+                            Label(cat.localizedName, systemImage: cat.icon)
                                 .tag(cat)
                         }
                     }
 
                     Picker("Priority", selection: $priority) {
                         ForEach(BudgetPriority.allCases, id: \.self) { pri in
-                            Text(pri.rawValue).tag(pri)
+                            Text(pri.localizedName).tag(pri)
                         }
                     }
                 }
@@ -526,7 +526,7 @@ struct EditBudgetItemView: View {
 
                     Picker("Payment Status", selection: $paymentStatus) {
                         ForEach(PaymentStatusType.allCases, id: \.self) { status in
-                            Text(status.rawValue).tag(status)
+                            Text(status.localizedName).tag(status)
                         }
                     }
                 }
@@ -628,7 +628,7 @@ struct ProductionAddTransactionView: View {
 
                     Picker("Type", selection: $transactionType) {
                         ForEach(TransactionType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
+                            Text(type.localizedName).tag(type)
                         }
                     }
 
@@ -638,7 +638,7 @@ struct ProductionAddTransactionView: View {
                 Section("Payment Method") {
                     Picker("Method", selection: $paymentMethod) {
                         ForEach(PaymentMethod.allCases, id: \.self) { method in
-                            Text(method.rawValue).tag(method)
+                            Text(method.localizedName).tag(method)
                         }
                     }
 
@@ -799,7 +799,7 @@ struct ProductionBudgetInsightsView: View {
             VStack(spacing: 8) {
                 ForEach(Array(topItems), id: \.id) { item in
                     HStack {
-                        Text(item.name)
+                        item.displayNameText
                             .font(.system(size: 13, weight: .regular))
                             .foregroundColor(Color(hex: "2C2C2C"))
 
@@ -850,7 +850,7 @@ struct ProductionBudgetInsightsView: View {
                     ForEach(Array(upcomingPayments), id: \.item.id) { payment in
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(payment.item.name)
+                                payment.item.displayNameText
                                     .font(.system(size: 13, weight: .regular))
                                     .foregroundColor(Color(hex: "2C2C2C"))
 
@@ -909,7 +909,7 @@ struct PaymentStatusBadge: View {
     let status: PaymentStatusType
 
     var body: some View {
-        Text(status.rawValue)
+        Text(status.localizedName)
             .font(.system(size: 11, weight: .medium))
             .foregroundColor(.white)
             .padding(.horizontal, 10)
@@ -922,7 +922,7 @@ struct PaymentStatusBadge: View {
 }
 
 struct InsightCard: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     let subtitle: String
     let color: Color
@@ -971,7 +971,7 @@ struct CategoryInsightRow: View {
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(Color(hex: "B89B91"))
 
-                Text(data.category.rawValue)
+                Text(data.category.localizedName)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Color(hex: "2C2C2C"))
 

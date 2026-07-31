@@ -30,7 +30,7 @@ struct TaskDetailSheet: View {
                             .multilineTextAlignment(.center)
 
                         HStack(spacing: 16) {
-                            Label(task.category.rawValue, systemImage: task.category.icon)
+                            Label(task.category.localizedName, systemImage: task.category.icon)
                                 .font(.system(size: 12, weight: .regular))
                                 .foregroundColor(Color(hex: "7A7A7A"))
 

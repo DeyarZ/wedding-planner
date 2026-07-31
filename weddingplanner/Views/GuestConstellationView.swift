@@ -348,7 +348,9 @@ struct GuestDetailCard: View {
                         .fontWeight(.bold)
                     
                     HStack {
-                        Label("\(guest.partySize) guest\(guest.partySize > 1 ? "s" : "")", 
+                        // Pluralized by the string catalog (`%lld guests`),
+                        // not by appending an English "s".
+                        Label("\(guest.partySize) guests",
                               systemImage: "person.fill")
                         
                         Spacer()

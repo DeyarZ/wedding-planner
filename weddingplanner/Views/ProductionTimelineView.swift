@@ -844,7 +844,7 @@ struct ProductionTaskCard: View {
 
                     HStack(spacing: 12) {
                         // Category tag
-                        Label(task.category.rawValue, systemImage: task.category.icon)
+                        Label(task.category.localizedName, systemImage: task.category.icon)
                             .font(.system(size: 11, weight: .regular))
                             .foregroundColor(Color(hex: "9B9B9B"))
 

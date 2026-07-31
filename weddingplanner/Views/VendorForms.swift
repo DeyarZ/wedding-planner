@@ -29,14 +29,14 @@ struct ProductionAddVendorView: View {
 
                     Picker("Category", selection: $category) {
                         ForEach(VendorCategory.allCases, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon)
+                            Label(cat.localizedName, systemImage: cat.icon)
                                 .tag(cat)
                         }
                     }
 
                     Picker("Status", selection: $status) {
                         ForEach(VendorStatus.allCases, id: \.self) { stat in
-                            Text(stat.rawValue).tag(stat)
+                            Text(stat.localizedName).tag(stat)
                         }
                     }
                 }
@@ -127,14 +127,14 @@ struct ProductionEditVendorView: View {
 
                     Picker("Category", selection: $category) {
                         ForEach(VendorCategory.allCases, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon)
+                            Label(cat.localizedName, systemImage: cat.icon)
                                 .tag(cat)
                         }
                     }
 
                     Picker("Status", selection: $status) {
                         ForEach(VendorStatus.allCases, id: \.self) { stat in
-                            Text(stat.rawValue).tag(stat)
+                            Text(stat.localizedName).tag(stat)
                         }
                     }
                 }
@@ -346,7 +346,7 @@ struct ProductionAddCommunicationView: View {
                 Section("Communication Details") {
                     Picker("Type", selection: $type) {
                         ForEach(CommunicationType.allCases, id: \.self) { commType in
-                            Text(commType.rawValue).tag(commType)
+                            Text(commType.localizedName).tag(commType)
                         }
                     }
 
@@ -585,7 +585,7 @@ struct ProductionDocumentViewer: View {
                         .font(.title2)
                         .padding()
 
-                    Text("Type: \(document.documentType.rawValue)")
+                    Text("Type: \(document.documentType.localizedNameString)")
                         .foregroundColor(.gray)
 
                     Spacer()

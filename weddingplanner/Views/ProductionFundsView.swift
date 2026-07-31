@@ -518,7 +518,7 @@ struct ProductionFundsView: View {
 struct BudgetStatCard: View {
     let icon: String
     let value: String
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
 
     var body: some View {
@@ -557,7 +557,7 @@ struct PaymentAlertRow: View {
                     .foregroundColor(isOverdue ? Color(hex: "EF5350") : Color(hex: "FFA726"))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.name)
+                    item.displayNameText
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(Color(hex: "2C2C2C"))
 
@@ -628,7 +628,7 @@ struct CategoryCard: View {
                     }
                 }
 
-                Text(breakdown.category.rawValue)
+                Text(breakdown.category.localizedName)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Color(hex: isLocked ? "8A8A8A" : "2C2C2C"))
                     .lineLimit(1)
@@ -698,7 +698,7 @@ struct BudgetTransactionRow: View {
                     .foregroundColor(Color(hex: "2C2C2C"))
 
                 HStack(spacing: 8) {
-                    Text(transaction.transactionType.rawValue)
+                    Text(transaction.transactionType.localizedName)
                         .font(.system(size: 11, weight: .thin))
                         .foregroundColor(Color(hex: "7A7A7A"))
 
@@ -791,14 +791,14 @@ struct SelectBudgetItemSheet: View {
                             .frame(width: 24)
 
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(item.name)
+                            item.displayNameText
                                 .font(.system(size: 15, weight: .regular))
                                 .foregroundColor(Color(hex: "2C2C2C"))
 
                             // Starter budgets name the item after its category,
                             // so the subtitle would just repeat the row.
-                            if item.name != item.category.rawValue {
-                                Text(item.category.rawValue)
+                            if !item.usesDefaultCategoryName {
+                                Text(item.category.localizedName)
                                     .font(.system(size: 11, weight: .thin))
                                     .foregroundColor(Color(hex: "9B9B9B"))
                             }

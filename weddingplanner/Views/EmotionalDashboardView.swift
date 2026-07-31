@@ -495,7 +495,7 @@ struct TodayFocusCard: View {
                     HStack(spacing: 8) {
                         Image(systemName: task.category.icon)
                             .font(.system(size: 11))
-                        Text(task.category.rawValue)
+                        Text(task.category.localizedName)
                             .font(.system(size: 12, weight: .thin))
                     }
                     .foregroundColor(Color(hex: "9B9B9B"))

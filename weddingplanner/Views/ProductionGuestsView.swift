@@ -472,7 +472,7 @@ struct ProductionGuestRow: View {
                         HStack(spacing: 4) {
                             Image(systemName: guest.group.icon)
                                 .font(.system(size: 10, weight: .light))
-                            Text(guest.group.rawValue)
+                            Text(guest.group.localizedName)
                                 .font(.system(size: 11, weight: .thin))
                         }
                         .foregroundColor(Color(hex: "7A7A7A"))
@@ -493,7 +493,7 @@ struct ProductionGuestRow: View {
                             HStack(spacing: 4) {
                                 Image(systemName: meal.icon)
                                     .font(.system(size: 10, weight: .light))
-                                Text(meal.rawValue)
+                                Text(meal.localizedName)
                                     .font(.system(size: 11, weight: .thin))
                             }
                             .foregroundColor(Color(hex: "B89B91"))
@@ -555,7 +555,7 @@ struct RSVPBadge: View {
     let status: RSVPStatus
 
     var body: some View {
-        Text(status.rawValue)
+        Text(status.localizedName)
             .font(.system(size: 11, weight: .medium))
             .foregroundColor(.white)
             .padding(.horizontal, 10)

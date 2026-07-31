@@ -31,7 +31,7 @@ struct ProductionAddGuestView: View {
 
                     Picker("Group", selection: $group) {
                         ForEach(GuestGroup.allCases, id: \.self) { grp in
-                            Label(grp.rawValue, systemImage: grp.icon)
+                            Label(grp.localizedName, systemImage: grp.icon)
                                 .tag(grp)
                         }
                     }
@@ -55,7 +55,7 @@ struct ProductionAddGuestView: View {
                     Picker("Meal Choice", selection: $mealChoice) {
                         Text("Not Selected").tag(nil as MealChoice?)
                         ForEach(MealChoice.allCases, id: \.self) { meal in
-                            Label(meal.rawValue, systemImage: meal.icon)
+                            Label(meal.localizedName, systemImage: meal.icon)
                                 .tag(meal as MealChoice?)
                         }
                     }
@@ -146,7 +146,7 @@ struct ProductionEditGuestView: View {
 
                     Picker("Group", selection: $group) {
                         ForEach(GuestGroup.allCases, id: \.self) { grp in
-                            Label(grp.rawValue, systemImage: grp.icon)
+                            Label(grp.localizedName, systemImage: grp.icon)
                                 .tag(grp)
                         }
                     }
@@ -157,7 +157,7 @@ struct ProductionEditGuestView: View {
                 Section("RSVP Status") {
                     Picker("Status", selection: $rsvpStatus) {
                         ForEach(RSVPStatus.allCases, id: \.self) { status in
-                            Text(status.rawValue).tag(status)
+                            Text(status.localizedName).tag(status)
                         }
                     }
                 }
@@ -178,7 +178,7 @@ struct ProductionEditGuestView: View {
                     Picker("Meal Choice", selection: $mealChoice) {
                         Text("Not Selected").tag(nil as MealChoice?)
                         ForEach(MealChoice.allCases, id: \.self) { meal in
-                            Label(meal.rawValue, systemImage: meal.icon)
+                            Label(meal.localizedName, systemImage: meal.icon)
                                 .tag(meal as MealChoice?)
                         }
                     }
@@ -302,7 +302,7 @@ struct ProductionAddPlusOneView: View {
                         Picker("Meal Choice", selection: $mealChoice) {
                             Text("Not Selected").tag(nil as MealChoice?)
                             ForEach(MealChoice.allCases, id: \.self) { meal in
-                                Label(meal.rawValue, systemImage: meal.icon)
+                                Label(meal.localizedName, systemImage: meal.icon)
                                     .tag(meal as MealChoice?)
                             }
                         }
@@ -533,7 +533,7 @@ struct ProductionGuestAnalyticsView: View {
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(Color(hex: "B89B91"))
 
-                        Text(meal.rawValue)
+                        Text(meal.localizedName)
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(Color(hex: "2C2C2C"))
 
@@ -576,7 +576,7 @@ struct ProductionGuestAnalyticsView: View {
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(Color(hex: group.color))
 
-                            Text(group.rawValue)
+                            Text(group.localizedName)
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(Color(hex: "2C2C2C"))
                         }
@@ -814,7 +814,7 @@ struct ProductionGuestExportView: View {
 
 struct StatCard: View {
     let value: String
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
 
     var body: some View {
@@ -838,7 +838,7 @@ struct StatCard: View {
 
 struct SpecialNeedStat: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let count: Int
 
     var body: some View {

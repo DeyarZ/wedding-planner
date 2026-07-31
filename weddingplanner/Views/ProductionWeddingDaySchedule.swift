@@ -594,7 +594,7 @@ struct DraggableEventRow: View {
                             HStack(spacing: 4) {
                                 Image(systemName: event.category.icon)
                                     .font(.system(size: 10, weight: .light))
-                                Text(event.category.rawValue)
+                                Text(event.category.localizedName)
                                     .font(.system(size: 11, weight: .thin))
                             }
                             .foregroundColor(Color(hex: event.category.color))
@@ -755,7 +755,7 @@ struct AddScheduleEventView: View {
 
                     Picker("Category", selection: $category) {
                         ForEach(EventCategory.allCases, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon)
+                            Label(cat.localizedName, systemImage: cat.icon)
                                 .tag(cat)
                         }
                     }
@@ -823,7 +823,7 @@ struct EditScheduleEventView: View {
 
                     Picker("Category", selection: $category) {
                         ForEach(EventCategory.allCases, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon)
+                            Label(cat.localizedName, systemImage: cat.icon)
                                 .tag(cat)
                         }
                     }

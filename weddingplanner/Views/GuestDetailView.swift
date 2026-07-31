@@ -159,7 +159,7 @@ struct ProductionGuestDetailView: View {
                     HStack(spacing: 4) {
                         Image(systemName: guest.group.icon)
                             .font(.system(size: 12, weight: .light))
-                        Text(guest.group.rawValue)
+                        Text(guest.group.localizedName)
                             .font(.system(size: 13, weight: .regular))
                     }
                     .foregroundColor(Color(hex: "7A7A7A"))
@@ -341,7 +341,7 @@ struct ProductionGuestDetailView: View {
                         Image(systemName: meal.icon)
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(Color(hex: "B89B91"))
-                        Text(meal.rawValue)
+                        Text(meal.localizedName)
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(Color(hex: "2C2C2C"))
                         Spacer()
@@ -678,7 +678,7 @@ struct ProductionGuestDetailView: View {
 
 struct GuestContactActionCard: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
     let action: () -> Void
 
@@ -727,7 +727,7 @@ struct GuestPlusOneRow: View {
                 }
 
                 if let meal = plusOne.mealChoice {
-                    Text(meal.rawValue)
+                    Text(meal.localizedName)
                         .font(.system(size: 11, weight: .thin))
                         .foregroundColor(Color(hex: "7A7A7A"))
                 }
@@ -758,7 +758,7 @@ struct GuestPlusOneRow: View {
 
 struct GuestSpecialNeedCard: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let isActive: Bool
 
     var body: some View {
