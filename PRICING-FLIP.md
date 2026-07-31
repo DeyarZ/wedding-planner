@@ -25,19 +25,88 @@ filled. Group localizations added (de/es/fr/it). Existing weekly/6-month verifie
 Annual sits at group level 1 *alongside* the 6-month (existing SKUs were not re-ranked per the
 don't-touch rule); the strict ladder in §1a is an optional 2-PATCH cleanup.
 
-**Remaining — human:**
-1. **Attach a review screenshot to each of the 3 SKUs** in ASC (only blocker; API submit failed
-   with `RELATIONSHIP.REQUIRED appStoreReviewScreenshot`), then submit **annual + monthly**
-   standalone.
-2. **Lifetime cannot be submitted standalone** — it is the app's first non-consumable
-   (`FIRST_NON_CONSUMABLE_MUST_BE_SUBMITTED_ON_VERSION`) and must ride with the next app-version
-   submission.
-3. **RevenueCat (§2 + §6a) is entirely open** — no RC API key for this project exists in
-   `~/.claude/.env.secrets`. Either add `RC_API_KEY_WEDDING` (RC → Project Settings → API Keys →
-   Secret) for agent execution, or click §2 (`default` offering) and §6a (`dismissal` offering)
-   by hand. Order per §2d: products Ready to Submit → import in RC → build offering → set Current.
+## Status (2026-07-31) — RevenueCat side EXECUTED, Current offering deliberately UNCHANGED
 
-**API execution notes** (corrections to the text below): the Italian locale code for
+RC project **`proj4da62644`** ("Wedding Planner: BridePlan"), App Store app **`appb0bb42def8`**
+(bundle `com.manuelworlitzer.weddingplanner`, ASC API key + subscription key both configured).
+All values below are **read back from the API**, not assumed.
+
+**The audit was wrong about "no offering configured."** A `default` offering existed all along and
+is **Current**: `ofrngc32ce0bfe7`, packages `$rc_six_month` → 6months, `$rc_weekly` → weekly,
+`$rc_lifetime` → a leftover **Test-Store** product (`…wedding_planner_premium`, app
+`app0a2aed8f6a`). That test product is also attached to the other two packages. It is an RC
+onboarding artifact, invisible to the App Store SDK, and was **left untouched** — `default` is the
+live paywall's source and nothing about it may change before the new binary ships.
+
+Created this pass (RC entitlement `premium` = **`entl0775a46e4e`**):
+
+| Resource | RC id | Detail |
+|---|---|---|
+| Product `…premium.annual` | `prodf166080c9b` | `subscription` |
+| Product `…premium.monthly` | `prode752659cf5` | `subscription` |
+| Product `…premium.lifetime` | `prod7a05e44e86` | `non_consumable` |
+| Offering **`ladder2026`** | `ofrngcb645ad4d8` | "Annual + Forever + Monthly ladder", `is_current: false` |
+| ├ `$rc_annual` | `pkge9222ac3ed3` | → `…premium.annual` |
+| ├ `$rc_lifetime` | `pkgee224681cc9` | → `…premium.lifetime` |
+| └ `$rc_monthly` | `pkgeb84d5ba292` | → `…premium.monthly` |
+| Offering **`dismissal`** | `ofrngf0b33b8dcb` | "Decline ladder / recovery", `is_current: false` |
+| ├ `$rc_six_month` | `pkge336a210ca1` | → `…premium.6months` |
+| └ `$rc_weekly` | `pkge37352ebbd3` | → `…premium.weekly` |
+
+Entitlement `premium` now reads back with **all five** App Store products attached: annual,
+monthly, lifetime, weekly, 6months. Weekly and 6-month were already attached — verified, not
+re-created, nothing else about them changed.
+
+**RC product records were creatable despite ASC `MISSING_METADATA`** — §2a's "they will not import
+until Ready to Submit" is wrong for the v2 API. What ASC approval actually gates is the **price**:
+the RC record exists, but StoreKit will not return a product (and the SDK will not show a card)
+until the SKU is Approved. So the offering is built and correct, and simply renders nothing for a
+SKU until ASC clears it.
+
+**RC API gotchas** (v2, cost real time — do not re-derive): `POST /products` with
+`type: "one_time"` silently creates a **`non_renewing_subscription`**, which is the wrong grant
+semantics for a Forever purchase. The `one_time: {is_consumable: false}` field is rejected on both
+create and update. The undocumented value **`type: "non_consumable"`** is accepted on create and is
+the only way to get it right — the first lifetime product was deleted and re-created for this.
+
+### Remaining — in this exact order
+
+1. **ASC: attach a review screenshot to each of the 3 SKUs**, then submit **annual + monthly**
+   standalone. (Only blocker; API submit failed with `RELATIONSHIP.REQUIRED
+   appStoreReviewScreenshot`.) Until these are Approved, `ladder2026` renders empty cards.
+2. **Ship the new binary.** Lifetime **cannot be submitted standalone** — it is the app's first
+   non-consumable (`FIRST_NON_CONSUMABLE_MUST_BE_SUBMITTED_ON_VERSION`) and must ride with the next
+   app-version submission. So the new build and the lifetime SKU go to review together.
+3. **Only after that binary is LIVE on the App Store: flip the Current offering** to `ladder2026`.
+   One click in the dashboard, or one API call:
+
+   ```
+   POST https://api.revenuecat.com/v2/projects/proj4da62644/offerings/ofrngcb645ad4d8
+   Authorization: Bearer $RC_API_KEY_WEDDING
+   Content-Type: application/json
+
+   {"is_current": true}
+   ```
+
+   (Verified: the update schema accepts `is_current`; probed as a no-op with `false`. Setting one
+   offering current moves it off `default` automatically. **Rollback** = the same call against
+   `ofrngc32ce0bfe7`.)
+4. **Sandbox-verify** per the §4 and §6d checklists before calling any of it done.
+
+> **Why step 3 must wait for step 2 — this is the whole safety constraint.**
+> The **currently shipped** binary does not render whatever the offering contains. Verified in
+> `SubscriptionManager.swift` at commit `dd1433c` (the live release): `weeklyPackage` and
+> `sixMonthPackage` filter `offerings?.current?.availablePackages` by the **exact literal product
+> IDs** `Config.weeklyProductID` / `Config.sixMonthProductID`. `ladder2026` contains neither. Making
+> it Current today gives every live user a paywall with **zero purchasable packages** — no
+> rollback speed saves the revenue lost in the meantime. The *new* code (Phase 1+) reads
+> `offerings?.current` generically and fetches `dismissal` by identifier, so it is safe with either
+> offering — which is why the flip is gated on the new binary being live, not merely submitted.
+>
+> `dismissal` is safe to leave in place right now: the old binary never asks for it, and the new
+> one skips the surface silently when it is missing.
+
+**API execution notes** (corrections to §1's text below): the Italian locale code for
 IAP/subscription localizations is `it`, not `it-IT`. Intro offers have no "all territories"
 shorthand — one POST per territory (175). Subscription base prices do **not** auto-equalize via
 API like IAP price schedules do; the 174 non-US territories were rolled out from the US price
@@ -175,10 +244,13 @@ Attach all three to the **existing `premium` entitlement**. Do not create a new 
 `SubscriptionManager.isSubscribed` checks `premium` and nothing else. A product not attached here
 purchases fine and unlocks nothing.
 
-### 2c. The `default` offering
+### 2c. The ladder offering
 
-Offerings → `default` (create it if the project genuinely has none — the audit found no offering
-ID configured, which is why no A/B was possible). Add exactly three packages:
+> **Superseded by the Status section — done.** The ladder was built as a **new** offering
+> `ladder2026` (`ofrngcb645ad4d8`), *not* by editing `default`. `default` is what the live binary
+> serves, so it stays frozen until the new build ships; the flip is then a Current-offering switch,
+> which is also a clean instant rollback. (The audit's "no offering ID configured" was wrong —
+> `default` exists and is Current.) The package table below is what `ladder2026` contains:
 
 | Package identifier | Package type | Product |
 |---|---|---|
@@ -198,7 +270,9 @@ If you attach the annual product to a *custom* package instead of `$rc_annual`, 
 to reading the StoreProduct's subscription period and still classifies it correctly — but use the
 standard identifiers anyway.
 
-Mark `default` as the **Current** offering. That is the flip. No app release required.
+Mark **`ladder2026`** as the Current offering. That is the flip — but it **does** require the new
+app release to be live first; see the Status section. No release is required for later *contents*
+changes, only for this first switch away from the legacy product IDs.
 
 ### 2d. Ordering / safety
 
@@ -313,6 +387,9 @@ before the flip and nobody meets a broken sheet.
 | **T-60 win-back** | local notification 60 days before the wedding date, non-premium users only, 10:00 local | **nothing** — works today |
 
 ### 6a. RevenueCat offering `dismissal`
+
+> **Done** — `ofrngf0b33b8dcb`, both packages attached, `is_current: false`. See the Status
+> section. Safe to leave live now: the old binary never asks for it.
 
 Offerings → `+ New` → identifier **`dismissal`**. Do **not** mark it Current — the app fetches it
 by identifier (`RecoveryOffers.dismissalOfferingID`), `current` stays the main paywall.
