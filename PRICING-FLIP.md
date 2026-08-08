@@ -69,7 +69,42 @@ semantics for a Forever purchase. The `one_time: {is_consumable: false}` field i
 create and update. The undocumented value **`type: "non_consumable"`** is accepted on create and is
 the only way to get it right — the first lifetime product was deleted and re-created for this.
 
+## Status (2026-08-08) — FLIP EXECUTED, `ladder2026` is Current, sandbox-verified
+
+All four steps of "Remaining" below are **done**. The ladder is live for new cohorts.
+
+Ground truth, read back from the APIs (not from the write responses):
+
+| Check | Value |
+|---|---|
+| App Store version | **1.5 / build 11 · READY_FOR_SALE** |
+| `premium.annual` / `.monthly` / `.lifetime` | **APPROVED** (all three) |
+| RC Current offering | **`ladder2026`** (`ofrngcb645ad4d8`) — `default` demoted |
+| `$rc_annual` → | `…premium.annual`, subscription, app `appb0bb42def8` |
+| `$rc_lifetime` → | `…premium.lifetime`, **non_consumable**, app `appb0bb42def8` |
+| `$rc_monthly` → | `…premium.monthly`, subscription, app `appb0bb42def8` |
+| `dismissal` | untouched, still fetched by identifier |
+
+The leftover Test-Store lifetime product that polluted `default` is **out of the live path** — all
+three current packages resolve to the real App Store app.
+
+**Sandbox verification (human, on device):** Annual purchased → lands in RC as a **trial** →
+entitlement grants → the post-purchase **Forever upsell chained correctly** right after the
+purchase. That exercises the whole chain the API cannot prove: paywall renders from `ladder2026`,
+StoreKit returns the products, `premium` unlocks, Phase 4's upsell fires.
+
+**Rollback** (unchanged, one call): `POST …/offerings/ofrngc32ce0bfe7 {"is_current": true}`.
+
+Still open, neither a blocker nor revenue-critical:
+- §1e territory pricing factors beyond US/DE (via `/asc-pricing`).
+- `…premium.6monthsOnetime` sits in `MISSING_METADATA` — a leftover, in no offering, harmless.
+- Watch RC paywall-view → trial-start for the first cohorts; roll back if trial-starts drop.
+
+---
+
 ### Remaining — in this exact order
+
+> **All four completed 2026-08-08 — see the status block above.** Kept for the reasoning.
 
 1. **ASC: attach a review screenshot to each of the 3 SKUs**, then submit **annual + monthly**
    standalone. (Only blocker; API submit failed with `RELATIONSHIP.REQUIRED
