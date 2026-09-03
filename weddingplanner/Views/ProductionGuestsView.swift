@@ -177,10 +177,14 @@ struct ProductionGuestsView: View {
                     Text("Guest List")
                         .font(.system(size: 32, weight: .light, design: .serif))
                         .foregroundColor(Color(hex: "2C2C2C"))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     Text(getMotivationalMessage())
                         .font(.system(size: 14, weight: .thin))
                         .foregroundColor(Color(hex: "9B9B9B"))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Spacer()
@@ -295,7 +299,7 @@ struct ProductionGuestsView: View {
                 HStack(spacing: 8) {
                     // RSVP filters
                     GuestFilterChip(
-                        label: "All RSVPs",
+                        label: String(localized: "All RSVPs"),
                         isSelected: selectedRSVPFilter == nil,
                         color: Color(hex: "B89B91")
                     ) {
@@ -305,7 +309,7 @@ struct ProductionGuestsView: View {
 
                     ForEach(RSVPStatus.allCases, id: \.self) { status in
                         GuestFilterChip(
-                            label: status.rawValue,
+                            label: status.localizedNameString,
                             isSelected: selectedRSVPFilter == status,
                             color: Color(hex: status.color)
                         ) {
@@ -319,7 +323,7 @@ struct ProductionGuestsView: View {
 
                     // Group filters
                     GuestFilterChip(
-                        label: "All Groups",
+                        label: String(localized: "All Groups"),
                         isSelected: selectedGroup == nil,
                         color: Color(hex: "D4B5A9")
                     ) {
@@ -329,7 +333,7 @@ struct ProductionGuestsView: View {
 
                     ForEach(GuestGroup.allCases, id: \.self) { group in
                         GuestFilterChip(
-                            label: group.rawValue,
+                            label: group.localizedNameString,
                             icon: group.icon,
                             isSelected: selectedGroup == group,
                             color: Color(hex: group.color)
@@ -346,24 +350,31 @@ struct ProductionGuestsView: View {
     }
 
     private var bottomStatsBar: some View {
-        HStack(spacing: 20) {
+        // Three pieces of copy on one line — the tightest row in the app once
+        // translated, so every item shrinks instead of pushing its neighbours out.
+        HStack(spacing: 12) {
             Button(action: sendReminders) {
                 HStack(spacing: 6) {
                     Image(systemName: "bell")
                         .font(.system(size: 12))
                     Text("Send Reminders")
                         .font(.system(size: 12, weight: .regular))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
                 }
                 .foregroundColor(Color(hex: "B89B91"))
             }
 
-            Spacer()
+            Spacer(minLength: 4)
 
             Text("\(guestStats.totalInvited) invited • \(guestStats.totalAttending) attending")
                 .font(.system(size: 12, weight: .thin))
                 .foregroundColor(Color(hex: "7A7A7A"))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
 
-            Spacer()
+            Spacer(minLength: 4)
 
             Button(action: {
                 if dataManager.canExportData() {
@@ -378,6 +389,8 @@ struct ProductionGuestsView: View {
                         .font(.system(size: 12))
                     Text("Export")
                         .font(.system(size: 12, weight: .regular))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
                 }
                 .foregroundColor(Color(hex: "B89B91"))
             }
@@ -542,10 +555,18 @@ struct QuickStat: View {
             Text(value)
                 .font(.system(size: 20, weight: .medium, design: .rounded))
                 .foregroundColor(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
 
+            // Four stats share one row — translated labels get a second line
+            // and can scale down before they clip.
             Text(label)
                 .font(.system(size: 10, weight: .thin))
                 .foregroundColor(Color(hex: "9B9B9B"))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)
     }
@@ -568,6 +589,8 @@ struct RSVPBadge: View {
 }
 
 struct GuestFilterChip: View {
+    /// Already-localized label — callers pass `String(localized:)` or an
+    /// enum's `localizedNameString`, never a raw English literal.
     let label: String
     var icon: String? = nil
     let isSelected: Bool
@@ -581,8 +604,10 @@ struct GuestFilterChip: View {
                     Image(systemName: icon)
                         .font(.system(size: 11, weight: .light))
                 }
-                Text(LocalizedStringKey(label))
+                Text(label)
                     .font(.system(size: 12, weight: .regular))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundColor(isSelected ? .white : Color(hex: "7A7A7A"))
             .padding(.horizontal, 12)

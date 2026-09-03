@@ -92,7 +92,7 @@ extension DayScheduleEvent {
         }
 
         events.append(DayScheduleEvent(
-            title: "Hair & Makeup",
+            title: String(localized: "Hair & Makeup"),
             startTime: timeOn(hour: 8, minute: 0),
             duration: 120,
             category: .preparation,
@@ -101,7 +101,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Getting Ready Photos",
+            title: String(localized: "Getting Ready Photos"),
             startTime: timeOn(hour: 10, minute: 0),
             duration: 60,
             category: .photography,
@@ -110,7 +110,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "First Look",
+            title: String(localized: "First Look"),
             startTime: timeOn(hour: 11, minute: 30),
             duration: 30,
             category: .photography,
@@ -119,7 +119,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Travel to Venue",
+            title: String(localized: "Travel to Venue"),
             startTime: timeOn(hour: 12, minute: 30),
             duration: 30,
             category: .transportation,
@@ -128,7 +128,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Guest Arrival",
+            title: String(localized: "Guest Arrival"),
             startTime: timeOn(hour: 13, minute: 0),
             duration: 30,
             category: .ceremony,
@@ -137,7 +137,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Ceremony",
+            title: String(localized: "Ceremony"),
             startTime: timeOn(hour: 13, minute: 30),
             duration: 30,
             category: .ceremony,
@@ -146,7 +146,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Cocktail Hour",
+            title: String(localized: "Cocktail Hour"),
             startTime: timeOn(hour: 14, minute: 0),
             duration: 90,
             category: .food,
@@ -155,7 +155,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Reception Entrance",
+            title: String(localized: "Reception Entrance"),
             startTime: timeOn(hour: 15, minute: 30),
             duration: 15,
             category: .reception,
@@ -164,7 +164,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Dinner Service",
+            title: String(localized: "Dinner Service"),
             startTime: timeOn(hour: 16, minute: 0),
             duration: 90,
             category: .food,
@@ -173,7 +173,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Speeches & Toasts",
+            title: String(localized: "Speeches & Toasts"),
             startTime: timeOn(hour: 17, minute: 30),
             duration: 30,
             category: .reception,
@@ -182,7 +182,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "First Dance",
+            title: String(localized: "First Dance"),
             startTime: timeOn(hour: 18, minute: 0),
             duration: 10,
             category: .entertainment,
@@ -191,7 +191,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Party & Dancing",
+            title: String(localized: "Party & Dancing"),
             startTime: timeOn(hour: 18, minute: 15),
             duration: 180,
             category: .entertainment,
@@ -200,7 +200,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Cake Cutting",
+            title: String(localized: "Cake Cutting"),
             startTime: timeOn(hour: 21, minute: 0),
             duration: 15,
             category: .reception,
@@ -209,7 +209,7 @@ extension DayScheduleEvent {
         sortOrder += 1
 
         events.append(DayScheduleEvent(
-            title: "Grand Exit",
+            title: String(localized: "Grand Exit"),
             startTime: timeOn(hour: 22, minute: 0),
             duration: 15,
             category: .ceremony,

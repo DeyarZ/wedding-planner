@@ -21,6 +21,7 @@ struct PremiumUpsellSheet: View {
                 .frame(width: 36, height: 4)
                 .padding(.top, 10)
 
+            ScrollView {
             VStack(spacing: 18) {
                 ZStack {
                     Circle()
@@ -57,6 +58,9 @@ struct PremiumUpsellSheet: View {
                         Text("Unlock everything for your big day")
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.white)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(
@@ -80,11 +84,12 @@ struct PremiumUpsellSheet: View {
             .padding(.horizontal, 28)
             .padding(.top, 26)
             .padding(.bottom, 20)
-
-            Spacer(minLength: 0)
+            .frame(maxWidth: .infinity)
+            }
+            .scrollBounceBehavior(.basedOnSize)
         }
         .background(Color(hex: "FDFBF7").ignoresSafeArea())
-        .presentationDetents([.height(400)])
+        .presentationDetents([.height(400), .large])
         .presentationDragIndicator(.hidden)
     }
 }
@@ -154,6 +159,8 @@ struct PremiumLockBadge: View {
                 Text("Premium")
                     .font(.system(size: 9, weight: .semibold))
                     .tracking(0.5)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
         }
         .foregroundColor(Color(hex: "B89B91"))
@@ -179,6 +186,8 @@ struct FreeLimitPill: View {
 
             Text("\(used) of \(limit) free")
                 .font(.system(size: 10, weight: .regular))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .foregroundColor(isFull ? Color(hex: "B89B91") : Color(hex: "9B9B9B"))
         .padding(.horizontal, 8)

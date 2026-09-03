@@ -716,7 +716,7 @@ struct ProductionGuestExportView: View {
     }
 
     private func exportGuestList() {
-        var text = "Wedding Guest List\n\n"
+        var text = String(localized: "Wedding Guest List") + "\n\n"
 
         let grouped = Dictionary(grouping: guests, by: { $0.group })
 
@@ -739,7 +739,7 @@ struct ProductionGuestExportView: View {
     }
 
     private func exportMealChoices() {
-        var text = "Meal Choices Summary\n\n"
+        var text = String(localized: "Meal Choices Summary") + "\n\n"
 
         let confirmedGuests = guests.filter { $0.rsvpStatus == .confirmed }
         var mealCounts = [MealChoice: Int]()
@@ -762,14 +762,14 @@ struct ProductionGuestExportView: View {
             text += "\(meal.rawValue): \(count)\n"
         }
 
-        text += "\n\nDetailed List:\n\n"
+        text += "\n\n" + String(localized: "Detailed List:") + "\n\n"
 
         for guest in confirmedGuests {
-            text += "\(guest.fullName): \(guest.mealChoice?.rawValue ?? "Not selected")\n"
+            text += "\(guest.fullName): \(guest.mealChoice?.rawValue ?? String(localized: "Not selected"))\n"
 
             if let plusOnes = guest.plusOnes {
                 for plusOne in plusOnes where plusOne.isAttending {
-                    text += "  - \(plusOne.name): \(plusOne.mealChoice?.rawValue ?? "Not selected")\n"
+                    text += "  - \(plusOne.name): \(plusOne.mealChoice?.rawValue ?? String(localized: "Not selected"))\n"
                 }
             }
         }
@@ -779,7 +779,7 @@ struct ProductionGuestExportView: View {
     }
 
     private func exportSeatingPlan() {
-        var text = "Seating Plan Export\n\n"
+        var text = String(localized: "Seating Plan Export") + "\n\n"
 
         let guestsWithTables = guests.filter { $0.tableNumber != nil }
             .sorted { ($0.tableNumber ?? 0) < ($1.tableNumber ?? 0) }
@@ -788,7 +788,7 @@ struct ProductionGuestExportView: View {
 
         for guest in guestsWithTables {
             if let table = guest.tableNumber, table != currentTable {
-                text += "\nTable \(table)\n"
+                text += "\n" + String(format: String(localized: "Table %lld"), table) + "\n"
                 text += String(repeating: "-", count: 10) + "\n"
                 currentTable = table
             }
@@ -800,7 +800,7 @@ struct ProductionGuestExportView: View {
             text += "\n"
         }
 
-        text += "\n\nUnseated Guests:\n"
+        text += "\n\n" + String(localized: "Unseated Guests:") + "\n"
         for guest in guests.filter({ $0.tableNumber == nil && $0.rsvpStatus == .confirmed }) {
             text += "• \(guest.fullName)\n"
         }

@@ -48,6 +48,9 @@ extension VendorStatus: LocalizedRawRepresentable {}
 extension PaymentStatus: LocalizedRawRepresentable {}
 extension DocumentType: LocalizedRawRepresentable {}
 
+// Photos
+extension PhotoCategory: LocalizedRawRepresentable {}
+
 // Schedule & tasks
 extension EventCategory: LocalizedRawRepresentable {}
 extension TaskCategory: LocalizedRawRepresentable {}

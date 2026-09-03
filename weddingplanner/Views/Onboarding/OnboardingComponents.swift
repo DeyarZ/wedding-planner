@@ -76,6 +76,39 @@ extension View {
     }
 }
 
+// MARK: - Long-translation safety
+
+/// Keeps a fixed-height screen usable when a translation runs long.
+///
+/// The screens in this flow are laid out with hard spacers and no scroll view,
+/// which is right in English and breaks in German, Hungarian or Polish: two extra
+/// lines in a headline plus three cards that each gain a line push the primary
+/// button past the bottom of an iPhone SE, where it cannot be tapped. Wrapping the
+/// stack in a scroll view that is never shorter than the screen leaves the English
+/// layout untouched — the flexible spacers get exactly the same slack — and only
+/// starts scrolling once the content genuinely does not fit.
+struct OnboardingScreenScroll<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        GeometryReader { geo in
+            ScrollView(showsIndicators: false) {
+                content
+                    .frame(minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+    }
+}
+
+extension View {
+    /// Wraps a whole screen body so a long translation scrolls instead of
+    /// pushing the call to action off-screen. See `OnboardingScreenScroll`.
+    func onboardingScreenScroll() -> some View {
+        OnboardingScreenScroll { self }
+    }
+}
+
 // MARK: - Header
 
 struct OnboardingIconBadge: View {
@@ -111,18 +144,23 @@ struct OnboardingTitle: View {
                 Text(kicker)
                     .font(.system(size: 21, weight: .light, design: .serif))
                     .foregroundColor(OnboardingStyle.ink)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Text(title)
                 .font(.system(size: titleSize, weight: .bold, design: .serif))
                 .foregroundColor(OnboardingStyle.ink)
                 .lineSpacing(2)
+                // A translated headline routinely needs a third line; let it
+                // take the height instead of being squeezed into two.
+                .fixedSize(horizontal: false, vertical: true)
 
             if let subtitle {
                 Text(subtitle)
                     .font(.system(size: 15, weight: .regular, design: .serif))
                     .foregroundColor(OnboardingStyle.inkSoft)
                     .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)
             }
         }
@@ -147,6 +185,12 @@ struct OnboardingPrimaryButton: View {
             Text(title)
                 .font(.system(size: 18, weight: .regular, design: .serif))
                 .foregroundColor(enabled ? OnboardingStyle.ink : OnboardingStyle.inkFaint)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                // Keeps a long translated label off the capsule's rounded ends.
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, minHeight: 56)
                 .background(
                     Capsule()
@@ -172,6 +216,9 @@ struct OnboardingTextButton: View {
                 .font(.system(size: 15, weight: .regular, design: .serif))
                 .foregroundColor(OnboardingStyle.inkFaint)
                 .underline()
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 32)
         }
     }
 }
@@ -205,16 +252,20 @@ struct OnboardingOptionRow: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
+                    // Answer labels are the copy most likely to double in length;
+                    // fixedSize makes the row grow rather than truncate.
                     Text(title)
                         .font(.system(size: 17, weight: .medium, design: .serif))
                         .foregroundColor(isSelected ? .white : OnboardingStyle.ink)
                         .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     if let subtitle {
                         Text(subtitle)
                             .font(.system(size: 13, weight: .regular, design: .serif))
                             .foregroundColor(isSelected ? Color.white.opacity(0.9) : OnboardingStyle.inkSoft)
                             .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
@@ -416,6 +467,7 @@ struct OnboardingTimelineRow: View {
                 Text(title)
                     .font(.system(size: 16, weight: .bold, design: .serif))
                     .foregroundColor(OnboardingStyle.ink)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(detail)
                     .font(.system(size: 13, weight: .regular, design: .serif))
                     .foregroundColor(OnboardingStyle.inkSoft)

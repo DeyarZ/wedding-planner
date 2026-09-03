@@ -10,6 +10,16 @@ struct FeedbackView: View {
         case other = "Other"
 
         var id: String { rawValue }
+
+        /// Screen label. The raw value deliberately stays English — it is the
+        /// support-email subject tag, not display copy.
+        var displayName: String {
+            switch self {
+            case .feature: return String(localized: "Feature Request")
+            case .bug: return String(localized: "Bug")
+            case .other: return String(localized: "Other")
+            }
+        }
     }
 
     @State private var category: FeedbackCategory = .feature
@@ -31,7 +41,7 @@ struct FeedbackView: View {
                 Section {
                     Picker("Category", selection: $category) {
                         ForEach(FeedbackCategory.allCases) { category in
-                            Text(LocalizedStringKey(category.rawValue)).tag(category)
+                            Text(category.displayName).tag(category)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -46,6 +56,7 @@ struct FeedbackView: View {
                     Text("Your message")
                 } footer: {
                     Text("Tell us what you'd love to see, or what went wrong. We read every message.")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .navigationTitle("Send Feedback")

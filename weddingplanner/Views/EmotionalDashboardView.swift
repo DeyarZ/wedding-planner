@@ -15,16 +15,18 @@ struct EmotionalDashboardView: View {
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
     private let selectionFeedback = UISelectionFeedbackGenerator()
 
-    // Beautiful affirmations that rotate
+    // Beautiful affirmations that rotate.
+    // Localized at their definition site so the catalog's static extractor can
+    // see them — the array itself already holds display-ready strings.
     private let affirmations = [
-        "One step closer to your perfect day",
-        "Love is in the details – and you're nailing them",
-        "Your love story is unfolding beautifully",
-        "Every decision brings you closer to forever",
-        "Trust the journey, enjoy the process",
-        "You're creating something unforgettable",
-        "Breathe. Everything is falling into place",
-        "Your wedding is becoming more beautiful each day"
+        String(localized: "One step closer to your perfect day"),
+        String(localized: "Love is in the details – and you're nailing them"),
+        String(localized: "Your love story is unfolding beautifully"),
+        String(localized: "Every decision brings you closer to forever"),
+        String(localized: "Trust the journey, enjoy the process"),
+        String(localized: "You're creating something unforgettable"),
+        String(localized: "Breathe. Everything is falling into place"),
+        String(localized: "Your wedding is becoming more beautiful each day")
     ]
 
     // Timer for affirmation rotation
@@ -163,7 +165,7 @@ struct EmotionalDashboardView: View {
             .animation(.easeOut(duration: 0.8).delay(0.2), value: animateIn)
 
             // Rotating affirmation
-            Text(LocalizedStringKey(affirmations[currentAffirmation]))
+            Text(affirmations[currentAffirmation])
                 .font(.system(size: 16, weight: .light, design: .serif))
                 .foregroundColor(Color(hex: "9B9B9B"))
                 .italic()
@@ -343,7 +345,7 @@ struct EmotionalDashboardView: View {
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(Color(hex: "9B9B9B"))
 
-                Text(LocalizedStringKey(getWeeklyWisdom()))
+                Text(getWeeklyWisdom())
                     .font(.system(size: 18, weight: .light, design: .serif))
                     .foregroundColor(Color(hex: "7A7A7A"))
                     .multilineTextAlignment(.center)
@@ -446,11 +448,11 @@ struct EmotionalDashboardView: View {
 
     private func getWeeklyWisdom() -> String {
         let wisdoms = [
-            "Your wedding is not a performance,\nit's a celebration of love",
-            "Perfect is not the goal,\njoy is",
-            "Every detail doesn't need to be perfect,\njust meaningful to you",
-            "This day is about your love story,\nnot anyone else's expectations",
-            "Trust your vendors,\nthey want your day to be beautiful too"
+            String(localized: "Your wedding is not a performance,\nit's a celebration of love"),
+            String(localized: "Perfect is not the goal,\njoy is"),
+            String(localized: "Every detail doesn't need to be perfect,\njust meaningful to you"),
+            String(localized: "This day is about your love story,\nnot anyone else's expectations"),
+            String(localized: "Trust your vendors,\nthey want your day to be beautiful too")
         ]
         let weekOfYear = Calendar.current.component(.weekOfYear, from: Date())
         return wisdoms[weekOfYear % wisdoms.count]
@@ -589,16 +591,26 @@ struct CoreAreaCard: View {
                     Text(value)
                         .font(.system(size: 20, weight: .regular, design: .rounded))
                         .foregroundColor(Color(hex: "2C2C2C"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
+                    // Translations of these subtitles run 30-50% longer than the
+                    // English source, so the card gives them a second line and
+                    // lets the type shrink before anything gets clipped.
                     Text(subtitle)
                         .font(.system(size: 12, weight: .thin))
                         .foregroundColor(Color(hex: "9B9B9B"))
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.75)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Text(title)
                     .font(.system(size: 11, weight: .regular))
                     .foregroundColor(Color(hex: "7A7A7A"))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)

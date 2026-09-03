@@ -159,6 +159,7 @@ struct OnboardingSocialProofScreen: View {
 
                 Spacer().frame(height: 50)
             }
+            .onboardingScreenScroll()
         }
         .onAppear {
             shown = true

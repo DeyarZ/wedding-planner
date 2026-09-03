@@ -253,7 +253,9 @@ struct ProductionAddPaymentView: View {
 
                     Picker("Payment Method", selection: $paymentMethod) {
                         ForEach(paymentMethods, id: \.self) { method in
-                            Text(method).tag(method)
+                            // `method` is persisted verbatim on Payment.paymentMethod,
+                            // so only the displayed label is resolved at runtime.
+                            Text(LocalizedStringKey(method)).tag(method)
                         }
                     }
                 }
@@ -499,7 +501,7 @@ struct ExportOptionsView: View {
                 .foregroundColor: UIColor.black
             ]
 
-            "Wedding Vendor List".draw(at: CGPoint(x: 50, y: 50), withAttributes: attributes)
+            String(localized: "Wedding Vendor List").draw(at: CGPoint(x: 50, y: 50), withAttributes: attributes)
 
             var yPosition: CGFloat = 100
 
@@ -518,19 +520,19 @@ struct ExportOptionsView: View {
     }
 
     private func shareContacts() {
-        var text = "Wedding Vendor Contacts\n\n"
+        var text = String(localized: "Wedding Vendor Contacts") + "\n\n"
 
         for vendor in vendors {
             text += "\(vendor.name)\n"
-            text += "Category: \(vendor.category.rawValue)\n"
+            text += String(format: String(localized: "Category: %@"), vendor.category.rawValue) + "\n"
             if let contact = vendor.contactName {
-                text += "Contact: \(contact)\n"
+                text += String(format: String(localized: "Contact: %@"), contact) + "\n"
             }
             if let phone = vendor.phone {
-                text += "Phone: \(phone)\n"
+                text += String(format: String(localized: "Phone: %@"), phone) + "\n"
             }
             if let email = vendor.email {
-                text += "Email: \(email)\n"
+                text += String(format: String(localized: "Email: %@"), email) + "\n"
             }
             text += "\n"
         }

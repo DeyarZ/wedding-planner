@@ -26,16 +26,18 @@ struct ProductionTimelineView: View {
     private let selectionFeedback = UISelectionFeedbackGenerator()
     private let notificationFeedback = UINotificationFeedbackGenerator()
 
-    // Micro-copy messages that rotate
+    // Micro-copy messages that rotate.
+    // Localized where they are defined so the catalog's static extractor sees
+    // them; the array holds display-ready strings.
     private let microCopyMessages = [
-        "Every great love deserves a great plan",
-        "You're further ahead than you think",
-        "One task at a time, love",
-        "Your perfect day is coming together",
-        "Trust the journey, enjoy the process",
-        "Small steps, big dreams",
-        "This is your moment to shine",
-        "Creating memories, one detail at a time"
+        String(localized: "Every great love deserves a great plan"),
+        String(localized: "You're further ahead than you think"),
+        String(localized: "One task at a time, love"),
+        String(localized: "Your perfect day is coming together"),
+        String(localized: "Trust the journey, enjoy the process"),
+        String(localized: "Small steps, big dreams"),
+        String(localized: "This is your moment to shine"),
+        String(localized: "Creating memories, one detail at a time")
     ]
 
     // Timer for micro-copy rotation
@@ -55,6 +57,18 @@ struct ProductionTimelineView: View {
             case .thisWeek: return "calendar"
             case .overdue: return "exclamationmark.circle"
             case .completed: return "checkmark.circle"
+            }
+        }
+
+        /// Display label. `rawValue` stays English — it is the filter's identity,
+        /// not its copy — so the visible chip title comes from here.
+        var localizedName: String {
+            switch self {
+            case .all: return String(localized: "All")
+            case .today: return String(localized: "Today")
+            case .thisWeek: return String(localized: "This Week")
+            case .overdue: return String(localized: "Overdue")
+            case .completed: return String(localized: "Completed")
             }
         }
     }
@@ -228,7 +242,7 @@ struct ProductionTimelineView: View {
             }
 
             // Rotating micro-copy
-            Text(LocalizedStringKey(microCopyMessages[currentMicroCopy]))
+            Text(microCopyMessages[currentMicroCopy])
                 .font(.system(size: 14, weight: .light, design: .serif))
                 .foregroundStyle(
                     LinearGradient(
@@ -304,12 +318,18 @@ struct ProductionTimelineView: View {
                 Text("Planning Journey")
                     .font(.system(size: 18, weight: .light, design: .serif))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer()
 
                 Text("\(completedPhasesCount)/\(weddingPhases.count) phases")
                     .font(.system(size: 12, weight: .thin))
                     .foregroundColor(Color(hex: "9B9B9B"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .layoutPriority(1)
             }
             .padding(.horizontal, 24)
 
@@ -339,6 +359,9 @@ struct ProductionTimelineView: View {
                 Text("Today's Focus")
                     .font(.system(size: 18, weight: .light, design: .serif))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer()
 
@@ -350,6 +373,9 @@ struct ProductionTimelineView: View {
                         Text("\(overdueTasks) need attention")
                             .font(.system(size: 11, weight: .regular))
                             .foregroundColor(Color(hex: "C89B8F"))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.75)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
@@ -703,8 +729,10 @@ struct ProductionFilterChip: View {
                 Image(systemName: filter.icon)
                     .font(.system(size: 12, weight: .regular))
 
-                Text(LocalizedStringKey(filter.rawValue))
+                Text(filter.localizedName)
                     .font(.system(size: 12, weight: .regular))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
                 if count > 0 {
                     Text("(\(count))")
@@ -774,8 +802,15 @@ struct ProductionTaskCard: View {
                     VStack {
                         Image(systemName: "pencil")
                             .font(.system(size: 20, weight: .light))
+                        // The swipe gutter is pinned to 80pt by the drag
+                        // thresholds below, so longer translations wrap and
+                        // shrink inside it instead of being clipped.
                         Text("Edit")
                             .font(.system(size: 10, weight: .regular))
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
+                            .padding(.horizontal, 4)
                     }
                     .foregroundColor(.white)
                     .frame(width: 80)
@@ -797,6 +832,10 @@ struct ProductionTaskCard: View {
                             .font(.system(size: 20, weight: .light))
                         Text("Reschedule")
                             .font(.system(size: 10, weight: .regular))
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
+                            .padding(.horizontal, 4)
                     }
                     .foregroundColor(.white)
                     .frame(width: 80)

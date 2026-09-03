@@ -113,6 +113,8 @@ struct ProductionWeddingDayScheduleView: View {
                                     .font(.system(size: 20, weight: .light))
                                 Text("Add Event")
                                     .font(.system(size: 14, weight: .regular, design: .serif))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
                             .foregroundColor(Color(hex: "B89B91"))
                             .padding(.vertical, 12)
@@ -216,23 +218,26 @@ struct ProductionWeddingDayScheduleView: View {
             return calendar.date(from: components) ?? Date()
         }
 
-        let defaultEvents = [
-            (title: "Hair & Makeup Begins", hour: 8, minute: 0, duration: 120, category: EventCategory.preparation, location: "Bridal Suite", notes: "Bride and bridesmaids"),
-            (title: "Photographer Arrives", hour: 9, minute: 30, duration: 30, category: EventCategory.photography, location: "Bridal Suite", notes: "Getting ready photos"),
-            (title: "Getting Dressed", hour: 10, minute: 0, duration: 60, category: EventCategory.preparation, location: "Bridal Suite", notes: "Final touches"),
-            (title: "First Look & Couple Photos", hour: 11, minute: 30, duration: 45, category: EventCategory.photography, location: "Garden", notes: "Private moment"),
-            (title: "Wedding Party Photos", hour: 12, minute: 15, duration: 45, category: EventCategory.photography, location: "Various Locations", notes: nil),
-            (title: "Guest Arrival", hour: 13, minute: 0, duration: 30, category: EventCategory.ceremony, location: "Ceremony Space", notes: "Welcome drinks available"),
-            (title: "Ceremony Begins", hour: 13, minute: 30, duration: 30, category: EventCategory.ceremony, location: "Main Hall", notes: nil),
-            (title: "Cocktail Hour", hour: 14, minute: 0, duration: 90, category: EventCategory.food, location: "Terrace", notes: "Canapés and drinks"),
-            (title: "Reception Entrance", hour: 15, minute: 30, duration: 15, category: EventCategory.reception, location: "Ballroom", notes: "Grand entrance"),
-            (title: "Dinner Service", hour: 16, minute: 0, duration: 90, category: EventCategory.food, location: "Ballroom", notes: "3-course meal"),
-            (title: "Speeches & Toasts", hour: 17, minute: 30, duration: 30, category: EventCategory.reception, location: "Ballroom", notes: nil),
-            (title: "First Dance", hour: 18, minute: 0, duration: 10, category: EventCategory.entertainment, location: "Dance Floor", notes: "Special song"),
-            (title: "Parent Dances", hour: 18, minute: 10, duration: 10, category: EventCategory.entertainment, location: "Dance Floor", notes: nil),
-            (title: "Party & Dancing", hour: 18, minute: 30, duration: 150, category: EventCategory.entertainment, location: "Dance Floor", notes: "DJ/Band plays"),
-            (title: "Cake Cutting", hour: 21, minute: 0, duration: 15, category: EventCategory.reception, location: "Ballroom", notes: nil),
-            (title: "Last Dance & Send-off", hour: 22, minute: 0, duration: 15, category: EventCategory.ceremony, location: "Main Entrance", notes: "Sparkler exit")
+        // Seeded copy the user reads (and can then edit), so every title,
+        // location and note is resolved through the string catalog here — the
+        // values are persisted onto the event, not looked up again at render.
+        let defaultEvents: [(title: String, hour: Int, minute: Int, duration: Int, category: EventCategory, location: String, notes: String?)] = [
+            (title: String(localized: "Hair & Makeup Begins"), hour: 8, minute: 0, duration: 120, category: EventCategory.preparation, location: String(localized: "Bridal Suite"), notes: String(localized: "Bride and bridesmaids")),
+            (title: String(localized: "Photographer Arrives"), hour: 9, minute: 30, duration: 30, category: EventCategory.photography, location: String(localized: "Bridal Suite"), notes: String(localized: "Getting ready photos")),
+            (title: String(localized: "Getting Dressed"), hour: 10, minute: 0, duration: 60, category: EventCategory.preparation, location: String(localized: "Bridal Suite"), notes: String(localized: "Final touches")),
+            (title: String(localized: "First Look & Couple Photos"), hour: 11, minute: 30, duration: 45, category: EventCategory.photography, location: String(localized: "Garden"), notes: String(localized: "Private moment")),
+            (title: String(localized: "Wedding Party Photos"), hour: 12, minute: 15, duration: 45, category: EventCategory.photography, location: String(localized: "Various Locations"), notes: nil),
+            (title: String(localized: "Guest Arrival"), hour: 13, minute: 0, duration: 30, category: EventCategory.ceremony, location: String(localized: "Ceremony Space"), notes: String(localized: "Welcome drinks available")),
+            (title: String(localized: "Ceremony Begins"), hour: 13, minute: 30, duration: 30, category: EventCategory.ceremony, location: String(localized: "Main Hall"), notes: nil),
+            (title: String(localized: "Cocktail Hour"), hour: 14, minute: 0, duration: 90, category: EventCategory.food, location: String(localized: "Terrace"), notes: String(localized: "Canapés and drinks")),
+            (title: String(localized: "Reception Entrance"), hour: 15, minute: 30, duration: 15, category: EventCategory.reception, location: String(localized: "Ballroom"), notes: String(localized: "Grand entrance")),
+            (title: String(localized: "Dinner Service"), hour: 16, minute: 0, duration: 90, category: EventCategory.food, location: String(localized: "Ballroom"), notes: String(localized: "3-course meal")),
+            (title: String(localized: "Speeches & Toasts"), hour: 17, minute: 30, duration: 30, category: EventCategory.reception, location: String(localized: "Ballroom"), notes: nil),
+            (title: String(localized: "First Dance"), hour: 18, minute: 0, duration: 10, category: EventCategory.entertainment, location: String(localized: "Dance Floor"), notes: String(localized: "Special song")),
+            (title: String(localized: "Parent Dances"), hour: 18, minute: 10, duration: 10, category: EventCategory.entertainment, location: String(localized: "Dance Floor"), notes: nil),
+            (title: String(localized: "Party & Dancing"), hour: 18, minute: 30, duration: 150, category: EventCategory.entertainment, location: String(localized: "Dance Floor"), notes: String(localized: "DJ/Band plays")),
+            (title: String(localized: "Cake Cutting"), hour: 21, minute: 0, duration: 15, category: EventCategory.reception, location: String(localized: "Ballroom"), notes: nil),
+            (title: String(localized: "Last Dance & Send-off"), hour: 22, minute: 0, duration: 15, category: EventCategory.ceremony, location: String(localized: "Main Entrance"), notes: String(localized: "Sparkler exit"))
         ]
 
         for eventData in defaultEvents {
@@ -344,7 +349,7 @@ struct ProductionWeddingDayScheduleView: View {
                 .font: UIFont.systemFont(ofSize: 24, weight: .light),
                 .foregroundColor: UIColor(hex: "2C2C2C")
             ]
-            let title = "Wedding Day Schedule"
+            let title = String(localized: "Wedding Day Schedule")
             title.draw(at: CGPoint(x: 50, y: 50), withAttributes: titleAttributes)
 
             // Couple names and date
@@ -396,7 +401,8 @@ struct ProductionWeddingDayScheduleView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
 
-        var scheduleText = "Wedding Day Schedule\n"
+        // Shared out of the app, so it reads in the couple's language.
+        var scheduleText = String(localized: "Wedding Day Schedule") + "\n"
         scheduleText += "\(dataManager.wedding?.coupleNames ?? "")\n"
         scheduleText += "\(formatter.string(from: dataManager.wedding?.date ?? Date()))\n\n"
 
@@ -407,7 +413,7 @@ struct ProductionWeddingDayScheduleView: View {
                 scheduleText += "📍 \(location)\n"
             }
             if let notes = event.notes {
-                scheduleText += "Notes: \(notes)\n"
+                scheduleText += String(localized: "Notes: \(notes)") + "\n"
             }
             scheduleText += "\n"
         }
@@ -419,9 +425,10 @@ struct ProductionWeddingDayScheduleView: View {
     private func shareWithVendors() {
         guard canExport else { activeGate = .pdfExport; return }
 
-        // Create a formatted message for vendors
-        var message = "Hi! Here's our wedding day schedule:\n\n"
-        message += "Date: \(formatDate(dataManager.wedding?.date ?? Date()))\n\n"
+        // Create a formatted message for vendors. It leaves the app, so it is
+        // written in the couple's language, not in English.
+        var message = String(localized: "Hi! Here's our wedding day schedule:") + "\n\n"
+        message += String(localized: "Date: \(formatDate(dataManager.wedding?.date ?? Date()))") + "\n\n"
 
         for event in scheduleEvents {
             message += "⏰ \(event.timeRange): \(event.title)"
@@ -431,7 +438,7 @@ struct ProductionWeddingDayScheduleView: View {
             message += "\n"
         }
 
-        message += "\nPlease let us know if you have any questions!"
+        message += "\n" + String(localized: "Please let us know if you have any questions!")
 
         pdfData = message.data(using: .utf8)
         showingShareSheet = true
@@ -468,36 +475,55 @@ struct TimelineSummary: View {
         let duration = last.endTime.timeIntervalSince(first.startTime)
         let hours = Int(duration) / 3600
         let minutes = (Int(duration) % 3600) / 60
-        return "\(hours)h \(minutes)m"
+        // The "h"/"m" unit abbreviations are copy, not number formatting.
+        return String(localized: "\(hours)h \(minutes)m")
     }
 
     var body: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: 16) {
             VStack(spacing: 4) {
                 Text(startTime)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Text("Start")
                     .font(.system(size: 10, weight: .thin))
                     .foregroundColor(Color(hex: "9B9B9B"))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             VStack(spacing: 4) {
                 Text(totalDuration)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(Color(hex: "B89B91"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Text("Duration")
                     .font(.system(size: 10, weight: .thin))
                     .foregroundColor(Color(hex: "9B9B9B"))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             VStack(spacing: 4) {
                 Text(endTime)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Text("End")
                     .font(.system(size: 10, weight: .thin))
                     .foregroundColor(Color(hex: "9B9B9B"))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal, 24)
@@ -538,18 +564,26 @@ struct DraggableEventRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 20) {
             // Time column
+            // The gutter stays a fixed 60pt so the timeline dots line up down
+            // the column; the times scale instead of the column growing.
             VStack(alignment: .trailing, spacing: 4) {
                 Text(timeString)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 Text(endTimeString)
                     .font(.system(size: 12, weight: .thin, design: .rounded))
                     .foregroundColor(Color(hex: "9B9B9B"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 Text("\(event.duration)m")
                     .font(.system(size: 10, weight: .thin))
                     .foregroundColor(Color(hex: "C4C4C4"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
             .frame(width: 60)
 
@@ -711,6 +745,9 @@ struct EmptyScheduleState: View {
                 Text("Load Suggested Schedule")
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
                     .background(
