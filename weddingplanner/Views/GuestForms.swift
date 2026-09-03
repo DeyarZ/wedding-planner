@@ -721,15 +721,18 @@ struct ProductionGuestExportView: View {
         let grouped = Dictionary(grouping: guests, by: { $0.group })
 
         for (group, groupGuests) in grouped.sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
-            text += "\(group.rawValue)\n"
-            text += String(repeating: "-", count: group.rawValue.count) + "\n"
+            // rawValue stays the sort key (stable, storage-backed); the SHOWN heading and
+            // its underline use the localized label.
+            let groupName = group.localizedNameString
+            text += "\(groupName)\n"
+            text += String(repeating: "-", count: groupName.count) + "\n"
 
             for guest in groupGuests.sorted(by: { $0.lastName < $1.lastName }) {
                 text += "• \(guest.fullName)"
                 if guest.totalAttending > 1 {
                     text += " (+\(guest.totalAttending - 1))"
                 }
-                text += " - \(guest.rsvpStatus.rawValue)\n"
+                text += " - \(guest.rsvpStatus.localizedNameString)\n"
             }
             text += "\n"
         }
@@ -759,17 +762,17 @@ struct ProductionGuestExportView: View {
         }
 
         for (meal, count) in mealCounts.sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
-            text += "\(meal.rawValue): \(count)\n"
+            text += "\(meal.localizedNameString): \(count)\n"
         }
 
         text += "\n\n" + String(localized: "Detailed List:") + "\n\n"
 
         for guest in confirmedGuests {
-            text += "\(guest.fullName): \(guest.mealChoice?.rawValue ?? String(localized: "Not selected"))\n"
+            text += "\(guest.fullName): \(guest.mealChoice?.localizedNameString ?? String(localized: "Not selected"))\n"
 
             if let plusOnes = guest.plusOnes {
                 for plusOne in plusOnes where plusOne.isAttending {
-                    text += "  - \(plusOne.name): \(plusOne.mealChoice?.rawValue ?? String(localized: "Not selected"))\n"
+                    text += "  - \(plusOne.name): \(plusOne.mealChoice?.localizedNameString ?? String(localized: "Not selected"))\n"
                 }
             }
         }
@@ -795,7 +798,7 @@ struct ProductionGuestExportView: View {
 
             text += "• \(guest.fullName)"
             if let meal = guest.mealChoice {
-                text += " (\(meal.rawValue))"
+                text += " (\(meal.localizedNameString))"
             }
             text += "\n"
         }

@@ -8773,10 +8773,190 @@
     },
     "%lldh %lldm" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld س %lld د"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld t %lld min"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Std. %lld Min."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lldh %2$lldm"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld t %lld min"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ó %lld p"
+          }
+        },
+        "is" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld klst. %lld mín."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld時間%lld分"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld시간 %lld분"
+          }
+        },
+        "lv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld st. %lld min"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld t %lld min"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld u %lld min"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld godz. %lld min"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ч %lld мин"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld tim %lld min"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ชม. %lld นาที"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sa %lld dk"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld год %lld хв"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld giờ %lld phút"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld小时%lld分钟"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld小時%lld分鐘"
           }
         }
       }
@@ -33762,7 +33942,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Explorează locații care se potrivesc stilului și numărului vostru de invitați"
+            "value" : "Explorați locații care se potrivesc stilului și numărului vostru de invitați"
           }
         },
         "ru" : {
@@ -42266,7 +42446,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resepsiyon tarzını seçin"
+            "value" : "Düğün yemeği tarzını seçin"
           }
         },
         "uk" : {
@@ -68274,7 +68454,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Exportiere euren Hochzeitstag"
+            "value" : "Exportiert euren Hochzeitstag"
           }
         },
         "es" : {
@@ -77659,7 +77839,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erhalte sanfte Erinnerungen an Aufgaben, Termine mit Dienstleistern und besondere Meilensteine auf eurem Weg zur Hochzeit"
+            "value" : "Erhaltet sanfte Erinnerungen an Aufgaben, Termine mit Dienstleistern und besondere Meilensteine auf eurem Weg zur Hochzeit"
           }
         },
         "es" : {
@@ -77755,7 +77935,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Primești mementouri blânde pentru sarcini, întâlniri cu furnizorii și momentele importante de pe drumul vostru spre nuntă"
+            "value" : "Primiți mementouri blânde pentru sarcini, întâlniri cu furnizorii și momentele importante de pe drumul vostru spre nuntă"
           }
         },
         "ru" : {
@@ -97637,7 +97817,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Caută fotografi al căror stil se potrivește cu viziunea voastră"
+            "value" : "Căutați fotografi al căror stil se potrivește cu viziunea voastră"
           }
         },
         "ru" : {
@@ -129199,7 +129379,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit Premium fügst du der Checkliste alles hinzu, was eure Hochzeit braucht – und hakst jede Aufgabe ab."
+            "value" : "Mit Premium fügt ihr der Checkliste alles hinzu, was eure Hochzeit braucht – und hakt jede Aufgabe ab."
           }
         },
         "es" : {
@@ -129751,7 +129931,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Premium macht aus eurem Plan ein schönes PDF, das du jedem in die Hand geben kannst."
+            "value" : "Premium macht aus eurem Plan ein schönes PDF, das ihr jedem in die Hand geben könnt."
           }
         },
         "es" : {
@@ -134299,7 +134479,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resepsiyon"
+            "value" : "Düğün Yemeği"
           }
         },
         "uk" : {
@@ -134483,7 +134663,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resepsiyona Giriş"
+            "value" : "Düğün Yemeğine Giriş"
           }
         },
         "uk" : {
@@ -140242,7 +140422,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sammle Fotos, die euren perfekten Tag inspirieren"
+            "value" : "Sammelt Fotos, die euren perfekten Tag inspirieren"
           }
         },
         "es" : {
@@ -143468,7 +143648,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alege 2-4 lucruri care contează cel mai mult pentru ziua voastră specială"
+            "value" : "Alegeți 2-4 lucruri care contează cel mai mult pentru ziua voastră specială"
           }
         },
         "ru" : {
@@ -147336,7 +147516,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fă o listă scurtă cu locurile potrivite numărului vostru de invitați și stilului vostru"
+            "value" : "Faceți o listă scurtă cu locurile potrivite numărului vostru de invitați și stilului vostru"
           }
         },
         "ru" : {
@@ -152393,7 +152573,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sammle Inspiration und finde eure Vision"
+            "value" : "Sammelt Inspiration und findet eure Vision"
           }
         },
         "es" : {
@@ -155701,7 +155881,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TIDSPUNKT"
+            "value" : "PLAN"
           }
         },
         "de" : {
@@ -155713,7 +155893,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TIEMPO"
+            "value" : "AGENDA"
           }
         },
         "et" : {
@@ -155731,19 +155911,19 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TEMPS"
+            "value" : "AGENDA"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "VRIJEME"
+            "value" : "PLAN"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "IDŐPONT"
+            "value" : "TERV"
           }
         },
         "is" : {
@@ -155755,25 +155935,25 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TEMPO"
+            "value" : "AGENDA"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "時刻"
+            "value" : "予定"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "시간"
+            "value" : "일정"
           }
         },
         "lv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "LAIKS"
+            "value" : "PLĀNS"
           }
         },
         "nb" : {
@@ -155791,19 +155971,19 @@
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GODZINA"
+            "value" : "PLAN"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "HORÁRIO"
+            "value" : "AGENDA"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ORĂ"
+            "value" : "PLAN"
           }
         },
         "ru" : {
@@ -155839,7 +156019,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SAAT"
+            "value" : "PLAN"
           }
         },
         "uk" : {
@@ -155851,7 +156031,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "THỜI GIAN"
+            "value" : "LỊCH"
           }
         },
         "zh-Hans" : {
@@ -172430,7 +172610,191 @@
         }
       }
     },
-    "VIP" : {},
+    "VIP" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "is" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "lv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VIP"
+          }
+        }
+      }
+    },
     "VIP Guest" : {
       "localizations" : {
         "ar" : {

@@ -332,7 +332,9 @@ struct ProductionVendorDetailView: View {
                                     .foregroundColor(Color(hex: "2C2C2C"))
 
                                 if let method = payment.paymentMethod {
-                                    Text(method)
+                                    // `method` is the persisted English rawValue; only the
+                                    // displayed label is resolved through the catalog.
+                                    Text(LocalizedStringKey(method))
                                         .font(.system(size: 11, weight: .thin))
                                         .foregroundColor(Color(hex: "9B9B9B"))
                                 }

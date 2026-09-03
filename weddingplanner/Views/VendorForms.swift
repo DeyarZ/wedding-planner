@@ -506,7 +506,7 @@ struct ExportOptionsView: View {
             var yPosition: CGFloat = 100
 
             for vendor in vendors {
-                let vendorText = "\(vendor.name) - \(vendor.category.rawValue)"
+                let vendorText = "\(vendor.name) - \(vendor.category.localizedNameString)"
                 vendorText.draw(at: CGPoint(x: 50, y: yPosition), withAttributes: [
                     .font: UIFont.systemFont(ofSize: 12),
                     .foregroundColor: UIColor.black
@@ -524,7 +524,7 @@ struct ExportOptionsView: View {
 
         for vendor in vendors {
             text += "\(vendor.name)\n"
-            text += String(format: String(localized: "Category: %@"), vendor.category.rawValue) + "\n"
+            text += String(format: String(localized: "Category: %@"), vendor.category.localizedNameString) + "\n"
             if let contact = vendor.contactName {
                 text += String(format: String(localized: "Contact: %@"), contact) + "\n"
             }

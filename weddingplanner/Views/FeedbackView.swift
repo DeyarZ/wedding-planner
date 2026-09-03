@@ -44,7 +44,10 @@ struct FeedbackView: View {
                             Text(category.displayName).tag(category)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    // .menu, not .segmented: localized category names ("Feature Request"
+                    // -> de "Funktionswunsch") overflow a 3-way segmented control and get
+                    // truncated to "Funktion...". A menu picker never truncates.
+                    .pickerStyle(.menu)
                 } header: {
                     Text("What's on your mind?")
                 }
