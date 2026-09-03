@@ -165083,7 +165083,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tidspunkt"
+            "value" : "Plan"
           }
         },
         "de" : {
@@ -165095,7 +165095,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tiempo"
+            "value" : "Agenda"
           }
         },
         "et" : {
@@ -165113,19 +165113,19 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Temps"
+            "value" : "Agenda"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vrijeme"
+            "value" : "Plan"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Időpont"
+            "value" : "Terv"
           }
         },
         "is" : {
@@ -165137,25 +165137,25 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tempo"
+            "value" : "Agenda"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "時刻"
+            "value" : "予定"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "시간"
+            "value" : "일정"
           }
         },
         "lv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laiks"
+            "value" : "Plāns"
           }
         },
         "nb" : {
@@ -165173,19 +165173,19 @@
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Godzina"
+            "value" : "Plan"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Horário"
+            "value" : "Agenda"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oră"
+            "value" : "Plan"
           }
         },
         "ru" : {
@@ -165221,7 +165221,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saat"
+            "value" : "Plan"
           }
         },
         "uk" : {
@@ -165233,7 +165233,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thời gian"
+            "value" : "Lịch"
           }
         },
         "zh-Hans" : {

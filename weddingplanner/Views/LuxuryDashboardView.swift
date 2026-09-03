@@ -296,8 +296,8 @@ struct LuxuryDashboardView: View {
             SnapshotCard(
                 icon: "dollarsign.circle",
                 title: "Funds",
-                value: formatCurrency(allocatedBudget),
-                subtitle: "of \(formatCurrency(totalBudget)) allocated",
+                value: formatBudget(allocatedBudget),
+                subtitle: "of \(formatBudget(totalBudget)) allocated",
                 color: Color(hex: "FFF4E6")
             )
             .opacity(animateIn ? 1 : 0)
@@ -480,13 +480,6 @@ struct LuxuryDashboardView: View {
         return max(0, components.day ?? 0)
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "EUR"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "€0"
-    }
 }
 
 // MARK: - Snapshot Card Component

@@ -180,7 +180,7 @@ struct ProductionTeamView: View {
                     )
 
                     TeamStat(
-                        value: String(format: "$%.0f", totalSpent),
+                        value: formatBudget(totalSpent),
                         label: "Paid",
                         color: Color(hex: "D4B5A9")
                     )
@@ -384,7 +384,7 @@ struct ProductionVendorCard: View {
 
                             Spacer()
 
-                            Text(String(format: "$%.0f", vendor.totalPaid))
+                            Text(formatBudget(vendor.totalPaid))
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundColor(Color(hex: "2C2C2C"))
                         }

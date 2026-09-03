@@ -158,14 +158,14 @@ struct ProductionEditVendorView: View {
                     HStack {
                         Text("Total Paid")
                         Spacer()
-                        Text(String(format: "$%.2f", vendor.totalPaid))
+                        Text(formatBudget(vendor.totalPaid, fractionDigits: 2))
                             .foregroundColor(.gray)
                     }
 
                     HStack {
                         Text("Remaining")
                         Spacer()
-                        Text(String(format: "$%.2f", vendor.remainingBalance))
+                        Text(formatBudget(vendor.remainingBalance, fractionDigits: 2))
                             .foregroundColor(vendor.remainingBalance > 0 ? .red : .green)
                     }
                 }
@@ -269,7 +269,7 @@ struct ProductionAddPaymentView: View {
                     HStack {
                         Text("Current Balance")
                         Spacer()
-                        Text(String(format: "$%.2f", vendor.remainingBalance))
+                        Text(formatBudget(vendor.remainingBalance, fractionDigits: 2))
                             .foregroundColor(.gray)
                     }
 
@@ -277,7 +277,7 @@ struct ProductionAddPaymentView: View {
                         HStack {
                             Text("New Balance")
                             Spacer()
-                            Text(String(format: "$%.2f", max(0, vendor.remainingBalance - amountValue)))
+                            Text(formatBudget(max(0, vendor.remainingBalance - amountValue), fractionDigits: 2))
                                 .foregroundColor(.green)
                         }
                     }
@@ -436,14 +436,14 @@ struct ExportOptionsView: View {
                     HStack {
                         Text("Total Budget")
                         Spacer()
-                        Text(String(format: "$%.2f", vendors.reduce(0) { $0 + $1.contractAmount }))
+                        Text(formatBudget(vendors.map(\.contractAmount).reduce(0, +), fractionDigits: 2))
                             .foregroundColor(.gray)
                     }
 
                     HStack {
                         Text("Total Paid")
                         Spacer()
-                        Text(String(format: "$%.2f", vendors.reduce(0) { $0 + $1.totalPaid }))
+                        Text(formatBudget(vendors.map(\.totalPaid).reduce(0, +), fractionDigits: 2))
                             .foregroundColor(.green)
                     }
                 }

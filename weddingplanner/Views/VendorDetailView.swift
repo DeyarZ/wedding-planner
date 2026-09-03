@@ -260,7 +260,7 @@ struct ProductionVendorDetailView: View {
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(Color(hex: "7A7A7A"))
                     Spacer()
-                    Text(String(format: "$%.2f", vendor.contractAmount))
+                    Text(formatBudget(vendor.contractAmount, fractionDigits: 2))
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(Color(hex: "2C2C2C"))
                 }
@@ -271,7 +271,7 @@ struct ProductionVendorDetailView: View {
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(Color(hex: "7A7A7A"))
                     Spacer()
-                    Text(String(format: "$%.2f", vendor.totalPaid))
+                    Text(formatBudget(vendor.totalPaid, fractionDigits: 2))
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(Color(hex: "66BB6A"))
                 }
@@ -282,7 +282,7 @@ struct ProductionVendorDetailView: View {
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(Color(hex: "7A7A7A"))
                     Spacer()
-                    Text(String(format: "$%.2f", vendor.remainingBalance))
+                    Text(formatBudget(vendor.remainingBalance, fractionDigits: 2))
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(vendor.remainingBalance > 0 ? Color(hex: "EF5350") : Color(hex: "66BB6A"))
                 }
@@ -342,7 +342,7 @@ struct ProductionVendorDetailView: View {
 
                             Spacer()
 
-                            Text(String(format: "$%.2f", payment.amount))
+                            Text(formatBudget(payment.amount, fractionDigits: 2))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(Color(hex: "66BB6A"))
                         }

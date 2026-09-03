@@ -137,11 +137,11 @@ struct VendorDeckCard: Identifiable {
     let portfolio: [String]
     
     static let sampleVendors = [
-        VendorDeckCard(name: "Enchanted Gardens", category: .venue, price: "$8,000", rating: 4.9, image: "building.columns", availability: "3 dates left", portfolio: ["photo1", "photo2"]),
-        VendorDeckCard(name: "Lens & Light Studio", category: .photo, price: "$3,500", rating: 4.8, image: "camera", availability: "Available", portfolio: ["photo3", "photo4"]),
-        VendorDeckCard(name: "Bloom Artistry", category: .flowers, price: "$2,200", rating: 5.0, image: "leaf", availability: "Booking fast", portfolio: ["photo5", "photo6"]),
-        VendorDeckCard(name: "Gourmet Affairs", category: .catering, price: "$12,000", rating: 4.7, image: "fork.knife", availability: "Available", portfolio: ["photo7", "photo8"]),
-        VendorDeckCard(name: "DJ Euphoria", category: .music, price: "$1,800", rating: 4.9, image: "music.note", availability: "2 dates left", portfolio: ["photo9", "photo10"])
+        VendorDeckCard(name: "Enchanted Gardens", category: .venue, price: formatBudget(8000), rating: 4.9, image: "building.columns", availability: "3 dates left", portfolio: ["photo1", "photo2"]),
+        VendorDeckCard(name: "Lens & Light Studio", category: .photo, price: formatBudget(3500), rating: 4.8, image: "camera", availability: "Available", portfolio: ["photo3", "photo4"]),
+        VendorDeckCard(name: "Bloom Artistry", category: .flowers, price: formatBudget(2200), rating: 5.0, image: "leaf", availability: "Booking fast", portfolio: ["photo5", "photo6"]),
+        VendorDeckCard(name: "Gourmet Affairs", category: .catering, price: formatBudget(12000), rating: 4.7, image: "fork.knife", availability: "Available", portfolio: ["photo7", "photo8"]),
+        VendorDeckCard(name: "DJ Euphoria", category: .music, price: formatBudget(1800), rating: 4.9, image: "music.note", availability: "2 dates left", portfolio: ["photo9", "photo10"])
     ]
 }
 

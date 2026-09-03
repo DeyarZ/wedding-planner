@@ -258,8 +258,8 @@ struct EmotionalDashboardView: View {
             CoreAreaCard(
                 icon: "creditcard",
                 title: "Funds",
-                value: formatCurrency(dataManager.spentBudget),
-                subtitle: LocalizedStringKey("of \(formatCurrency(dataManager.totalBudget)) spent"),
+                value: formatBudget(dataManager.spentBudget),
+                subtitle: LocalizedStringKey("of \(formatBudget(dataManager.totalBudget)) spent"),
                 color: Color(hex: "C8E8D4"),
                 tabIndex: 4,
                 action: {
@@ -387,14 +387,6 @@ struct EmotionalDashboardView: View {
 
     private func getConfirmedGuestsCount() -> Int {
         dataManager.wedding?.confirmedGuestsCount ?? 0
-    }
-
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
     }
 
     private func getNextMilestone() -> (title: String, timeText: String, icon: String, task: WeddingTask?)? {
