@@ -91,6 +91,8 @@ struct ForeverUpsellView: View {
                                 Text("Forever")
                                     .font(.system(size: 20, weight: .bold, design: .serif))
                                     .foregroundColor(Color(hex: "2C2C2C"))
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
 
                                 Text("Pay once, yours until the big day & beyond")
                                     .font(.system(size: 13, weight: .regular))
@@ -110,7 +112,14 @@ struct ForeverUpsellView: View {
                                 Text("one-time")
                                     .font(.system(size: 12, weight: .regular))
                                     .foregroundColor(Color(hex: "9B9B9B"))
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.8)
+                                    .multilineTextAlignment(.trailing)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
+                            // Price column keeps its intrinsic width; the title
+                            // column yields first on longer translations.
+                            .layoutPriority(1)
                         }
                         .padding(18)
                         .background(
@@ -131,6 +140,9 @@ struct ForeverUpsellView: View {
                                     Text(String(format: String(localized: "Make it Forever — %@"), priceText))
                                         .font(.system(size: 18, weight: .medium))
                                         .foregroundColor(.white)
+                                        .lineLimit(2)
+                                        .minimumScaleFactor(0.7)
+                                        .multilineTextAlignment(.center)
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -163,6 +175,8 @@ struct ForeverUpsellView: View {
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(Color(hex: "9B9B9B"))
                                 .underline()
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.top, 4)
                         .disabled(isPurchasing)

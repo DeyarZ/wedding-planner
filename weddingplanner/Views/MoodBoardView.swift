@@ -75,7 +75,7 @@ struct MoodBoardView: View {
                             HStack(spacing: 12) {
                                 PhotoCategoryChip(
                                     category: nil,
-                                    label: "All",
+                                    label: String(localized: "All"),
                                     isSelected: selectedCategory == nil
                                 ) {
                                     withAnimation(.spring(response: 0.3)) {

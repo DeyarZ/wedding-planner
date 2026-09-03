@@ -78,8 +78,12 @@ enum RSVPStatus: String, Codable, CaseIterable {
         }
     }
     
+    /// Display-only label. Resolved through the string catalog via
+    /// `LocalizedRawRepresentable` — handing back the bare `rawValue` left
+    /// every RSVP chip in English on a non-English device. `rawValue` itself
+    /// is untouched, so storage, `Codable` and comparisons are unaffected.
     var text: String {
-        return self.rawValue
+        return localizedNameString
     }
 }
 

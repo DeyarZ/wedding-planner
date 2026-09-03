@@ -1,3 +1,9 @@
 
 # Playwright MCP scratch output
 .playwright-mcp/
+
+# Python bytecode
+__pycache__/
+*.pyc
+build/
+*.xcarchive

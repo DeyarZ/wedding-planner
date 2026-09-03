@@ -97,7 +97,7 @@ struct CountdownHeroCard: View {
                 }
                 
                 VStack(spacing: 4) {
-                    Text("$\(Int(dataManager.totalBudget - dataManager.spentBudget))")
+                    Text(formatBudget(dataManager.totalBudget - dataManager.spentBudget))
                         .font(.title2)
                         .fontWeight(.semibold)
                     Text("Budget Left")

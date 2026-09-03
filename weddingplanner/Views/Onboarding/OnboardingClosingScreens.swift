@@ -73,6 +73,10 @@ struct OnboardingCommitScreen: View {
                             .font(.system(size: 14, weight: .medium, design: .serif))
                             .foregroundColor(OnboardingStyle.inkSoft)
                             .multilineTextAlignment(.center)
+                            // The label lives inside a 158pt circle, so a longer
+                            // translation shrinks rather than spilling over the rim.
+                            .lineLimit(3)
+                            .minimumScaleFactor(0.7)
                             .padding(.horizontal, 20)
                     }
                 }
@@ -205,6 +209,7 @@ struct OnboardingNotificationScreen: View {
 
                 Spacer().frame(height: 60)
             }
+            .onboardingScreenScroll()
         }
         .onAppear { shown = true }
     }
@@ -293,6 +298,7 @@ struct OnboardingTrialTimelineScreen: View {
 
                 Spacer().frame(height: 46)
             }
+            .onboardingScreenScroll()
         }
         .onAppear { shown = true }
     }
@@ -427,6 +433,7 @@ struct OnboardingValueRecapScreen: View {
 
                 Spacer().frame(height: 50)
             }
+            .onboardingScreenScroll()
         }
         .overlay {
             if showTrackingPriming {

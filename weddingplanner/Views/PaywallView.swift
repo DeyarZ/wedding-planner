@@ -111,9 +111,9 @@ struct PaywallView: View {
                 VStack(spacing: 24) {
                     // Sweet features with hearts
                     VStack(spacing: 12) {
-                        FeatureRow(icon: "heart.fill", text: "Unlimited guests & vendors", color: Color(hex: "FFB6C1"))
-                        FeatureRow(icon: "sparkles", text: "Smart budget insights", color: Color(hex: "FFD700"))
-                        FeatureRow(icon: "calendar.badge.clock", text: "Timeline management", color: Color(hex: "D4B5A9"))
+                        FeatureRow(icon: "heart.fill", text: String(localized: "Unlimited guests & vendors"), color: Color(hex: "FFB6C1"))
+                        FeatureRow(icon: "sparkles", text: String(localized: "Smart budget insights"), color: Color(hex: "FFD700"))
+                        FeatureRow(icon: "calendar.badge.clock", text: String(localized: "Timeline management"), color: Color(hex: "D4B5A9"))
                     }
                     .padding(.horizontal, 32)
 
@@ -154,6 +154,8 @@ struct PaywallView: View {
                             Text(trustText)
                                 .font(.system(size: 14, weight: .regular, design: .serif))
                                 .foregroundColor(Color(hex: "2C2C2C"))
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
 
                         // Purchase button
@@ -173,6 +175,9 @@ struct PaywallView: View {
                                     Text(ctaTitle)
                                         .font(.system(size: 18, weight: .medium))
                                         .foregroundColor(.white)
+                                        .lineLimit(2)
+                                        .minimumScaleFactor(0.7)
+                                        .multilineTextAlignment(.center)
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -194,6 +199,7 @@ struct PaywallView: View {
                         summaryText
                             .foregroundColor(Color(hex: "9B9B9B"))
                             .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     // Restore Purchases Button
@@ -214,6 +220,8 @@ struct PaywallView: View {
                                 .font(.system(size: 12, weight: .regular))
                                 .foregroundColor(Color(hex: "9B9B9B"))
                                 .underline()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
                         }
 
                         Text(" & ")
@@ -227,6 +235,8 @@ struct PaywallView: View {
                                 .font(.system(size: 12, weight: .regular))
                                 .foregroundColor(Color(hex: "9B9B9B"))
                                 .underline()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
                         }
                     }
                     .padding(.top, 4)
@@ -520,6 +530,8 @@ struct FeatureRow: View {
             Text(text)
                 .font(.system(size: 15, weight: .regular, design: .serif))
                 .foregroundColor(Color(hex: "4A4A4A"))
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
         }
@@ -641,6 +653,8 @@ struct PlanRowCard: View {
                     Text(plan.title)
                         .font(.system(size: 18, weight: .bold, design: .serif))
                         .foregroundColor(Color(hex: "2C2C2C"))
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     Text(plan.subtitle)
                         .font(.system(size: 13, weight: .regular))
@@ -662,8 +676,15 @@ struct PlanRowCard: View {
                         Text(plan.priceCaption)
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "9B9B9B"))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.trailing)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+                // The price column keeps its intrinsic width; a long German or
+                // Polish plan name wraps instead of clipping the number.
+                .layoutPriority(1)
             }
             .padding(.vertical, 18)
             .padding(.horizontal, 18)
@@ -690,6 +711,8 @@ struct PlanRowCard: View {
                         .font(.system(size: 10, weight: .bold))
                         .tracking(0.5)
                         .foregroundColor(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
                         .background(Capsule().fill(Color(hex: "D4B5A9")))

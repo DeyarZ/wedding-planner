@@ -793,67 +793,67 @@ struct WeddingPhase: Identifiable {
 
         return [
             WeddingPhase(
-                title: "Dream & Discover",
+                title: String(localized: "Dream & Discover"),
                 icon: "sparkles",
-                timeframe: "12+ months before",
+                timeframe: String(localized: "12+ months before"),
                 startDate: calendar.date(byAdding: .month, value: -12, to: weddingDate) ?? Date(),
                 endDate: calendar.date(byAdding: .month, value: -10, to: weddingDate) ?? Date(),
                 taskCategories: [.planning],
-                description: "Start collecting inspiration and setting your vision"
+                description: String(localized: "Start collecting inspiration and setting your vision")
             ),
             WeddingPhase(
-                title: "Book Your Team",
+                title: String(localized: "Book Your Team"),
                 icon: "person.2",
-                timeframe: "10-12 months before",
+                timeframe: String(localized: "10-12 months before"),
                 startDate: calendar.date(byAdding: .month, value: -10, to: weddingDate) ?? Date(),
                 endDate: calendar.date(byAdding: .month, value: -8, to: weddingDate) ?? Date(),
                 taskCategories: [.venue, .vendors, .photography, .catering],
-                description: "Secure your venue and key vendors"
+                description: String(localized: "Secure your venue and key vendors")
             ),
             WeddingPhase(
-                title: "Design & Style",
+                title: String(localized: "Design & Style"),
                 icon: "paintpalette",
-                timeframe: "8-10 months before",
+                timeframe: String(localized: "8-10 months before"),
                 startDate: calendar.date(byAdding: .month, value: -8, to: weddingDate) ?? Date(),
                 endDate: calendar.date(byAdding: .month, value: -6, to: weddingDate) ?? Date(),
                 taskCategories: [.attire, .decorations, .flowers],
-                description: "Choose your dress and design elements"
+                description: String(localized: "Choose your dress and design elements")
             ),
             WeddingPhase(
-                title: "Guest Planning",
+                title: String(localized: "Guest Planning"),
                 icon: "envelope",
-                timeframe: "6-8 months before",
+                timeframe: String(localized: "6-8 months before"),
                 startDate: calendar.date(byAdding: .month, value: -6, to: weddingDate) ?? Date(),
                 endDate: calendar.date(byAdding: .month, value: -4, to: weddingDate) ?? Date(),
                 taskCategories: [.invitations],
-                description: "Finalize guest list and send save-the-dates"
+                description: String(localized: "Finalize guest list and send save-the-dates")
             ),
             WeddingPhase(
-                title: "Details & Logistics",
+                title: String(localized: "Details & Logistics"),
                 icon: "checklist",
-                timeframe: "3-6 months before",
+                timeframe: String(localized: "3-6 months before"),
                 startDate: calendar.date(byAdding: .month, value: -4, to: weddingDate) ?? Date(),
                 endDate: calendar.date(byAdding: .month, value: -2, to: weddingDate) ?? Date(),
                 taskCategories: [.entertainment, .transportation, .accommodation],
-                description: "Arrange transportation and accommodations"
+                description: String(localized: "Arrange transportation and accommodations")
             ),
             WeddingPhase(
-                title: "Final Touches",
+                title: String(localized: "Final Touches"),
                 icon: "seal",
-                timeframe: "1-3 months before",
+                timeframe: String(localized: "1-3 months before"),
                 startDate: calendar.date(byAdding: .month, value: -2, to: weddingDate) ?? Date(),
                 endDate: calendar.date(byAdding: .month, value: -1, to: weddingDate) ?? Date(),
                 taskCategories: [.legal, .other],
-                description: "Finalize all details and confirmations"
+                description: String(localized: "Finalize all details and confirmations")
             ),
             WeddingPhase(
-                title: "The Final Countdown",
+                title: String(localized: "The Final Countdown"),
                 icon: "heart",
-                timeframe: "Final month",
+                timeframe: String(localized: "Final month"),
                 startDate: calendar.date(byAdding: .month, value: -1, to: weddingDate) ?? Date(),
                 endDate: weddingDate,
                 taskCategories: TaskCategory.allCases,
-                description: "Last preparations and enjoy the moment"
+                description: String(localized: "Last preparations and enjoy the moment")
             )
         ]
     }
@@ -1584,67 +1584,69 @@ struct PhaseDetailView: View {
     }
 
     private func getSuggestedTasks(for phase: WeddingPhase) -> [String] {
-        switch phase.title {
-        case "Dream & Discover":
+        // Keyed on the phase icon, which stays stable across locales
+        // (phase.title is localized and must not be matched on).
+        switch phase.icon {
+        case "sparkles":
             return [
-                "Create a wedding vision board",
-                "Set your budget",
-                "Choose your wedding style",
-                "Start guest list draft",
-                "Research venues"
+                String(localized: "Create a wedding vision board"),
+                String(localized: "Set your budget"),
+                String(localized: "Choose your wedding style"),
+                String(localized: "Start guest list draft"),
+                String(localized: "Research venues")
             ]
-        case "Book Your Team":
+        case "person.2":
             return [
-                "Book your venue",
-                "Hire wedding planner",
-                "Book photographer",
-                "Book videographer",
-                "Secure caterer",
-                "Book florist"
+                String(localized: "Book your venue"),
+                String(localized: "Hire wedding planner"),
+                String(localized: "Book photographer"),
+                String(localized: "Book videographer"),
+                String(localized: "Secure caterer"),
+                String(localized: "Book florist")
             ]
-        case "Design & Style":
+        case "paintpalette":
             return [
-                "Shop for wedding dress",
-                "Choose bridesmaid dresses",
-                "Select color palette",
-                "Design invitations",
-                "Plan ceremony decor",
-                "Choose reception style"
+                String(localized: "Shop for wedding dress"),
+                String(localized: "Choose bridesmaid dresses"),
+                String(localized: "Select color palette"),
+                String(localized: "Design invitations"),
+                String(localized: "Plan ceremony decor"),
+                String(localized: "Choose reception style")
             ]
-        case "Guest Planning":
+        case "envelope":
             return [
-                "Finalize guest list",
-                "Send save-the-dates",
-                "Book hotel blocks",
-                "Create wedding website",
-                "Plan rehearsal dinner"
+                String(localized: "Finalize guest list"),
+                String(localized: "Send save-the-dates"),
+                String(localized: "Book hotel blocks"),
+                String(localized: "Create wedding website"),
+                String(localized: "Plan rehearsal dinner")
             ]
-        case "Details & Logistics":
+        case "checklist":
             return [
-                "Order invitations",
-                "Book transportation",
-                "Arrange accommodations",
-                "Plan honeymoon",
-                "Order wedding rings",
-                "Schedule hair/makeup trials"
+                String(localized: "Order invitations"),
+                String(localized: "Book transportation"),
+                String(localized: "Arrange accommodations"),
+                String(localized: "Plan honeymoon"),
+                String(localized: "Order wedding rings"),
+                String(localized: "Schedule hair/makeup trials")
             ]
-        case "Final Touches":
+        case "seal":
             return [
-                "Send invitations",
-                "Final dress fitting",
-                "Finalize ceremony details",
-                "Create seating chart",
-                "Write vows",
-                "Confirm all vendors"
+                String(localized: "Send invitations"),
+                String(localized: "Final dress fitting"),
+                String(localized: "Finalize ceremony details"),
+                String(localized: "Create seating chart"),
+                String(localized: "Write vows"),
+                String(localized: "Confirm all vendors")
             ]
-        case "The Final Countdown":
+        case "heart":
             return [
-                "Final venue walkthrough",
-                "Pack for honeymoon",
-                "Rehearsal dinner",
-                "Prepare payments/tips",
-                "Emergency kit",
-                "Relax and breathe"
+                String(localized: "Final venue walkthrough"),
+                String(localized: "Pack for honeymoon"),
+                String(localized: "Rehearsal dinner"),
+                String(localized: "Prepare payments/tips"),
+                String(localized: "Emergency kit"),
+                String(localized: "Relax and breathe")
             ]
         default:
             return []

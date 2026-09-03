@@ -158,14 +158,14 @@ struct ProductionEditVendorView: View {
                     HStack {
                         Text("Total Paid")
                         Spacer()
-                        Text(String(format: "$%.2f", vendor.totalPaid))
+                        Text(formatBudget(vendor.totalPaid, fractionDigits: 2))
                             .foregroundColor(.gray)
                     }
 
                     HStack {
                         Text("Remaining")
                         Spacer()
-                        Text(String(format: "$%.2f", vendor.remainingBalance))
+                        Text(formatBudget(vendor.remainingBalance, fractionDigits: 2))
                             .foregroundColor(vendor.remainingBalance > 0 ? .red : .green)
                     }
                 }
@@ -253,7 +253,9 @@ struct ProductionAddPaymentView: View {
 
                     Picker("Payment Method", selection: $paymentMethod) {
                         ForEach(paymentMethods, id: \.self) { method in
-                            Text(method).tag(method)
+                            // `method` is persisted verbatim on Payment.paymentMethod,
+                            // so only the displayed label is resolved at runtime.
+                            Text(LocalizedStringKey(method)).tag(method)
                         }
                     }
                 }
@@ -267,7 +269,7 @@ struct ProductionAddPaymentView: View {
                     HStack {
                         Text("Current Balance")
                         Spacer()
-                        Text(String(format: "$%.2f", vendor.remainingBalance))
+                        Text(formatBudget(vendor.remainingBalance, fractionDigits: 2))
                             .foregroundColor(.gray)
                     }
 
@@ -275,7 +277,7 @@ struct ProductionAddPaymentView: View {
                         HStack {
                             Text("New Balance")
                             Spacer()
-                            Text(String(format: "$%.2f", max(0, vendor.remainingBalance - amountValue)))
+                            Text(formatBudget(max(0, vendor.remainingBalance - amountValue), fractionDigits: 2))
                                 .foregroundColor(.green)
                         }
                     }
@@ -434,14 +436,14 @@ struct ExportOptionsView: View {
                     HStack {
                         Text("Total Budget")
                         Spacer()
-                        Text(String(format: "$%.2f", vendors.reduce(0) { $0 + $1.contractAmount }))
+                        Text(formatBudget(vendors.map(\.contractAmount).reduce(0, +), fractionDigits: 2))
                             .foregroundColor(.gray)
                     }
 
                     HStack {
                         Text("Total Paid")
                         Spacer()
-                        Text(String(format: "$%.2f", vendors.reduce(0) { $0 + $1.totalPaid }))
+                        Text(formatBudget(vendors.map(\.totalPaid).reduce(0, +), fractionDigits: 2))
                             .foregroundColor(.green)
                     }
                 }
@@ -499,12 +501,12 @@ struct ExportOptionsView: View {
                 .foregroundColor: UIColor.black
             ]
 
-            "Wedding Vendor List".draw(at: CGPoint(x: 50, y: 50), withAttributes: attributes)
+            String(localized: "Wedding Vendor List").draw(at: CGPoint(x: 50, y: 50), withAttributes: attributes)
 
             var yPosition: CGFloat = 100
 
             for vendor in vendors {
-                let vendorText = "\(vendor.name) - \(vendor.category.rawValue)"
+                let vendorText = "\(vendor.name) - \(vendor.category.localizedNameString)"
                 vendorText.draw(at: CGPoint(x: 50, y: yPosition), withAttributes: [
                     .font: UIFont.systemFont(ofSize: 12),
                     .foregroundColor: UIColor.black
@@ -518,19 +520,19 @@ struct ExportOptionsView: View {
     }
 
     private func shareContacts() {
-        var text = "Wedding Vendor Contacts\n\n"
+        var text = String(localized: "Wedding Vendor Contacts") + "\n\n"
 
         for vendor in vendors {
             text += "\(vendor.name)\n"
-            text += "Category: \(vendor.category.rawValue)\n"
+            text += String(format: String(localized: "Category: %@"), vendor.category.localizedNameString) + "\n"
             if let contact = vendor.contactName {
-                text += "Contact: \(contact)\n"
+                text += String(format: String(localized: "Contact: %@"), contact) + "\n"
             }
             if let phone = vendor.phone {
-                text += "Phone: \(phone)\n"
+                text += String(format: String(localized: "Phone: %@"), phone) + "\n"
             }
             if let email = vendor.email {
-                text += "Email: \(email)\n"
+                text += String(format: String(localized: "Email: %@"), email) + "\n"
             }
             text += "\n"
         }

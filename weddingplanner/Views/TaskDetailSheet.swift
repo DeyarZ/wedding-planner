@@ -33,13 +33,18 @@ struct TaskDetailSheet: View {
                             Label(task.category.localizedName, systemImage: task.category.icon)
                                 .font(.system(size: 12, weight: .regular))
                                 .foregroundColor(Color(hex: "7A7A7A"))
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
 
                             if task.priority == .urgent {
                                 Label("Urgent", systemImage: "exclamationmark.circle.fill")
                                     .font(.system(size: 12, weight: .medium))
                                     .foregroundColor(Color(hex: "F4B5A0"))
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.8)
                             }
                         }
+                        .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(.top, 20)
 
@@ -53,6 +58,9 @@ struct TaskDetailSheet: View {
 
                             Text(isCompleted ? "Completed" : "Mark as Complete")
                                 .font(.system(size: 16, weight: .medium))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
 
                             if isCompletionLocked {
                                 PremiumLockBadge(compact: true)
@@ -128,6 +136,9 @@ struct TaskDetailSheet: View {
                         Text("Save Changes")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(

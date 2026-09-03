@@ -133,6 +133,9 @@ struct TrackingPrimingView: View {
             Text(text)
                 .font(.system(size: 15, weight: .regular))
                 .foregroundColor(Color(hex: "2C2C2C"))
+                .multilineTextAlignment(.leading)
+                // A translated bullet is routinely two lines wide.
+                .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
     }

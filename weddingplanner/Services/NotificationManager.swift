@@ -67,13 +67,13 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     func scheduleDailyMorningCheckIn() {
         let content = UNMutableNotificationContent()
         let greetings = [
-            "Good morning beautiful! Ready to plan your perfect day? 💕",
-            "Rise and shine! Let's tackle today's wedding tasks together ✨",
-            "Morning sunshine! Your wedding is getting closer 🌸",
-            "Hello lovely! Time to make wedding magic happen today 💫",
-            "Good morning! Every step brings you closer to 'I do' 💍"
+            String(localized: "Good morning beautiful! Ready to plan your perfect day? 💕"),
+            String(localized: "Rise and shine! Let's tackle today's wedding tasks together ✨"),
+            String(localized: "Morning sunshine! Your wedding is getting closer 🌸"),
+            String(localized: "Hello lovely! Time to make wedding magic happen today 💫"),
+            String(localized: "Good morning! Every step brings you closer to 'I do' 💍")
         ]
-        content.title = "Your Daily Wedding Check-in"
+        content.title = String(localized: "Your Daily Wedding Check-in")
         content.body = greetings.randomElement() ?? greetings[0]
         content.sound = .default
         content.badge = 1
@@ -91,8 +91,8 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
 
     func scheduleEveningReflection() {
         let content = UNMutableNotificationContent()
-        content.title = "Evening Check-in"
-        content.body = "You did amazing today! Take a moment to review tomorrow's tasks 🌙"
+        content.title = String(localized: "Evening Check-in")
+        content.body = String(localized: "You did amazing today! Take a moment to review tomorrow's tasks 🌙")
         content.sound = .default
 
         // Schedule for 8 PM every day
@@ -108,8 +108,8 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
 
     func scheduleWeeklyMilestone() {
         let content = UNMutableNotificationContent()
-        content.title = "Weekly Milestone"
-        content.body = "Another week closer to your big day! Let's see your progress 🎉"
+        content.title = String(localized: "Weekly Milestone")
+        content.body = String(localized: "Another week closer to your big day! Let's see your progress 🎉")
         content.sound = .default
 
         // Schedule for Sunday at 6 PM
@@ -130,8 +130,11 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         guard let dueDate = task.dueDate else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Task Reminder"
-        content.body = "\(task.title) is due today! Let's get it done 💪"
+        content.title = String(localized: "Task Reminder")
+        content.body = String(
+            format: String(localized: "%@ is due today! Let's get it done 💪"),
+            task.title
+        )
         content.sound = .default
         content.categoryIdentifier = "TASK_REMINDER"
         content.userInfo = ["taskId": task.id.hashValue]
@@ -154,8 +157,12 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
 
     func scheduleVendorAppointment(for vendor: Vendor, date: Date, notes: String?) {
         let content = UNMutableNotificationContent()
-        content.title = "Vendor Appointment"
-        content.body = "Meeting with \(vendor.name) in 1 hour! \(notes ?? "")"
+        content.title = String(localized: "Vendor Appointment")
+        content.body = String(
+            format: String(localized: "Meeting with %1$@ in 1 hour! %2$@"),
+            vendor.name,
+            notes ?? ""
+        )
         content.sound = .default
         content.categoryIdentifier = "VENDOR_APPOINTMENT"
         content.userInfo = ["vendorId": vendor.id.hashValue]
@@ -185,29 +192,29 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
 
         switch daysUntilWedding {
         case 365:
-            content.title = "One Year to Go! 🎊"
-            content.body = "Your wedding journey officially begins! Let's make this year amazing"
+            content.title = String(localized: "One Year to Go! 🎊")
+            content.body = String(localized: "Your wedding journey officially begins! Let's make this year amazing")
         case 180:
-            content.title = "6 Months to Go! 💕"
-            content.body = "Halfway there! Time to finalize those big decisions"
+            content.title = String(localized: "6 Months to Go! 💕")
+            content.body = String(localized: "Halfway there! Time to finalize those big decisions")
         case 90:
-            content.title = "3 Months! 🌸"
-            content.body = "The final stretch begins! Your dream day is so close"
+            content.title = String(localized: "3 Months! 🌸")
+            content.body = String(localized: "The final stretch begins! Your dream day is so close")
         case 60:
-            content.title = "2 Months! ✨"
-            content.body = "Things are getting real! Let's nail these final details"
+            content.title = String(localized: "2 Months! ✨")
+            content.body = String(localized: "Things are getting real! Let's nail these final details")
         case 30:
-            content.title = "ONE MONTH! 💍"
-            content.body = "30 days until you say 'I do'! How exciting is this?!"
+            content.title = String(localized: "ONE MONTH! 💍")
+            content.body = String(localized: "30 days until you say 'I do'! How exciting is this?!")
         case 7:
-            content.title = "ONE WEEK! 🎉"
-            content.body = "7 days! Take a deep breath - you've got this!"
+            content.title = String(localized: "ONE WEEK! 🎉")
+            content.body = String(localized: "7 days! Take a deep breath - you've got this!")
         case 1:
-            content.title = "TOMORROW! 💕✨🎊"
-            content.body = "Tomorrow you marry your best friend! Get some rest, beautiful bride!"
+            content.title = String(localized: "TOMORROW! 💕✨🎊")
+            content.body = String(localized: "Tomorrow you marry your best friend! Get some rest, beautiful bride!")
         case 0:
-            content.title = "TODAY'S THE DAY! 👰"
-            content.body = "Happy Wedding Day! Enjoy every magical moment! 💕"
+            content.title = String(localized: "TODAY'S THE DAY! 👰")
+            content.body = String(localized: "Happy Wedding Day! Enjoy every magical moment! 💕")
         default:
             return
         }
@@ -230,18 +237,18 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
 
     func scheduleRandomMotivation() {
         let motivations = [
-            "Your venue is going to look absolutely stunning! 🏰",
-            "Remember: Perfect is not the goal, joy is! 💕",
-            "You're doing an amazing job planning this wedding! ⭐",
-            "Take a breath. Everything is falling into place beautifully ✨",
-            "Your love story deserves this beautiful celebration! 💑",
-            "The little details are adding up to something magical! 🌟",
-            "You're going to be the most beautiful bride! 👰",
-            "This stress is temporary, the marriage is forever! 💍"
+            String(localized: "Your venue is going to look absolutely stunning! 🏰"),
+            String(localized: "Remember: Perfect is not the goal, joy is! 💕"),
+            String(localized: "You're doing an amazing job planning this wedding! ⭐"),
+            String(localized: "Take a breath. Everything is falling into place beautifully ✨"),
+            String(localized: "Your love story deserves this beautiful celebration! 💑"),
+            String(localized: "The little details are adding up to something magical! 🌟"),
+            String(localized: "You're going to be the most beautiful bride! 👰"),
+            String(localized: "This stress is temporary, the marriage is forever! 💍")
         ]
 
         let content = UNMutableNotificationContent()
-        content.title = "A Little Reminder"
+        content.title = String(localized: "A Little Reminder")
         content.body = motivations.randomElement() ?? motivations[0]
         content.sound = .default
 

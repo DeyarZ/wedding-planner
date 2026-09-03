@@ -353,10 +353,10 @@ enum StressLevel {
     
     var description: String {
         switch self {
-        case .low: return "Smooth Sailing"
-        case .medium: return "On Track"
-        case .high: return "Needs Attention"
-        case .panic: return "Critical"
+        case .low: return String(localized: "Smooth Sailing")
+        case .medium: return String(localized: "On Track")
+        case .high: return String(localized: "Needs Attention")
+        case .panic: return String(localized: "Critical")
         }
     }
 }

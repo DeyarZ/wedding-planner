@@ -132,19 +132,19 @@ struct LuxuryVendorsView: View {
         HStack(spacing: 16) {
             SummaryCard(
                 title: "TOTAL",
-                value: formatCurrency(totalVendorsAmount),
+                value: formatBudget(totalVendorsAmount),
                 accent: Color(hex: "E8E8F2")
             )
 
             SummaryCard(
                 title: "PAID",
-                value: formatCurrency(totalPaidAmount),
+                value: formatBudget(totalPaidAmount),
                 accent: Color(hex: "E8F2E8")
             )
 
             SummaryCard(
                 title: "REMAINING",
-                value: formatCurrency(totalVendorsAmount - totalPaidAmount),
+                value: formatBudget(totalVendorsAmount - totalPaidAmount),
                 accent: Color(hex: "F2E8E8")
             )
         }
@@ -201,12 +201,6 @@ struct LuxuryVendorsView: View {
         }
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 struct LuxuryVendorCard: View {
@@ -288,7 +282,7 @@ struct LuxuryVendorCard: View {
                     .frame(height: 2)
 
                     HStack {
-                        Text(formatCurrency(vendor.totalPaid))
+                        Text(formatBudget(vendor.totalPaid))
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "4CAF50"))
 
@@ -296,7 +290,7 @@ struct LuxuryVendorCard: View {
                             .font(.system(size: 11, weight: .thin))
                             .foregroundColor(Color(hex: "B8B8B8"))
 
-                        Text(formatCurrency(vendor.contractAmount))
+                        Text(formatBudget(vendor.contractAmount))
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "2C2C2C"))
                     }
@@ -338,12 +332,6 @@ struct LuxuryVendorCard: View {
         }, perform: {})
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 struct SummaryCard: View {
@@ -797,7 +785,7 @@ struct PaymentProgressView: View {
                         .font(.system(size: 11, weight: .thin))
                         .foregroundColor(Color(hex: "B8B8B8"))
 
-                    Text(formatCurrency(vendor.totalPaid))
+                    Text(formatBudget(vendor.totalPaid))
                         .font(.system(size: 20, weight: .light, design: .rounded))
                         .foregroundColor(Color(hex: "4CAF50"))
                 }
@@ -809,7 +797,7 @@ struct PaymentProgressView: View {
                         .font(.system(size: 11, weight: .thin))
                         .foregroundColor(Color(hex: "B8B8B8"))
 
-                    Text(formatCurrency(vendor.remainingBalance))
+                    Text(formatBudget(vendor.remainingBalance))
                         .font(.system(size: 20, weight: .light, design: .rounded))
                         .foregroundColor(Color(hex: "2C2C2C"))
                 }
@@ -830,7 +818,7 @@ struct PaymentProgressView: View {
             }
             .frame(height: 4)
 
-            Text("\(Int(progress * 100))% of \(formatCurrency(vendor.contractAmount))")
+            Text("\(Int(progress * 100))% of \(formatBudget(vendor.contractAmount))")
                 .font(.system(size: 11, weight: .regular))
                 .foregroundColor(Color(hex: "9B9B9B"))
         }
@@ -841,12 +829,6 @@ struct PaymentProgressView: View {
         )
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 struct PaymentRow: View {
@@ -868,7 +850,7 @@ struct PaymentRow: View {
 
             Spacer()
 
-            Text(formatCurrency(payment.amount))
+            Text(formatBudget(payment.amount))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color(hex: "4CAF50"))
         }
@@ -883,12 +865,6 @@ struct PaymentRow: View {
         )
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 // Add Payment View

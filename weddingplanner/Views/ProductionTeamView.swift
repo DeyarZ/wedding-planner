@@ -142,10 +142,14 @@ struct ProductionTeamView: View {
                     Text("Your Dream Team")
                         .font(.system(size: 32, weight: .light, design: .serif))
                         .foregroundColor(Color(hex: "2C2C2C"))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     Text(getMotivationalMessage())
                         .font(.system(size: 14, weight: .thin))
                         .foregroundColor(Color(hex: "9B9B9B"))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Spacer()
@@ -176,7 +180,7 @@ struct ProductionTeamView: View {
                     )
 
                     TeamStat(
-                        value: String(format: "$%.0f", totalSpent),
+                        value: formatBudget(totalSpent),
                         label: "Paid",
                         color: Color(hex: "D4B5A9")
                     )
@@ -228,7 +232,7 @@ struct ProductionTeamView: View {
                     CategoryFilterChip(
                         category: nil,
                         isSelected: selectedCategory == nil,
-                        label: "All"
+                        label: String(localized: "All")
                     ) {
                         selectedCategory = nil
                         selectionFeedback.selectionChanged()
@@ -380,7 +384,7 @@ struct ProductionVendorCard: View {
 
                             Spacer()
 
-                            Text(String(format: "$%.0f", vendor.totalPaid))
+                            Text(formatBudget(vendor.totalPaid))
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundColor(Color(hex: "2C2C2C"))
                         }
@@ -466,10 +470,18 @@ struct TeamStat: View {
             Text(value)
                 .font(.system(size: 18, weight: .medium, design: .rounded))
                 .foregroundColor(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
 
+            // Three stats share the row, so a longer translated label wraps to
+            // a second line and scales down rather than truncating.
             Text(label)
                 .font(.system(size: 11, weight: .thin))
                 .foregroundColor(Color(hex: "9B9B9B"))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -517,6 +529,8 @@ struct ContactButton: View {
 struct CategoryFilterChip: View {
     let category: VendorCategory?
     var isSelected: Bool
+    /// Already-localized label. Callers pass `String(localized:)`; when it is
+    /// nil the chip falls back to the category's catalog-resolved name.
     var label: String? = nil
     let action: () -> Void
 
@@ -528,8 +542,10 @@ struct CategoryFilterChip: View {
                         .font(.system(size: 12, weight: .light))
                 }
 
-                Text(LocalizedStringKey(label ?? category?.rawValue ?? ""))
+                Text(label ?? category?.localizedNameString ?? "")
                     .font(.system(size: 12, weight: .regular))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundColor(isSelected ? .white : Color(hex: "7A7A7A"))
             .padding(.horizontal, 12)

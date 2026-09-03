@@ -89,6 +89,8 @@ struct DismissalPaywallView: View {
                                 Text(trustText)
                                     .font(.system(size: 14, weight: .regular, design: .serif))
                                     .foregroundColor(Color(hex: "2C2C2C"))
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
 
                             Button(action: purchase) {
@@ -105,6 +107,9 @@ struct DismissalPaywallView: View {
                                         Text("Keep my plan")
                                             .font(.system(size: 18, weight: .medium))
                                             .foregroundColor(.white)
+                                            .lineLimit(2)
+                                            .minimumScaleFactor(0.7)
+                                            .multilineTextAlignment(.center)
                                     }
                                 }
                                 .frame(maxWidth: .infinity)
@@ -128,6 +133,7 @@ struct DismissalPaywallView: View {
                                     .font(.system(size: 15, weight: .regular, design: .serif))
                                     .foregroundColor(Color(hex: "9B9B9B"))
                                     .multilineTextAlignment(.center)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
 
@@ -136,6 +142,8 @@ struct DismissalPaywallView: View {
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(Color(hex: "9B9B9B"))
                                 .underline()
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .disabled(isPurchasing)
 
@@ -162,6 +170,8 @@ struct DismissalPaywallView: View {
                 .font(.system(size: 10, weight: .bold))
                 .tracking(2)
                 .foregroundColor(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 5)
                 .background(Capsule().fill(Color(hex: "D4B5A9")))
@@ -212,6 +222,8 @@ struct DismissalPaywallView: View {
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(Color(hex: "9B9B9B"))
                         .underline()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
 
                 Text(" & ")
@@ -223,6 +235,8 @@ struct DismissalPaywallView: View {
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(Color(hex: "9B9B9B"))
                         .underline()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
             }
         }

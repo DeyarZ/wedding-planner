@@ -124,7 +124,7 @@ struct ProductionBudgetItemDetailView: View {
                         Text("Budget")
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "9B9B9B"))
-                        Text(formatCurrency(budgetItem.estimatedAmount))
+                        Text(formatBudget(budgetItem.estimatedAmount, fractionDigits: 2))
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(Color(hex: "2C2C2C"))
                     }
@@ -135,7 +135,7 @@ struct ProductionBudgetItemDetailView: View {
                         Text("Spent")
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "9B9B9B"))
-                        Text(formatCurrency(budgetItem.amountSpent))
+                        Text(formatBudget(budgetItem.amountSpent, fractionDigits: 2))
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(budgetItem.isOverBudget ? Color(hex: "FFA726") : Color(hex: "66BB6A"))
                     }
@@ -146,7 +146,7 @@ struct ProductionBudgetItemDetailView: View {
                         Text("Remaining")
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "9B9B9B"))
-                        Text(formatCurrency(budgetItem.remainingAmount))
+                        Text(formatBudget(budgetItem.remainingAmount, fractionDigits: 2))
                             .font(.system(size: 18, weight: .medium))
                             .foregroundColor(budgetItem.remainingAmount >= 0 ? Color(hex: "2C2C2C") : Color(hex: "EF5350"))
                     }
@@ -188,7 +188,7 @@ struct ProductionBudgetItemDetailView: View {
                             .font(.system(size: 13, weight: .regular))
                             .foregroundColor(Color(hex: "7A7A7A"))
                         Spacer()
-                        Text(formatCurrency(budgetItem.depositAmount))
+                        Text(formatBudget(budgetItem.depositAmount, fractionDigits: 2))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Color(hex: "2C2C2C"))
                         if budgetItem.depositPaid {
@@ -267,7 +267,7 @@ struct ProductionBudgetItemDetailView: View {
 
                             Spacer()
 
-                            Text(formatCurrency(transaction.amount))
+                            Text(formatBudget(transaction.amount, fractionDigits: 2))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(Color(hex: "2C2C2C"))
                         }
@@ -321,13 +321,6 @@ struct ProductionBudgetItemDetailView: View {
                         .stroke(Color(hex: "EF5350"), lineWidth: 1)
                 )
         }
-    }
-
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -535,14 +528,14 @@ struct EditBudgetItemView: View {
                     HStack {
                         Text("Amount Spent")
                         Spacer()
-                        Text(formatCurrency(budgetItem.amountSpent))
+                        Text(formatBudget(budgetItem.amountSpent, fractionDigits: 2))
                             .foregroundColor(.gray)
                     }
 
                     HStack {
                         Text("Remaining")
                         Spacer()
-                        Text(formatCurrency(budgetItem.remainingAmount))
+                        Text(formatBudget(budgetItem.remainingAmount, fractionDigits: 2))
                             .foregroundColor(budgetItem.remainingAmount >= 0 ? .green : .red)
                     }
                 }
@@ -598,12 +591,6 @@ struct EditBudgetItemView: View {
         }
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 // MARK: - Add Transaction View
@@ -756,13 +743,13 @@ struct ProductionBudgetInsightsView: View {
                 InsightCard(
                     title: "Budget Used",
                     value: "\(Int((totalSpent / max(totalBudget, 1)) * 100))%",
-                    subtitle: formatCurrency(totalSpent),
+                    subtitle: formatBudget(totalSpent),
                     color: Color(hex: "B89B91")
                 )
 
                 InsightCard(
                     title: "Remaining",
-                    value: formatCurrency(totalBudget - totalSpent),
+                    value: formatBudget(totalBudget - totalSpent),
                     subtitle: "\(Int(((totalBudget - totalSpent) / max(totalBudget, 1)) * 100))%",
                     color: Color(hex: "66BB6A")
                 )
@@ -805,7 +792,7 @@ struct ProductionBudgetInsightsView: View {
 
                         Spacer()
 
-                        Text(formatCurrency(item.estimatedAmount))
+                        Text(formatBudget(item.estimatedAmount))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Color(hex: "7A7A7A"))
                     }
@@ -861,7 +848,7 @@ struct ProductionBudgetInsightsView: View {
 
                             Spacer()
 
-                            Text(formatCurrency(payment.item.outstandingAmount))
+                            Text(formatBudget(payment.item.outstandingAmount))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(Color(hex: "2C2C2C"))
                         }
@@ -886,14 +873,6 @@ struct ProductionBudgetInsightsView: View {
             return (category: category, spent: spent, budget: budget)
         }
         .sorted { $0.spent > $1.spent }
-    }
-
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -977,7 +956,7 @@ struct CategoryInsightRow: View {
 
                 Spacer()
 
-                Text(formatCurrency(data.spent))
+                Text(formatBudget(data.spent))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(Color(hex: "7A7A7A"))
             }
@@ -997,11 +976,4 @@ struct CategoryInsightRow: View {
         }
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }

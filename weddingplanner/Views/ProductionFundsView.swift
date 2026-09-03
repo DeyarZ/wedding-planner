@@ -184,22 +184,33 @@ struct ProductionFundsView: View {
                         Text("Total Budget")
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "9B9B9B"))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                        Text(formatCurrency(totalBudget))
+                        Text(formatBudget(totalBudget))
                             .font(.system(size: 28, weight: .light, design: .rounded))
                             .foregroundColor(Color(hex: "2C2C2C"))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
                     }
 
-                    Spacer()
+                    Spacer(minLength: 8)
 
                     VStack(alignment: .trailing, spacing: 8) {
                         Text("Remaining")
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color(hex: "9B9B9B"))
+                            .lineLimit(2)
+                            .multilineTextAlignment(.trailing)
+                            .minimumScaleFactor(0.8)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                        Text(formatCurrency(remaining))
+                        Text(formatBudget(remaining))
                             .font(.system(size: 28, weight: .light, design: .rounded))
                             .foregroundColor(remaining >= 0 ? Color(hex: "66BB6A") : Color(hex: "FFA726"))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
                     }
                 }
 
@@ -212,7 +223,7 @@ struct ProductionFundsView: View {
 
                         Spacer()
 
-                        Text("\(formatCurrency(totalSpent)) (\(Int(percentageSpent))%)")
+                        Text("\(formatBudget(totalSpent)) (\(Int(percentageSpent))%)")
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Color(hex: "2C2C2C"))
                     }
@@ -321,6 +332,9 @@ struct ProductionFundsView: View {
                 Text("Category Breakdown")
                     .font(.system(size: 18, weight: .light, design: .serif))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer()
 
@@ -361,6 +375,9 @@ struct ProductionFundsView: View {
                 Text("Recent Transactions")
                     .font(.system(size: 18, weight: .light, design: .serif))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer()
 
@@ -465,14 +482,6 @@ struct ProductionFundsView: View {
         }
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
-
     private func addBudgetItem(_ item: BudgetItem) {
         item.wedding = dataManager.wedding
         modelContext.insert(item)
@@ -530,10 +539,18 @@ struct BudgetStatCard: View {
             Text(value)
                 .font(.system(size: 18, weight: .medium, design: .rounded))
                 .foregroundColor(Color(hex: "2C2C2C"))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
 
+            // Four cards share the row — translated labels wrap to a second
+            // line and scale down instead of truncating.
             Text(label)
                 .font(.system(size: 10, weight: .thin))
                 .foregroundColor(Color(hex: "9B9B9B"))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -565,14 +582,19 @@ struct PaymentAlertRow: View {
                         Text(days < 0 ? String(localized: "\(abs(days)) days overdue") : String(localized: "Due in \(days) days"))
                             .font(.system(size: 11, weight: .thin))
                             .foregroundColor(isOverdue ? Color(hex: "EF5350") : Color(hex: "7A7A7A"))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
-                Spacer()
+                Spacer(minLength: 8)
 
-                Text(formatCurrency(item.outstandingAmount))
+                Text(formatBudget(item.outstandingAmount))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(Color(hex: "2C2C2C"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
             .padding(12)
             .background(
@@ -583,13 +605,6 @@ struct PaymentAlertRow: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 struct CategoryCard: View {
@@ -631,11 +646,13 @@ struct CategoryCard: View {
                 Text(breakdown.category.localizedName)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Color(hex: isLocked ? "8A8A8A" : "2C2C2C"))
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(formatCurrency(breakdown.spent))
+                        Text(formatBudget(breakdown.spent))
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Color(hex: "2C2C2C"))
 
@@ -660,9 +677,11 @@ struct CategoryCard: View {
                     }
                     .frame(height: 4)
 
-                    Text("of \(formatCurrency(breakdown.budget))")
+                    Text("of \(formatBudget(breakdown.budget))")
                         .font(.system(size: 10, weight: .thin))
                         .foregroundColor(Color(hex: "9B9B9B"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
                 .blur(radius: isLocked ? 4 : 0)
                 .allowsHitTesting(!isLocked)
@@ -678,13 +697,6 @@ struct CategoryCard: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 struct BudgetTransactionRow: View {
@@ -714,7 +726,7 @@ struct BudgetTransactionRow: View {
 
             Spacer()
 
-            Text(formatCurrency(transaction.amount))
+            Text(formatBudget(transaction.amount, fractionDigits: 2))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(transaction.transactionType == .refund ? Color(hex: "66BB6A") : Color(hex: "2C2C2C"))
         }
@@ -732,12 +744,6 @@ struct BudgetTransactionRow: View {
         return formatter.string(from: date)
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 struct BudgetQuickActionButton: View {
@@ -754,9 +760,16 @@ struct BudgetQuickActionButton: View {
                     .font(.system(size: 20, weight: .regular))
                     .foregroundColor(isLocked ? Color(hex: "B89B91") : color)
 
+                // "Export Report" / "View Insights" grow well past the third of
+                // the row they get, so they wrap and scale rather than clip.
                 Text(label)
                     .font(.system(size: 11, weight: .regular))
                     .foregroundColor(Color(hex: "7A7A7A"))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 4)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
@@ -809,7 +822,7 @@ struct SelectBudgetItemSheet: View {
                         if isLocked(item) {
                             PremiumLockBadge(compact: true)
                         } else {
-                            Text(formatCurrency(item.outstandingAmount))
+                            Text(formatBudget(item.outstandingAmount))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(Color(hex: "7A7A7A"))
                         }
@@ -824,13 +837,6 @@ struct SelectBudgetItemSheet: View {
         }
     }
 
-    private func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
-    }
 }
 
 struct EmptyTransactionsState: View {

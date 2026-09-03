@@ -161,6 +161,9 @@ struct OnboardingPlanRevealScreen: View {
                 Text(data.coupleNames)
                     .font(.system(size: 19, weight: .light, design: .serif))
                     .foregroundColor(OnboardingStyle.inkSoft)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 28)
                     .onboardingAppear(shown, delay: 0.12)
 
                 Spacer().frame(height: 26)
@@ -193,6 +196,7 @@ struct OnboardingPlanRevealScreen: View {
 
                 Spacer().frame(height: 50)
             }
+            .onboardingScreenScroll()
         }
         .onAppear {
             // The wedding, its budget categories and the full checklist are
@@ -269,6 +273,7 @@ struct OnboardingFeaturePreviewScreen: View {
 
                 Spacer().frame(height: 48)
             }
+            .onboardingScreenScroll()
         }
         .onAppear { shown = true }
     }
@@ -328,6 +333,7 @@ struct OnboardingFeaturePreviewScreen: View {
                             Text(dueLabel(task))
                                 .font(.system(size: 12, weight: .regular, design: .serif))
                                 .foregroundColor(OnboardingStyle.inkFaint)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
 
                         Spacer(minLength: 0)
@@ -364,10 +370,14 @@ struct OnboardingFeaturePreviewScreen: View {
                             Text(slice.name)
                                 .font(.system(size: 14, weight: .medium, design: .serif))
                                 .foregroundColor(OnboardingStyle.ink)
-                            Spacer()
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 8)
                             Text(OnboardingCurrency.format(data.budget * slice.share))
                                 .font(.system(size: 14, weight: .regular, design: .serif))
                                 .foregroundColor(OnboardingStyle.inkSoft)
+                                // The money never truncates — a long category
+                                // name gives way instead.
+                                .fixedSize()
                         }
                         GeometryReader { geo in
                             ZStack(alignment: .leading) {
@@ -433,6 +443,9 @@ struct OnboardingFeaturePreviewScreen: View {
             Text(label)
                 .font(.system(size: 12, weight: .regular, design: .serif))
                 .foregroundColor(OnboardingStyle.inkSoft)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
     }

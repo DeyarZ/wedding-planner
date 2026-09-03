@@ -31,7 +31,7 @@ struct VendorsView: View {
                             vendor: VendorItem(
                                 name: "Enchanted Lens Photography",
                                 category: "Photographer",
-                                price: "$3,500",
+                                price: formatBudget(3500),
                                 rating: 4.9,
                                 status: .booked,
                                 image: "camera.fill"
@@ -42,7 +42,7 @@ struct VendorsView: View {
                             vendor: VendorItem(
                                 name: "The Grand Ballroom",
                                 category: "Venue",
-                                price: "$8,000",
+                                price: formatBudget(8000),
                                 rating: 4.8,
                                 status: .booked,
                                 image: "building.columns.fill"
@@ -53,7 +53,7 @@ struct VendorsView: View {
                             vendor: VendorItem(
                                 name: "Bloom & Blossom Florals",
                                 category: "Florist",
-                                price: "$2,200",
+                                price: formatBudget(2200),
                                 rating: 4.7,
                                 status: .pending,
                                 image: "leaf.fill"
@@ -64,7 +64,7 @@ struct VendorsView: View {
                             vendor: VendorItem(
                                 name: "Sweet Dreams Bakery",
                                 category: "Cake",
-                                price: "$800",
+                                price: formatBudget(800),
                                 rating: 5.0,
                                 status: .pending,
                                 image: "birthday.cake.fill"
@@ -75,7 +75,7 @@ struct VendorsView: View {
                             vendor: VendorItem(
                                 name: "DJ Groovy",
                                 category: "Music",
-                                price: "$1,500",
+                                price: formatBudget(1500),
                                 rating: 4.6,
                                 status: .pending,
                                 image: "music.note"

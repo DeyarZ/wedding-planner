@@ -716,20 +716,23 @@ struct ProductionGuestExportView: View {
     }
 
     private func exportGuestList() {
-        var text = "Wedding Guest List\n\n"
+        var text = String(localized: "Wedding Guest List") + "\n\n"
 
         let grouped = Dictionary(grouping: guests, by: { $0.group })
 
         for (group, groupGuests) in grouped.sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
-            text += "\(group.rawValue)\n"
-            text += String(repeating: "-", count: group.rawValue.count) + "\n"
+            // rawValue stays the sort key (stable, storage-backed); the SHOWN heading and
+            // its underline use the localized label.
+            let groupName = group.localizedNameString
+            text += "\(groupName)\n"
+            text += String(repeating: "-", count: groupName.count) + "\n"
 
             for guest in groupGuests.sorted(by: { $0.lastName < $1.lastName }) {
                 text += "• \(guest.fullName)"
                 if guest.totalAttending > 1 {
                     text += " (+\(guest.totalAttending - 1))"
                 }
-                text += " - \(guest.rsvpStatus.rawValue)\n"
+                text += " - \(guest.rsvpStatus.localizedNameString)\n"
             }
             text += "\n"
         }
@@ -739,7 +742,7 @@ struct ProductionGuestExportView: View {
     }
 
     private func exportMealChoices() {
-        var text = "Meal Choices Summary\n\n"
+        var text = String(localized: "Meal Choices Summary") + "\n\n"
 
         let confirmedGuests = guests.filter { $0.rsvpStatus == .confirmed }
         var mealCounts = [MealChoice: Int]()
@@ -759,17 +762,17 @@ struct ProductionGuestExportView: View {
         }
 
         for (meal, count) in mealCounts.sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
-            text += "\(meal.rawValue): \(count)\n"
+            text += "\(meal.localizedNameString): \(count)\n"
         }
 
-        text += "\n\nDetailed List:\n\n"
+        text += "\n\n" + String(localized: "Detailed List:") + "\n\n"
 
         for guest in confirmedGuests {
-            text += "\(guest.fullName): \(guest.mealChoice?.rawValue ?? "Not selected")\n"
+            text += "\(guest.fullName): \(guest.mealChoice?.localizedNameString ?? String(localized: "Not selected"))\n"
 
             if let plusOnes = guest.plusOnes {
                 for plusOne in plusOnes where plusOne.isAttending {
-                    text += "  - \(plusOne.name): \(plusOne.mealChoice?.rawValue ?? "Not selected")\n"
+                    text += "  - \(plusOne.name): \(plusOne.mealChoice?.localizedNameString ?? String(localized: "Not selected"))\n"
                 }
             }
         }
@@ -779,7 +782,7 @@ struct ProductionGuestExportView: View {
     }
 
     private func exportSeatingPlan() {
-        var text = "Seating Plan Export\n\n"
+        var text = String(localized: "Seating Plan Export") + "\n\n"
 
         let guestsWithTables = guests.filter { $0.tableNumber != nil }
             .sorted { ($0.tableNumber ?? 0) < ($1.tableNumber ?? 0) }
@@ -788,19 +791,19 @@ struct ProductionGuestExportView: View {
 
         for guest in guestsWithTables {
             if let table = guest.tableNumber, table != currentTable {
-                text += "\nTable \(table)\n"
+                text += "\n" + String(format: String(localized: "Table %lld"), table) + "\n"
                 text += String(repeating: "-", count: 10) + "\n"
                 currentTable = table
             }
 
             text += "• \(guest.fullName)"
             if let meal = guest.mealChoice {
-                text += " (\(meal.rawValue))"
+                text += " (\(meal.localizedNameString))"
             }
             text += "\n"
         }
 
-        text += "\n\nUnseated Guests:\n"
+        text += "\n\n" + String(localized: "Unseated Guests:") + "\n"
         for guest in guests.filter({ $0.tableNumber == nil && $0.rsvpStatus == .confirmed }) {
             text += "• \(guest.fullName)\n"
         }
