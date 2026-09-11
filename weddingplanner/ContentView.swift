@@ -26,6 +26,8 @@ struct ContentView: View {
     /// so it survives relaunches — as @State it reset every launch and the
     /// paywall was shown on EVERY cold start.
     @AppStorage("lastColdStartPaywallAt") private var lastColdStartPaywallAt: Double = 0
+    /// Observed only to rebuild the tab pages when Settings changes the currency.
+    @AppStorage(BudgetCurrency.overrideKey) private var currencyOverride = ""
 
     /// At most one unprompted cold-start paywall per day.
     private let coldStartPaywallCooldown: TimeInterval = 24 * 60 * 60
@@ -95,6 +97,11 @@ struct ContentView: View {
                             .tag(4)
                     }
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    // Amounts are formatted inline on every screen, so a
+                    // currency change in Settings has to rebuild the pages —
+                    // a child whose inputs did not change would otherwise
+                    // keep the old symbol until some unrelated redraw.
+                    .id(currencyOverride)
 
                     // Ultra minimal navigation
                     LuxuryNavigation(selectedTab: $selectedTab)
@@ -202,6 +209,7 @@ struct ContentView: View {
 struct LuxuryHeader: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var currentTime = Date()
+    @State private var showSettings = false
 
     let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
@@ -233,7 +241,23 @@ struct LuxuryHeader: View {
                     .font(.system(size: 13, weight: .thin))
                     .foregroundColor(Color(hex: "B8B8B8"))
             }
+            .accessibilityLabel(Text("Send Feedback"))
             .padding(.trailing, 14)
+
+            // Settings: wedding details, budget, currency. Same weight as the
+            // feedback bubble — an entry point, not a call to action.
+            Button {
+                showSettings = true
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 13, weight: .thin))
+                    .foregroundColor(Color(hex: "B8B8B8"))
+            }
+            .accessibilityLabel(Text("Settings"))
+            .padding(.trailing, 14)
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
 
             // Minimal date
             if let wedding = dataManager.wedding {

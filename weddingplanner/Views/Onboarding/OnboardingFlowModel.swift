@@ -232,11 +232,12 @@ enum PlanningParty: String, CaseIterable, Identifiable {
 ///
 /// The budget question used to be hardcoded in US dollars, which meant a German
 /// user planned a "$50,000" wedding and then saw euros everywhere else in the
-/// app. Everything here derives from `Locale.current`.
+/// app. The currency is `BudgetCurrency.code` — device region, or the choice
+/// made in Settings — so onboarding and the app never disagree.
 enum OnboardingCurrency {
 
     static var code: String {
-        Locale.current.currency?.identifier ?? "USD"
+        BudgetCurrency.code
     }
 
     static var symbol: String {
