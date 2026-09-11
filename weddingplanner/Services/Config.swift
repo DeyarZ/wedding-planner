@@ -16,6 +16,14 @@ enum Config {
     // MARK: - Support
     static let supportEmail = "m.worlitzer@gmx.de"
 
+    // MARK: - Cross-promo (Everlens)
+    /// Everlens — the studio's disposable-camera app for wedding guests
+    /// (`com.wizarddynamics.eventcam`). See `EverlensPromo`.
+    static let everlensAppStoreID = "6775506628"
+    /// Account-wide App Store provider token. Campaign links need it for the
+    /// `ct=` token to show up in App Analytics → Sources → Campaigns.
+    static let appStoreProviderToken = "127508914"
+
     // MARK: - Product IDs (App Store Connect)
     //
     // These constants exist for tooling, debugging and the pricing runbook only.

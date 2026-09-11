@@ -901,6 +901,13 @@ struct ProductionTaskCard: View {
                             .foregroundColor(Color(hex: "B8B8B8"))
                             .lineLimit(1)
                     }
+
+                    // Everlens — only on the seeded guest-photos task. The
+                    // timeline has no tap-to-open, so the pitch lives here.
+                    if EverlensPromo.showsPromo(for: task) {
+                        EverlensBanner(surface: .timeline, compact: true)
+                            .padding(.top, 6)
+                    }
                 }
 
                 Spacer()

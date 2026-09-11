@@ -22,6 +22,11 @@ enum Analytics {
         static let foreverUpsellViewed = "forever_upsell_viewed"
         static let foreverUpsellPurchased = "forever_upsell_purchased"
         static let foreverUpsellSkipped = "forever_upsell_skipped"
+
+        // Cross-promo — Everlens placements (see `EverlensPromo`).
+        static let everlensPromoViewed = "everlens_promo_viewed"
+        static let everlensStoreOpened = "everlens_store_opened"
+        static let everlensPromoDismissed = "everlens_promo_dismissed"
     }
 
     /// Where a paywall impression came from. Sent as the `source` property on
@@ -114,6 +119,25 @@ enum Analytics {
     /// The Forever upsell was declined. Fires once per user at most.
     static func foreverUpsellSkipped() {
         track(Event.foreverUpsellSkipped)
+    }
+
+    // MARK: - Cross-promo
+
+    /// The Everlens sheet was opened. `surface` is the placement it came from
+    /// (`brideplan-task`, `brideplan-dashboard`, …) — the same token the App
+    /// Store campaign link carries, so impressions and installs line up.
+    static func everlensPromoViewed(surface: String) {
+        track(Event.everlensPromoViewed, ["surface": surface])
+    }
+
+    /// The couple tapped through to Everlens on the App Store.
+    static func everlensStoreOpened(surface: String) {
+        track(Event.everlensStoreOpened, ["surface": surface])
+    }
+
+    /// A placement was closed for good (only the dashboard card is dismissable).
+    static func everlensPromoDismissed(surface: String) {
+        track(Event.everlensPromoDismissed, ["surface": surface])
     }
 
     // MARK: - Helpers

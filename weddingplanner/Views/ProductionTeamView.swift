@@ -78,6 +78,16 @@ struct ProductionTeamView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
 
+                // Everlens — the guests' side of photography
+                if selectedCategory == .photography, EverlensPromo.isAvailable {
+                    EverlensBanner(
+                        surface: .vendors,
+                        subtitle: "Your photographer gets the couple. Your guests get everything else."
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
+                }
+
                 if vendors.isEmpty {
                     // Empty state
                     EmptyTeamState {

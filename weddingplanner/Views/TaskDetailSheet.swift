@@ -75,6 +75,14 @@ struct TaskDetailSheet: View {
                         )
                     }
 
+                    // Everlens — only on the seeded guest-photos task
+                    if EverlensPromo.showsPromo(for: task) {
+                        EverlensBanner(
+                            surface: .task,
+                            subtitle: "Your photographer gets the couple. Your guests get everything else."
+                        )
+                    }
+
                     // Due date
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Due Date")

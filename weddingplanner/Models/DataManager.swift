@@ -63,6 +63,7 @@ class DataManager: ObservableObject {
             if let firstWedding = weddings.first {
                 self.wedding = firstWedding
                 self.hasWedding = true
+                seedCrossPromoTask()
             } else {
                 self.hasWedding = false
             }
@@ -106,9 +107,18 @@ class DataManager: ObservableObject {
             self.wedding = newWedding
             self.hasWedding = true
             syncWinBackNotification()
+            seedCrossPromoTask()
         } catch {
             print("Error creating wedding: \(error)")
         }
+    }
+
+    /// Makes sure the Everlens guest-photos task exists. Idempotent and locale
+    /// gated (see `EverlensPromo.seedTaskIfNeeded`); runs on every load so the
+    /// couples who onboarded before the promo shipped get it too.
+    private func seedCrossPromoTask() {
+        guard let modelContext, let wedding else { return }
+        EverlensPromo.seedTaskIfNeeded(for: wedding, in: modelContext)
     }
 
     /// Keeps the T-60 win-back aligned with the wedding date. Called from every

@@ -10,6 +10,7 @@ struct EmotionalDashboardView: View {
     @State private var showTaskDetail = false
     @State private var selectedTask: WeddingTask? = nil
     @State private var activeGate: PremiumGate? = nil
+    @State private var everlensCardDismissed = false
 
     // Haptic feedback generators
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -56,6 +57,11 @@ struct EmotionalDashboardView: View {
 
                     // Core Areas Snapshot
                     coreAreasSnapshot
+
+                    // Everlens — last 60 days only
+                    if showsEverlensCard {
+                        everlensSection
+                    }
 
                     // Next Milestone Banner
                     nextMilestoneSection
@@ -279,6 +285,23 @@ struct EmotionalDashboardView: View {
             // Post notification to change tab
             NotificationCenter.default.post(name: NSNotification.Name("ChangeTab"), object: nil, userInfo: ["tab": index])
         }
+    }
+
+    // MARK: - Everlens Section
+    private var showsEverlensCard: Bool {
+        !everlensCardDismissed && EverlensPromo.shouldShowDashboardCard(for: dataManager.wedding)
+    }
+
+    private var everlensSection: some View {
+        EverlensDashboardCard {
+            withAnimation(.easeOut(duration: 0.3)) {
+                everlensCardDismissed = true
+            }
+            EverlensPromo.dismissDashboardCard()
+        }
+        .opacity(animateIn ? 1 : 0)
+        .offset(y: animateIn ? 0 : 20)
+        .animation(.easeOut(duration: 0.8).delay(0.6), value: animateIn)
     }
 
     // MARK: - Next Milestone Section

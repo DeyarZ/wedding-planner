@@ -36768,6 +36768,47 @@
         }
       }
     },
+    "By the makers of BridePlan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von den Machern von BridePlan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De los creadores de BridePlan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par les créateurs de BridePlan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dai creatori di BridePlan"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Van de makers van BridePlan"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dos criadores do BridePlan"
+          }
+        }
+      }
+    },
     "CATEGORY" : {
       "localizations" : {
         "ar" : {
@@ -44312,6 +44353,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "雞尾酒時光"
+          }
+        }
+      }
+    },
+    "Collect your guests' photos" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gästefotos sammeln"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reúne las fotos de tus invitados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupérez les photos de vos invités"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raccogli le foto dei tuoi invitati"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verzamel de foto's van jullie gasten"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reúna as fotos dos seus convidados"
           }
         }
       }
@@ -64567,6 +64649,88 @@
         }
       }
     },
+    "Everlens turns every guest into a photographer. One QR code on the table — no app to download, no sign-up." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens macht jeden Gast zum Fotografen. Ein QR-Code auf dem Tisch – keine App zum Herunterladen, keine Registrierung."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens convierte a cada invitado en fotógrafo. Un código QR en la mesa: sin descargar apps, sin registrarse."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens fait de chaque invité un photographe. Un QR code sur la table : aucune appli à télécharger, aucune inscription."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens trasforma ogni invitato in un fotografo. Un codice QR sul tavolo: nessuna app da scaricare, nessuna registrazione."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens maakt van elke gast een fotograaf. Eén QR-code op tafel – geen app downloaden, geen account nodig."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Everlens transforma cada convidado em fotógrafo. Um QR code na mesa: sem baixar app, sem cadastro."
+          }
+        }
+      }
+    },
+    "Everlens: the disposable camera for your guests" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens: die Einwegkamera für deine Gäste"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens: la cámara desechable para tus invitados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens : l'appareil photo jetable pour vos invités"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens: la fotocamera usa e getta per i tuoi invitati"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens: de wegwerpcamera voor jullie gasten"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens: a câmera descartável para seus convidados"
+          }
+        }
+      }
+    },
     "Every cost accounted for" : {
       "localizations" : {
         "ar" : {
@@ -66219,6 +66383,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每個名字、每個細節，都井然有序"
+          }
+        }
+      }
+    },
+    "Every photo lands in your album. Download them all and keep them forever." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedes Foto landet in deinem Album. Lade alle herunter und behalte sie für immer."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada foto llega a tu álbum. Descárgalas todas y guárdalas para siempre."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque photo arrive dans votre album. Téléchargez-les toutes et gardez-les pour toujours."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ogni foto finisce nel tuo album. Scaricale tutte e conservale per sempre."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elke foto komt in jullie album. Download ze allemaal en bewaar ze voor altijd."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada foto vai direto para o seu álbum. Baixe todas e guarde para sempre."
           }
         }
       }
@@ -78368,6 +78573,47 @@
         }
       }
     },
+    "Get Everlens — it's free" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everlens holen – kostenlos"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargar Everlens: es gratis"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Télécharger Everlens – c'est gratuit"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scarica Everlens – è gratis"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download Everlens – gratis"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixar o Everlens – é grátis"
+          }
+        }
+      }
+    },
     "Get Started" : {
       "localizations" : {
         "ar" : {
@@ -80207,6 +80453,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "把最終人數告訴場地方"
+          }
+        }
+      }
+    },
+    "Give your guests a camera" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib deinen Gästen eine Kamera"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dales una cámara a tus invitados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offrez un appareil photo à vos invités"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dai una fotocamera ai tuoi invitati"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef jullie gasten een camera"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dê uma câmera aos seus convidados"
           }
         }
       }
@@ -84623,6 +84910,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "賓客"
+          }
+        }
+      }
+    },
+    "Guests scan the code and start snapping. iPhone guests open it instantly via App Clip." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gäste scannen den Code und legen los. iPhone-Gäste öffnen ihn sofort per App Clip."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los invitados escanean el código y empiezan a hacer fotos. En iPhone se abre al instante con App Clip."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les invités scannent le code et se mettent à photographier. Sur iPhone, ça s'ouvre instantanément via App Clip."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli invitati scansionano il codice e iniziano a scattare. Su iPhone si apre all'istante con App Clip."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasten scannen de code en beginnen te fotograferen. Op iPhone opent het direct via App Clip."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os convidados escaneiam o código e começam a fotografar. No iPhone, abre na hora via App Clip."
           }
         }
       }
@@ -115366,6 +115694,47 @@
         }
       }
     },
+    "One QR code on every table and your wedding is captured from every angle." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein QR-Code auf jedem Tisch – und deine Hochzeit wird aus jedem Winkel festgehalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un código QR en cada mesa y tu boda queda captada desde todos los ángulos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un QR code sur chaque table, et votre mariage est capturé sous tous les angles."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un codice QR su ogni tavolo e il tuo matrimonio viene immortalato da ogni angolazione."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén QR-code op elke tafel en jullie bruiloft wordt vanuit elke hoek vastgelegd."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um QR code em cada mesa e seu casamento é registrado de todos os ângulos."
+          }
+        }
+      }
+    },
     "One Year to Go! 🎊" : {
       "localizations" : {
         "ar" : {
@@ -116834,6 +117203,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "還有一件小事"
+          }
+        }
+      }
+    },
+    "One shared album" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein gemeinsames Album"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un álbum compartido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un seul album partagé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un unico album condiviso"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén gedeeld album"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um álbum compartilhado"
           }
         }
       }
@@ -126406,6 +126816,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "攝影與錄影"
+          }
+        }
+      }
+    },
+    "Photos stay hidden until you tap Reveal — like developing the film the morning after." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Fotos bleiben verborgen, bis du auf „Enthüllen“ tippst – wie das Entwickeln des Films am Morgen danach."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las fotos permanecen ocultas hasta que pulsas Revelar, como cuando se revelaba el carrete a la mañana siguiente."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les photos restent cachées jusqu'à ce que vous appuyiez sur Révéler, comme un film qu'on développe le lendemain matin."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le foto restano nascoste finché non tocchi Svela, come sviluppare il rullino la mattina dopo."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto's blijven verborgen tot je op Onthullen tikt – zoals het ontwikkelen van het rolletje de ochtend erna."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fotos ficam escondidas até você tocar em Revelar, como revelar o filme na manhã seguinte."
           }
         }
       }
@@ -141499,6 +141950,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "把啟發你完美婚禮的照片收藏起來"
+          }
+        }
+      }
+    },
+    "Scan & shoot" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scannen & knipsen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escanea y dispara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scannez et shootez"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scansiona e scatta"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scannen & knippen"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneie e fotografe"
           }
         }
       }
@@ -162670,6 +163162,88 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最重要的那一場"
+          }
+        }
+      }
+    },
+    "The big reveal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die große Enthüllung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La gran revelación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grande révélation"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il grande svelamento"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De grote onthulling"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A grande revelação"
+          }
+        }
+      }
+    },
+    "The disposable camera for your guests" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Einwegkamera für deine Gäste"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La cámara desechable para tus invitados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'appareil photo jetable pour vos invités"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fotocamera usa e getta per i tuoi invitati"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De wegwerpcamera voor jullie gasten"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A câmera descartável para seus convidados"
           }
         }
       }
@@ -197821,6 +198395,47 @@
         }
       }
     },
+    "Your photographer gets the couple. Your guests get everything else." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Fotograf hat das Brautpaar. Deine Gäste haben alles andere."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu fotógrafo capta a la pareja. Tus invitados, todo lo demás."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre photographe capture les mariés. Vos invités, tout le reste."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo fotografo riprende gli sposi. I tuoi invitati, tutto il resto."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jullie fotograaf legt het bruidspaar vast. Jullie gasten al het andere."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu fotógrafo registra o casal. Seus convidados, todo o resto."
+          }
+        }
+      }
+    },
     "Your plan for %@ is built and waiting." : {
       "localizations" : {
         "ar" : {
@@ -200025,6 +200640,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "你的婚禮計畫進行得很漂亮！🌸"
+          }
+        }
+      }
+    },
+    "Your wedding through your guests' eyes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Hochzeit durch die Augen deiner Gäste"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu boda a través de los ojos de tus invitados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre mariage à travers les yeux de vos invités"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo matrimonio con gli occhi dei tuoi invitati"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jullie bruiloft door de ogen van jullie gasten"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu casamento pelos olhos dos seus convidados"
           }
         }
       }

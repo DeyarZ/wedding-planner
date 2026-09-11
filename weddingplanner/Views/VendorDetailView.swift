@@ -52,6 +52,17 @@ struct ProductionVendorDetailView: View {
                             .opacity(animateIn ? 1 : 0)
                             .animation(.easeOut(duration: 0.6).delay(0.1), value: animateIn)
 
+                        // Everlens — the guests' side of photography
+                        if EverlensPromo.isAvailable, vendor.category == .photography || vendor.category == .videography {
+                            EverlensBanner(
+                                surface: .vendorDetail,
+                                subtitle: "Your photographer gets the couple. Your guests get everything else."
+                            )
+                            .padding(.horizontal, 24)
+                            .opacity(animateIn ? 1 : 0)
+                            .animation(.easeOut(duration: 0.6).delay(0.15), value: animateIn)
+                        }
+
                         // Payment tracking
                         paymentSection
                             .padding(.horizontal, 24)
