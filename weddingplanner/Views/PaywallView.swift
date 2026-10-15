@@ -49,48 +49,17 @@ struct PaywallView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Close button
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        dismissWithoutPurchase()
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Color(hex: "7A7A7A"))
-                            .frame(width: 32, height: 32)
-                            .background(
-                                Circle()
-                                    .fill(Color.white)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 8, y: 4)
-                            )
-                            // The disc stays 32pt so it keeps its visual weight,
-                            // but the hit area is padded out to the 44pt HIG
-                            // minimum — App Review checks that a paywall can be
-                            // dismissed, and a 32pt target is a rejection risk.
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    // Closing mid-purchase would tear the flow down under the
-                    // in-flight StoreKit callback.
-                    .disabled(isPurchasing)
-                    .accessibilityLabel(Text("Close"))
-                }
-                // 18/14 + the 6pt inset of the 32pt disc inside its 44pt target
-                // == the 24/20 the disc sat at before it was enlarged.
-                .padding(.horizontal, 18)
-                .padding(.top, 14)
-
                 // The ladder can be 1–4 cards tall depending on what the
-                // current RevenueCat offering contains, so the whole sheet
-                // scrolls rather than clipping on small devices.
+                // current RevenueCat offering contains, so the plan area
+                // scrolls rather than clipping on small devices. The purchase
+                // button does NOT scroll — it is pinned below (see the footer).
                 ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                 // Romantic hero section
-                VStack(spacing: 16) {
+                VStack(spacing: 12) {
                     // Animated hearts icon
                     PaywallHeartAnimation()
-                        .frame(height: 80)
+                        .frame(height: 64)
 
                     // Heartfelt title
                     VStack(spacing: 8) {
@@ -105,25 +74,20 @@ struct PaywallView: View {
                     .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 32)
-                .padding(.top, 20)
+                .padding(.top, 16)
 
                 // Main content
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     // Sweet features with hearts
                     VStack(spacing: 12) {
                         FeatureRow(icon: "heart.fill", text: String(localized: "Unlimited guests & vendors"), color: Color(hex: "FFB6C1"))
                         FeatureRow(icon: "sparkles", text: String(localized: "Smart budget insights"), color: Color(hex: "FFD700"))
                         FeatureRow(icon: "calendar.badge.clock", text: String(localized: "Timeline management"), color: Color(hex: "D4B5A9"))
                     }
-                    .padding(.horizontal, 32)
-
-                    // Warm message
-                    Text("We're here to make your planning journey stress-free")
-                        .font(.system(size: 14, weight: .regular, design: .serif))
-                        .foregroundColor(Color(hex: "9B9B9B"))
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 40)
+                    // 16, not 32: at 32 (on top of the container's 32) the
+                    // French/German feature lines wrapped and pushed the last
+                    // plan card under the pinned footer.
+                    .padding(.horizontal, 16)
 
                     // Pricing ladder — one card per package in the current
                     // RevenueCat offering, ordered annual → forever → monthly.
@@ -144,62 +108,6 @@ struct PaywallView: View {
                             }
                         }
                         .padding(.horizontal, 4)
-                    }
-
-                    VStack(spacing: 10) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Color(hex: "2C2C2C"))
-                            Text(trustText)
-                                .font(.system(size: 14, weight: .regular, design: .serif))
-                                .foregroundColor(Color(hex: "2C2C2C"))
-                                .multilineTextAlignment(.leading)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-
-                        // Purchase button
-                        Button(action: {
-                            purchaseSubscription()
-                        }) {
-                            HStack(spacing: 8) {
-                                if isPurchasing {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                        .scaleEffect(0.8)
-                                } else {
-                                    Image(systemName: "heart.fill")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(.white)
-
-                                    Text(ctaTitle)
-                                        .font(.system(size: 18, weight: .medium))
-                                        .foregroundColor(.white)
-                                        .lineLimit(2)
-                                        .minimumScaleFactor(0.7)
-                                        .multilineTextAlignment(.center)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color(hex: "D4B5A9"), Color(hex: "B89B91")],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                            )
-                            .shadow(color: Color(hex: "B89B91").opacity(0.3), radius: 12, y: 6)
-                        }
-                        .disabled(isPurchasing)
-
-                        summaryText
-                            .foregroundColor(Color(hex: "9B9B9B"))
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     // Restore Purchases Button
@@ -242,9 +150,107 @@ struct PaywallView: View {
                     .padding(.top, 4)
                 }
                 .padding(.horizontal, 32)
-                .padding(.bottom, 32)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
                 }
                 }
+
+                // Pinned purchase footer. It used to sit inside the ScrollView
+                // below the cards, which put the CTA under the home indicator
+                // and the price summary fully below the fold on a 6.1" iPhone
+                // (and further down in German) — every buyer had to scroll to
+                // find the button. Pinned, the button and the billing terms of
+                // whichever card is selected are always on screen.
+                VStack(spacing: 10) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+                        Text(trustText)
+                            .font(.system(size: 14, weight: .regular, design: .serif))
+                            .foregroundColor(Color(hex: "2C2C2C"))
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    // Purchase button
+                    Button(action: {
+                        purchaseSubscription()
+                    }) {
+                        HStack(spacing: 8) {
+                            if isPurchasing {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+
+                                Text(ctaTitle)
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundColor(.white)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.7)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "D4B5A9"), Color(hex: "B89B91")],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                        )
+                        .shadow(color: Color(hex: "B89B91").opacity(0.3), radius: 12, y: 6)
+                    }
+                    .disabled(isPurchasing)
+
+                    summaryText
+                        .foregroundColor(Color(hex: "9B9B9B"))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 32)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+            }
+            // The close button floats over the top-right corner instead of
+            // owning a 58pt row of its own — that row is what pushed the CTA
+            // off screen. Same control, same 44pt target, never scrolls away.
+            .overlay(alignment: .topTrailing) {
+                Button(action: {
+                    dismissWithoutPurchase()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(Color(hex: "7A7A7A"))
+                        .frame(width: 32, height: 32)
+                        .background(
+                            Circle()
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.1), radius: 8, y: 4)
+                        )
+                        // The disc stays 32pt so it keeps its visual weight,
+                        // but the hit area is padded out to the 44pt HIG
+                        // minimum — App Review checks that a paywall can be
+                        // dismissed, and a 32pt target is a rejection risk.
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                // Closing mid-purchase would tear the flow down under the
+                // in-flight StoreKit callback.
+                .disabled(isPurchasing)
+                .accessibilityLabel(Text("Close"))
+                // 18/14 + the 6pt inset of the 32pt disc inside its 44pt target
+                // == the 24/20 the disc sat at before it was enlarged.
+                .padding(.trailing, 18)
+                .padding(.top, 14)
             }
         }
         .sheet(isPresented: $showTermsOfUse) {
