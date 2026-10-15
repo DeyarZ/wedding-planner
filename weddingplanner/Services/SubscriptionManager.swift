@@ -49,10 +49,23 @@ class SubscriptionManager: NSObject, ObservableObject {
         availablePackages.first { Self.planKind(for: $0) == kind }
     }
 
-    /// The package that should come pre-selected on the paywall. Front-loads
-    /// cash: annual wins, then the one-time "Forever", then the longest
-    /// remaining subscription. Falls back to whatever the offering has.
+    /// Offering-metadata key naming the package to pre-select, e.g.
+    /// `{"default_package": "$rc_monthly"}` on the RevenueCat offering. Lets
+    /// the default plan be A/B tested as an RC Experiment (two offerings, same
+    /// packages, different metadata) without a release. Absent, empty or naming
+    /// a package the offering does not contain → the priority list below.
+    static let defaultPackageMetadataKey = "default_package"
+
+    /// The package that should come pre-selected on the paywall. The current
+    /// offering's `default_package` metadata wins when set; otherwise this
+    /// front-loads cash: annual wins, then the one-time "Forever", then the
+    /// longest remaining subscription. Falls back to whatever the offering has.
     var defaultPackage: Package? {
+        if let identifier = currentOffering?.getMetadataValue(for: Self.defaultPackageMetadataKey, default: ""),
+           !identifier.isEmpty,
+           let package = availablePackages.first(where: { $0.identifier == identifier }) {
+            return package
+        }
         for kind in PlanKind.selectionPriority {
             if let package = package(kind) { return package }
         }
