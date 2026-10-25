@@ -173,6 +173,7 @@ class SubscriptionManager: NSObject, ObservableObject {
         do {
             offerings = try await Purchases.shared.offerings()
         } catch {
+            Self.trackFailure("offerings_failed", prefix: "of", error: error)
             print("[SubscriptionManager] Failed to load offerings: \(error)")
         }
     }
@@ -189,11 +190,15 @@ class SubscriptionManager: NSObject, ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        let productID = package.storeProduct.productIdentifier
+
         do {
             let result = try await Purchases.shared.purchase(package: package)
             customerInfo = result.customerInfo
 
             if !result.userCancelled {
+                Analytics.track("purchase_completed", ["product": productID])
+
                 if !isSubscribed {
                     await updateSubscriptionStatus()
                 }
@@ -219,9 +224,11 @@ class SubscriptionManager: NSObject, ObservableObject {
                 return true
             }
 
+            Analytics.track("purchase_cancelled", ["product": productID])
             isLoading = false
             return false
         } catch {
+            Self.trackFailure("purchase_failed", prefix: "pf", error: error, extra: ["product": productID])
             errorMessage = "Purchase failed: \(error.localizedDescription)"
             isLoading = false
             print("[SubscriptionManager] Purchase failed: \(error)")
@@ -244,6 +251,42 @@ class SubscriptionManager: NSObject, ObservableObject {
             isLoading = false
             print("[SubscriptionManager] Restore failed: \(error)")
         }
+    }
+
+    // MARK: - Failure telemetry
+
+    /// Purchases twice died silently for days (09-24, 10-19) with the error
+    /// only printed. Failures now reach Meta + Singular with their NSError
+    /// domain/code, plus a second event whose *name* carries the code (e.g.
+    /// `pf_2_SK_0`) so the cause is countable per day in Meta's event stats.
+    private nonisolated static func trackFailure(_ event: String, prefix: String, error: Error, extra: [String: Any] = [:]) {
+        let ns = error as NSError
+        let underlying = ns.userInfo[NSUnderlyingErrorKey] as? NSError
+
+        var params = extra
+        params["domain"] = ns.domain
+        params["code"] = ns.code
+        params["u_domain"] = underlying?.domain ?? ""
+        params["u_code"] = underlying?.code ?? 0
+        params["desc"] = String(ns.localizedDescription.prefix(100))
+        Analytics.track(event, params)
+
+        let uDomain = underlying.map { shortErrorDomain($0.domain) } ?? "na"
+        let raw = "\(prefix)_\(ns.code)_\(uDomain)_\(underlying?.code ?? 0)"
+        let name = String(raw.map { $0.isASCII && ($0.isLetter || $0.isNumber) ? $0 : "_" })
+        // 32, not Meta's 40: Singular caps event names at 32 characters.
+        Analytics.track(String(name.prefix(32)))
+    }
+
+    /// `SKErrorDomain` → `SK`, `StoreKit.StoreKitError` → `StoreKit`,
+    /// `NSURLErrorDomain` → `NSURL`.
+    private nonisolated static func shortErrorDomain(_ domain: String) -> String {
+        var short = domain.split(separator: ".").last.map(String.init) ?? domain
+        for suffix in ["ErrorDomain", "Domain", "Error"] where short.hasSuffix(suffix) && short.count > suffix.count {
+            short.removeLast(suffix.count)
+            break
+        }
+        return String(short.prefix(12))
     }
 
     func hasFreeTrial(for product: StoreProduct) -> Bool {

@@ -425,6 +425,7 @@ struct PaywallView: View {
         AppEvents.shared.logEvent(.initiatedCheckout)
 
         guard let plan = selectedPlan else {
+            Analytics.track("checkout_no_package")
             print("[Paywall] No package available in the current offering")
             return
         }
